@@ -15,9 +15,9 @@ import org.springframework.util.ClassUtils;
 
 public class AbacAnnotationMethodSecurityMetadataSource extends AbstractMethodSecurityMetadataSource {
 
-	private final PrePostRequestAttributeFactory<String> attributeFactory;
+	private final PrePostInvocationAttributeFactory<String> attributeFactory;
 
-	public AbacAnnotationMethodSecurityMetadataSource(PrePostRequestAttributeFactory<String> attributeFactory) {
+	public AbacAnnotationMethodSecurityMetadataSource(PrePostInvocationAttributeFactory<String> attributeFactory) {
 		this.attributeFactory = attributeFactory;
 	}
 

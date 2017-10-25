@@ -1,11 +1,11 @@
 package net.folivo.springframework.security.abac.config;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.AfterInvocationProvider;
@@ -21,28 +21,39 @@ import org.springframework.security.access.method.MethodSecurityMetadataSource;
 import org.springframework.security.access.prepost.PostInvocationAdviceProvider;
 import org.springframework.security.access.vote.AffirmativeBased;
 
+import net.folivo.springframework.security.abac.expression.ExpressionBasedInvocationAttributeFactory;
+import net.folivo.springframework.security.abac.expression.ExpressionBasedRequestAttributeConverter;
+import net.folivo.springframework.security.abac.pdp.RequestAttributeConverter;
 import net.folivo.springframework.security.abac.prepost.AbacAnnotationMethodSecurityMetadataSource;
 import net.folivo.springframework.security.abac.prepost.HierarchicalMethodSecurityMetadataSource;
-import net.folivo.springframework.security.abac.prepost.PdpUsingPreInvocationAuthorizationAdvice;
-import net.folivo.springframework.security.abac.prepost.PreInvocationAuthorizationAdviceVoter;
-import net.folivo.springframework.security.abac.prepost.PrePostRequestAttributeFactory;
-import net.folivo.springframework.security.abac.prepost.expression.ExpressionBasedInvocationAttributeFactory;
+import net.folivo.springframework.security.abac.prepost.PreInvocationAuthorizationVoter;
+import net.folivo.springframework.security.abac.prepost.PrePostInvocationAttributeFactory;
 
-@Configuration
-public class AbacPepConfiguration {
+public class PepConfiguration {
+
+	private final PdpConfiguration pdpConfig;
 
 	private MethodSecurityInterceptor methodSecurityInterceptor;
 
-	private MethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+	private MethodSecurityExpressionHandler expressionHandler;
+	private Collection<RequestAttributeConverter> requestAttributeConverters;
+
+	public PepConfiguration(PdpConfiguration pdpConfig) {
+		this.pdpConfig = pdpConfig;
+
+		expressionHandler = new DefaultMethodSecurityExpressionHandler();
+		requestAttributeConverters = new ArrayList<>();
+		requestAttributeConverters.add(new ExpressionBasedRequestAttributeConverter(expressionHandler));
+	}
 
 	protected AccessDecisionManager accessDecisionManager() {
-		// TODO
 		List<AccessDecisionVoter<? extends Object>> decisionVoters = new ArrayList<>();
-		PdpUsingPreInvocationAuthorizationAdvice expressionAdvice = new PdpUsingPreInvocationAuthorizationAdvice();
 
-		// TODO decide here the use of local or remote PDP
-
-		decisionVoters.add(new PreInvocationAuthorizationAdviceVoter(expressionAdvice));
+		// TODO maybe allow multiple voters
+		// e.g. for local and remote pdp's at same time. if local pdp has no idea it can
+		// ask remote pdp.
+		decisionVoters.add(new PreInvocationAuthorizationVoter(getRequestAttributeConverters(),
+				pdpConfig.getRequestFactory(), pdpConfig.getPdpClient(), pdpConfig.getResponseEvaluator()));
 
 		return new AffirmativeBased(decisionVoters);
 	}
@@ -50,7 +61,7 @@ public class AbacPepConfiguration {
 	@Bean
 	public MethodInterceptor methodSecurityInterceptor() throws Exception {
 		// TODO
-		this.methodSecurityInterceptor = isAspectJ() ? new AspectJMethodSecurityInterceptor()
+		methodSecurityInterceptor = isAspectJ() ? new AspectJMethodSecurityInterceptor()
 				: new MethodSecurityInterceptor();
 		methodSecurityInterceptor.setAccessDecisionManager(accessDecisionManager());
 		methodSecurityInterceptor.setAfterInvocationManager(afterInvocationManager());
@@ -59,15 +70,15 @@ public class AbacPepConfiguration {
 		if (runAsManager != null) {
 			methodSecurityInterceptor.setRunAsManager(runAsManager);
 		}
-		return this.methodSecurityInterceptor;
+		return methodSecurityInterceptor;
 	}
 
 	@Bean
 	public MethodSecurityMetadataSource methodSecurityMetadataSource() {
 		List<MethodSecurityMetadataSource> sources = new ArrayList<>();
-		PrePostRequestAttributeFactory<String> attributeFactory = new ExpressionBasedInvocationAttributeFactory(
+		PrePostInvocationAttributeFactory<String> attributeFactory = new ExpressionBasedInvocationAttributeFactory(
 				getExpressionHandler());
-		// TODO other MetadataSources
+		// TODO more MetadataSources!
 		sources.add(new AbacAnnotationMethodSecurityMetadataSource(attributeFactory));
 		return new HierarchicalMethodSecurityMetadataSource(sources);
 	}
@@ -87,6 +98,10 @@ public class AbacPepConfiguration {
 		afterInvocationProviders.add(postInvocationAdviceProvider);
 		invocationProviderManager.setProviders(afterInvocationProviders);
 		return invocationProviderManager;
+	}
+
+	protected Collection<RequestAttributeConverter> getRequestAttributeConverters() {
+		return requestAttributeConverters;
 	}
 
 	private boolean isAspectJ() {

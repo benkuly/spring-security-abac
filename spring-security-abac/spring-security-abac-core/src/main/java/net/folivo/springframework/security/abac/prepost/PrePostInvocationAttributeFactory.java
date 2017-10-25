@@ -5,7 +5,7 @@ import org.springframework.security.access.prepost.PostInvocationAttribute;
 import org.springframework.security.access.prepost.PreInvocationAttribute;
 
 //TODO extends necessary?
-public interface PrePostRequestAttributeFactory<T> extends AopInfrastructureBean {
+public interface PrePostInvocationAttributeFactory<T> extends AopInfrastructureBean {
 
 	PreInvocationAttribute createPreInvocationAttributes(AttributeCategory category, String id, T value);
 

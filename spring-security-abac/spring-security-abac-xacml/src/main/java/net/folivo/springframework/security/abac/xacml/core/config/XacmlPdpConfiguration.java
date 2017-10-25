@@ -11,8 +11,24 @@ import com.att.research.xacml.api.pdp.PDPEngineFactory;
 import com.att.research.xacml.util.FactoryException;
 import com.att.research.xacml.util.XACMLProperties;
 
+import net.folivo.springframework.security.abac.config.PdpConfiguration;
+import net.folivo.springframework.security.abac.pdp.PdpClient;
+import net.folivo.springframework.security.abac.pdp.RequestFactory;
+import net.folivo.springframework.security.abac.pdp.ResponseEvaluator;
+import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlRequestFactory;
+
 @Configuration
-public class XacmlPdpConfiguration {
+public class XacmlPdpConfiguration implements PdpConfiguration {
+
+	private RequestFactory requestFactory;
+	private PdpClient pdpClient;
+	private ResponseEvaluator responseEvaluator;
+
+	public XacmlPdpConfiguration() {
+		requestFactory = new XacmlRequestFactory();
+		pdpClient = new XacmlPdpClient();
+		responseEvaluator = new XacmlResponseEvaluator();
+	}
 
 	@Bean
 	public PDPEngine getPdpEngine() {
@@ -24,5 +40,20 @@ public class XacmlPdpConfiguration {
 		} catch (FactoryException e) {
 			throw new BeanCreationException("PDPEngine", "Failed to create a PDPEngine", e);
 		}
+	}
+
+	@Override
+	public RequestFactory getRequestFactory() {
+		return requestFactory;
+	}
+
+	@Override
+	public PdpClient getPdpClient() {
+		return pdpClient;
+	}
+
+	@Override
+	public ResponseEvaluator getResponseEvaluator() {
+		return responseEvaluator;
 	}
 }

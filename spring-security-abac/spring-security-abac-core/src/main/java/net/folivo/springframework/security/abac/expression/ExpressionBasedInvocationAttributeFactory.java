@@ -1,4 +1,4 @@
-package net.folivo.springframework.security.abac.prepost.expression;
+package net.folivo.springframework.security.abac.expression;
 
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
@@ -9,9 +9,9 @@ import org.springframework.security.access.prepost.PreInvocationAttribute;
 import net.folivo.springframework.security.abac.prepost.AbacPostInvocationAttribute;
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationAttribute;
 import net.folivo.springframework.security.abac.prepost.AttributeCategory;
-import net.folivo.springframework.security.abac.prepost.PrePostRequestAttributeFactory;
+import net.folivo.springframework.security.abac.prepost.PrePostInvocationAttributeFactory;
 
-public class ExpressionBasedInvocationAttributeFactory implements PrePostRequestAttributeFactory<String> {
+public class ExpressionBasedInvocationAttributeFactory implements PrePostInvocationAttributeFactory<String> {
 
 	private final Object parserLock = new Object();
 	private ExpressionParser parser;

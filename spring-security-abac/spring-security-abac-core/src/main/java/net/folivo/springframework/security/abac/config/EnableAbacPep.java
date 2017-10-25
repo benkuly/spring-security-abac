@@ -11,7 +11,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 @Retention(value = java.lang.annotation.RetentionPolicy.RUNTIME)
 @Target(value = { java.lang.annotation.ElementType.TYPE })
 @Documented
-@Import({ AbacPepConfiguration.class })
+@Import({ PepConfiguration.class })
 @EnableGlobalMethodSecurity
 @Configuration
 public @interface EnableAbacPep {
