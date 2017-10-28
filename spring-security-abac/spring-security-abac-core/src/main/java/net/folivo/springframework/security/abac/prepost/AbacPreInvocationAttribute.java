@@ -6,8 +6,8 @@ import net.folivo.springframework.security.abac.pdp.RequestAttribute;
 
 public class AbacPreInvocationAttribute extends RequestAttribute implements PreInvocationAttribute {
 
-	public AbacPreInvocationAttribute(AttributeCategory category, String id, Object value) {
-		super(category, id, value);
+	public AbacPreInvocationAttribute(AttributeCategory category, String id, String datatype, Object value) {
+		super(category, id, datatype, value);
 	}
 
 	@Override

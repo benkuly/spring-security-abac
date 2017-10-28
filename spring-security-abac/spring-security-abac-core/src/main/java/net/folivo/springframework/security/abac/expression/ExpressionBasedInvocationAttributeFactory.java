@@ -22,18 +22,20 @@ public class ExpressionBasedInvocationAttributeFactory implements PrePostInvocat
 	}
 
 	@Override
-	public PreInvocationAttribute createPreInvocationAttributes(AttributeCategory category, String id, String value) {
+	public PreInvocationAttribute createPreInvocationAttributes(AttributeCategory category, String id, String datatype,
+			String value) {
 		try {
-			return new AbacPreInvocationAttribute(category, id, getParser().parseExpression(value));
+			return new AbacPreInvocationAttribute(category, id, datatype, getParser().parseExpression(value));
 		} catch (ParseException e) {
 			throw new IllegalArgumentException("Failed to parse expression '" + e.getExpressionString() + "'", e);
 		}
 	}
 
 	@Override
-	public PostInvocationAttribute createPostInvocationAttributes(AttributeCategory category, String id, String value) {
+	public PostInvocationAttribute createPostInvocationAttributes(AttributeCategory category, String id,
+			String datatype, String value) {
 		try {
-			return new AbacPostInvocationAttribute(category, id, getParser().parseExpression(value));
+			return new AbacPostInvocationAttribute(category, id, datatype, getParser().parseExpression(value));
 		} catch (ParseException e) {
 			throw new IllegalArgumentException("Failed to parse expression '" + e.getExpressionString() + "'", e);
 		}

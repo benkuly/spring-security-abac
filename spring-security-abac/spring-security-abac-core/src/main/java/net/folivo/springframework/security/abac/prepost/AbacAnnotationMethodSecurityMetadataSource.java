@@ -72,15 +72,15 @@ public class AbacAnnotationMethodSecurityMetadataSource extends AbstractMethodSe
 
 	private void createAndAddPreInvocationAttribute(AttributeCategory category, AttributeMapping[] attributes,
 			List<ConfigAttribute> listToAdd) {
-		Arrays.asList(attributes).stream()
-				.map(a -> attributeFactory.createPreInvocationAttributes(AttributeCategory.SUBJECT, a.id(), a.value()))
+		Arrays.asList(attributes).stream().map(a -> attributeFactory
+				.createPreInvocationAttributes(AttributeCategory.SUBJECT, a.id(), a.datatype(), a.value()))
 				.forEach(listToAdd::add);
 	}
 
 	private void createAndAddPostInvocationAttribute(AttributeCategory category, AttributeMapping[] attributes,
 			List<ConfigAttribute> listToAdd) {
-		Arrays.asList(attributes).stream()
-				.map(a -> attributeFactory.createPostInvocationAttributes(AttributeCategory.SUBJECT, a.id(), a.value()))
+		Arrays.asList(attributes).stream().map(a -> attributeFactory
+				.createPostInvocationAttributes(AttributeCategory.SUBJECT, a.id(), a.datatype(), a.value()))
 				.forEach(listToAdd::add);
 	}
 

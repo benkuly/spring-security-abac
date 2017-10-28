@@ -28,7 +28,7 @@ public class ExpressionBasedRequestAttributeConverter implements RequestAttribut
 		Expression expr = (Expression) requestAttr.getValue();
 		EvaluationContext context = expressionHandler.createEvaluationContext(authentication, method);
 
-		return new RequestAttribute(requestAttr.getCategory(), requestAttr.getId(), expr.getValue(context));
+		return new RequestAttribute(requestAttr.getCategory(), requestAttr.getId(), requestAttr.getDatatype(),
+				expr.getValue(context));
 	}
-
 }
