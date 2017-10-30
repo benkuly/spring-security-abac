@@ -7,6 +7,6 @@ public interface RequestAttributeConverter {
 
 	boolean supportsValueType(Class<?> clazz);
 
-	RequestAttribute convert(RequestAttribute requestAttr, Authentication authentication, MethodInvocation method);
+	PdpRequestAttribute convert(PdpRequestAttribute requestAttr, Authentication authentication, MethodInvocation method);
 
 }

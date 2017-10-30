@@ -10,11 +10,11 @@ import org.springframework.security.access.prepost.PreInvocationAttribute;
 import org.springframework.security.core.Authentication;
 
 import net.folivo.springframework.security.abac.pdp.PdpClient;
-import net.folivo.springframework.security.abac.pdp.Request;
-import net.folivo.springframework.security.abac.pdp.RequestAttribute;
+import net.folivo.springframework.security.abac.pdp.PdpRequest;
+import net.folivo.springframework.security.abac.pdp.PdpRequestAttribute;
 import net.folivo.springframework.security.abac.pdp.RequestAttributeConverter;
 import net.folivo.springframework.security.abac.pdp.RequestFactory;
-import net.folivo.springframework.security.abac.pdp.Response;
+import net.folivo.springframework.security.abac.pdp.PdpResponse;
 import net.folivo.springframework.security.abac.pdp.ResponseEvaluator;
 
 public class PreInvocationAuthorizationVoter implements AccessDecisionVoter<MethodInvocation> {
@@ -45,11 +45,11 @@ public class PreInvocationAuthorizationVoter implements AccessDecisionVoter<Meth
 	@Override
 	public int vote(Authentication authentication, MethodInvocation method, Collection<ConfigAttribute> attributes) {
 
-		Collection<RequestAttribute> requestAttrs = new ArrayList<>();
+		Collection<PdpRequestAttribute> requestAttrs = new ArrayList<>();
 
 		for (ConfigAttribute a : attributes) {
 			if (isPreInvocationAttribute(a)) {
-				RequestAttribute r = (RequestAttribute) a;
+				PdpRequestAttribute r = (PdpRequestAttribute) a;
 				requestAttrs.add(attributeConverter.stream().filter(c -> c.supportsValueType(r.getValue().getClass()))
 						.findFirst().map(c -> c.convert(r, authentication, method)).orElse(r));
 			}
@@ -59,15 +59,15 @@ public class PreInvocationAuthorizationVoter implements AccessDecisionVoter<Meth
 			return ACCESS_ABSTAIN;
 		}
 
-		Request request = requestFactory.build(requestAttrs);
-		Response response = pdpClient.decide(request);
+		PdpRequest request = requestFactory.build(requestAttrs);
+		PdpResponse response = pdpClient.decide(request);
 		boolean allowed = eval.evaluateToBoolean(response);
 
 		return allowed ? ACCESS_GRANTED : ACCESS_DENIED;
 	}
 
 	private boolean isPreInvocationAttribute(ConfigAttribute attribute) {
-		return attribute instanceof PreInvocationAttribute && attribute instanceof RequestAttribute;
+		return attribute instanceof PreInvocationAttribute && attribute instanceof PdpRequestAttribute;
 	}
 
 }

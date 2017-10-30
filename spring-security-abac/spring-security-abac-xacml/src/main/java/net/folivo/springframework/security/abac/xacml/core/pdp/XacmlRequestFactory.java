@@ -11,8 +11,8 @@ import com.att.research.xacml.std.IdentifierImpl;
 import com.att.research.xacml.std.StdMutableRequestAttributes;
 import com.att.research.xacml.std.annotations.RequestParser;
 
-import net.folivo.springframework.security.abac.pdp.Request;
-import net.folivo.springframework.security.abac.pdp.RequestAttribute;
+import net.folivo.springframework.security.abac.pdp.PdpRequest;
+import net.folivo.springframework.security.abac.pdp.PdpRequestAttribute;
 import net.folivo.springframework.security.abac.pdp.RequestFactory;
 import net.folivo.springframework.security.abac.prepost.AttributeCategory;
 
@@ -20,18 +20,18 @@ public class XacmlRequestFactory implements RequestFactory {
 
 	// TODO throw exception when build didn't work
 	@Override
-	public Request build(Collection<RequestAttribute> requestAttrs) {
+	public PdpRequest build(Collection<PdpRequestAttribute> requestAttrs) {
 		// TODO use RequestParser from at&t xaxml as reference
 		// TODO bad way to use the field when you already know how to get the value
 		List<StdMutableRequestAttributes> attributes = new ArrayList<>();
-		for (RequestAttribute r : requestAttrs) {
+		for (PdpRequestAttribute r : requestAttrs) {
 			String datatype = "auto".equals(r.getDatatype()) ? null : r.getDatatype();
 
 			// TODO maybe use identifier base from configuration?
 			// TODO maybe set issuer for cloud applications
 			try {
 				RequestParser.addAttribute(attributes, findCategory(r.getCategory()), new IdentifierImpl(r.getId()),
-						false, datatype, null, null, RequestAttribute.class.getField("value"), r);
+						false, datatype, null, null, PdpRequestAttribute.class.getField("value"), r);
 			} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException
 					| DataTypeException e) {
 				// TODO Auto-generated catch block

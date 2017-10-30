@@ -3,7 +3,6 @@ package net.folivo.springframework.security.abac.xacml.core.config;
 import java.util.Properties;
 
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.att.research.xacml.api.pdp.PDPEngine;
@@ -15,7 +14,9 @@ import net.folivo.springframework.security.abac.config.PdpConfiguration;
 import net.folivo.springframework.security.abac.pdp.PdpClient;
 import net.folivo.springframework.security.abac.pdp.RequestFactory;
 import net.folivo.springframework.security.abac.pdp.ResponseEvaluator;
+import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlPdpClient;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlRequestFactory;
+import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlResponseEvaluator;
 
 @Configuration
 public class XacmlPdpConfiguration implements PdpConfiguration {
@@ -30,7 +31,6 @@ public class XacmlPdpConfiguration implements PdpConfiguration {
 		responseEvaluator = new XacmlResponseEvaluator();
 	}
 
-	@Bean
 	public PDPEngine getPdpEngine() {
 		Properties props = new Properties();
 		props.setProperty(XACMLProperties.PROP_ROOTPOLICIES, "policy");
