@@ -1,5 +1,7 @@
 package net.folivo.springframework.security.abac.pdp;
 
-public interface PdpResponse {
+public interface RequestHolder {
+
+	Object getRequest();
 
 }

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.AfterInvocationProvider;
@@ -29,6 +30,7 @@ import net.folivo.springframework.security.abac.prepost.HierarchicalMethodSecuri
 import net.folivo.springframework.security.abac.prepost.PreInvocationAuthorizationVoter;
 import net.folivo.springframework.security.abac.prepost.PrePostInvocationAttributeFactory;
 
+@Configuration
 public class PepConfiguration {
 
 	private final PdpConfiguration pdpConfig;

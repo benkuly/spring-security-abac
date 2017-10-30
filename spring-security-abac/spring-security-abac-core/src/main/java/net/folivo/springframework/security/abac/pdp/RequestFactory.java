@@ -4,6 +4,6 @@ import java.util.Collection;
 
 public interface RequestFactory {
 
-	PdpRequest build(Collection<PdpRequestAttribute> requestAttrs);
+	RequestHolder build(Collection<RequestAttribute> requestAttrs);
 
 }

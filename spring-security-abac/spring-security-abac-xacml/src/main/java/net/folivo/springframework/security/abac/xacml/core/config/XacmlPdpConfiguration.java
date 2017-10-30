@@ -27,7 +27,7 @@ public class XacmlPdpConfiguration implements PdpConfiguration {
 
 	public XacmlPdpConfiguration() {
 		requestFactory = new XacmlRequestFactory();
-		pdpClient = new XacmlPdpClient();
+		pdpClient = new XacmlPdpClient(getPdpEngine());
 		responseEvaluator = new XacmlResponseEvaluator();
 	}
 

@@ -12,7 +12,7 @@ import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.method.AbstractMethodSecurityMetadataSource;
 import org.springframework.security.access.method.MethodSecurityMetadataSource;
 
-import net.folivo.springframework.security.abac.pdp.PdpRequestAttribute;
+import net.folivo.springframework.security.abac.pdp.RequestAttribute;
 
 public class HierarchicalMethodSecurityMetadataSource extends AbstractMethodSecurityMetadataSource {
 
@@ -31,7 +31,7 @@ public class HierarchicalMethodSecurityMetadataSource extends AbstractMethodSecu
 		Map<String, ConfigAttribute> set = new HashMap<>();
 
 		metadataSources.stream().flatMap(s -> s.getAttributes(method, targetClass).stream())
-				.filter(a -> a instanceof PdpRequestAttribute).forEach(a -> set.put(((PdpRequestAttribute) a).getId(), a));
+				.filter(a -> a instanceof RequestAttribute).forEach(a -> set.put(((RequestAttribute) a).getId(), a));
 
 		return set.values();
 	}
