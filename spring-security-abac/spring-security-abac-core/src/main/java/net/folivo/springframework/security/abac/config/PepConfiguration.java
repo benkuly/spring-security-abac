@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.aopalliance.intercept.MethodInterceptor;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionManager;
@@ -30,31 +31,25 @@ import net.folivo.springframework.security.abac.prepost.HierarchicalMethodSecuri
 import net.folivo.springframework.security.abac.prepost.PreInvocationAuthorizationVoter;
 import net.folivo.springframework.security.abac.prepost.PrePostInvocationAttributeFactory;
 
+//TODO better segregation between methodSecurity stuff and abac -> own Configuration
+//more @Bean's?
 @Configuration
-public class PepConfiguration {
+public class PepConfiguration implements InitializingBean {
 
 	private final PdpConfiguration pdpConfig;
-
-	private MethodSecurityInterceptor methodSecurityInterceptor;
-
-	private MethodSecurityExpressionHandler expressionHandler;
-	private Collection<RequestAttributeConverter> requestAttributeConverters;
 
 	public PepConfiguration(PdpConfiguration pdpConfig) {
 		this.pdpConfig = pdpConfig;
 
-		expressionHandler = new DefaultMethodSecurityExpressionHandler();
-		requestAttributeConverters = new ArrayList<>();
-		requestAttributeConverters.add(new ExpressionBasedRequestAttributeConverter(expressionHandler));
 	}
 
-	protected AccessDecisionManager accessDecisionManager() {
+	protected AccessDecisionManager methodSecurityAccessDecisionManager() {
 		List<AccessDecisionVoter<? extends Object>> decisionVoters = new ArrayList<>();
 
 		// TODO maybe allow multiple voters
 		// e.g. for local and remote pdp's at same time. if local pdp has no idea it can
 		// ask remote pdp.
-		decisionVoters.add(new PreInvocationAuthorizationVoter(getRequestAttributeConverters(),
+		decisionVoters.add(new PreInvocationAuthorizationVoter(requestAttributeConverters(),
 				pdpConfig.getRequestFactory(), pdpConfig.getPdpClient(), pdpConfig.getResponseEvaluator()));
 
 		return new AffirmativeBased(decisionVoters);
@@ -63,10 +58,10 @@ public class PepConfiguration {
 	@Bean
 	public MethodInterceptor methodSecurityInterceptor() throws Exception {
 		// TODO
-		methodSecurityInterceptor = isAspectJ() ? new AspectJMethodSecurityInterceptor()
+		MethodSecurityInterceptor methodSecurityInterceptor = isAspectJ() ? new AspectJMethodSecurityInterceptor()
 				: new MethodSecurityInterceptor();
-		methodSecurityInterceptor.setAccessDecisionManager(accessDecisionManager());
-		methodSecurityInterceptor.setAfterInvocationManager(afterInvocationManager());
+		methodSecurityInterceptor.setAccessDecisionManager(methodSecurityAccessDecisionManager());
+		methodSecurityInterceptor.setAfterInvocationManager(methodSecurityAfterInvocationManager());
 		methodSecurityInterceptor.setSecurityMetadataSource(methodSecurityMetadataSource());
 		RunAsManager runAsManager = runAsManager();
 		if (runAsManager != null) {
@@ -79,22 +74,23 @@ public class PepConfiguration {
 	public MethodSecurityMetadataSource methodSecurityMetadataSource() {
 		List<MethodSecurityMetadataSource> sources = new ArrayList<>();
 		PrePostInvocationAttributeFactory<String> attributeFactory = new ExpressionBasedInvocationAttributeFactory(
-				getExpressionHandler());
-		// TODO more MetadataSources!
+				methodSecurityExpressionHandler());
+		// TODO more MetadataSources! -> extra methods/beans
 		sources.add(new AbacAnnotationMethodSecurityMetadataSource(attributeFactory));
 		return new HierarchicalMethodSecurityMetadataSource(sources);
 	}
 
-	protected MethodSecurityExpressionHandler getExpressionHandler() {
-		return expressionHandler;
+	@Bean
+	protected MethodSecurityExpressionHandler methodSecurityExpressionHandler() {
+		return new DefaultMethodSecurityExpressionHandler();
 	}
 
-	protected AfterInvocationManager afterInvocationManager() {
+	protected AfterInvocationManager methodSecurityAfterInvocationManager() {
 		// TODO
 		// TODO decide here the use of local or remote PDP
 		AfterInvocationProviderManager invocationProviderManager = new AfterInvocationProviderManager();
 		ExpressionBasedPostInvocationAdvice postAdvice = new ExpressionBasedPostInvocationAdvice(
-				getExpressionHandler());
+				methodSecurityExpressionHandler());
 		PostInvocationAdviceProvider postInvocationAdviceProvider = new PostInvocationAdviceProvider(postAdvice);
 		List<AfterInvocationProvider> afterInvocationProviders = new ArrayList<>();
 		afterInvocationProviders.add(postInvocationAdviceProvider);
@@ -102,7 +98,10 @@ public class PepConfiguration {
 		return invocationProviderManager;
 	}
 
-	protected Collection<RequestAttributeConverter> getRequestAttributeConverters() {
+	protected Collection<RequestAttributeConverter> requestAttributeConverters() {
+		Collection<RequestAttributeConverter> requestAttributeConverters;
+		requestAttributeConverters = new ArrayList<>();
+		requestAttributeConverters.add(new ExpressionBasedRequestAttributeConverter(methodSecurityExpressionHandler()));
 		return requestAttributeConverters;
 	}
 
@@ -113,6 +112,12 @@ public class PepConfiguration {
 
 	protected RunAsManager runAsManager() {
 		return null;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		// TODO Auto-generated method stub
+
 	}
 
 }
