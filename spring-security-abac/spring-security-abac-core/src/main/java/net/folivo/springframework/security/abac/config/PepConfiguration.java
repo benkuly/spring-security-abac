@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionManager;
@@ -22,6 +23,12 @@ import org.springframework.security.access.intercept.aspectj.AspectJMethodSecuri
 import org.springframework.security.access.method.MethodSecurityMetadataSource;
 import org.springframework.security.access.prepost.PostInvocationAdviceProvider;
 import org.springframework.security.access.vote.AffirmativeBased;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
+import org.springframework.security.config.annotation.ObjectPostProcessor;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 
 import net.folivo.springframework.security.abac.expression.ExpressionBasedInvocationAttributeFactory;
 import net.folivo.springframework.security.abac.expression.ExpressionBasedRequestAttributeConverter;
@@ -34,11 +41,24 @@ import net.folivo.springframework.security.abac.prepost.PrePostInvocationAttribu
 //TODO better segregation between methodSecurity stuff and abac -> own Configuration
 //more @Bean's?
 @Configuration
+@EnableGlobalAuthentication
 public class PepConfiguration implements InitializingBean {
 
+	private final AuthenticationConfiguration authConfig;
 	private final PdpConfiguration pdpConfig;
 
-	public PepConfiguration(PdpConfiguration pdpConfig) {
+	private boolean disableAuthenticationRegistry;
+	private AuthenticationManager authManager;
+	private AuthenticationManagerBuilder authBuilder;
+	private ObjectPostProcessor<Object> objectPostProcessor = new ObjectPostProcessor<Object>() {
+		@Override
+		public <T> T postProcess(T object) {
+			throw new IllegalStateException(ObjectPostProcessor.class.getName() + " is a required bean.");
+		}
+	};
+
+	public PepConfiguration(AuthenticationConfiguration authConfig, PdpConfiguration pdpConfig) {
+		this.authConfig = authConfig;
 		this.pdpConfig = pdpConfig;
 
 	}
@@ -63,6 +83,7 @@ public class PepConfiguration implements InitializingBean {
 		methodSecurityInterceptor.setAccessDecisionManager(methodSecurityAccessDecisionManager());
 		methodSecurityInterceptor.setAfterInvocationManager(methodSecurityAfterInvocationManager());
 		methodSecurityInterceptor.setSecurityMetadataSource(methodSecurityMetadataSource());
+		methodSecurityInterceptor.setAuthenticationManager(authenticationManager());
 		RunAsManager runAsManager = runAsManager();
 		if (runAsManager != null) {
 			methodSecurityInterceptor.setRunAsManager(runAsManager);
@@ -103,6 +124,55 @@ public class PepConfiguration implements InitializingBean {
 		requestAttributeConverters = new ArrayList<>();
 		requestAttributeConverters.add(new ExpressionBasedRequestAttributeConverter(methodSecurityExpressionHandler()));
 		return requestAttributeConverters;
+	}
+
+	/**
+	 * Gets the {@link AuthenticationManager} to use. The default strategy is if
+	 * {@link #configure(AuthenticationManagerBuilder)} method is overridden to use
+	 * the {@link AuthenticationManagerBuilder} that was passed in. Otherwise,
+	 * autowire the {@link AuthenticationManager} by type.
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	protected AuthenticationManager authenticationManager() throws Exception {
+		if (authManager != null) {
+
+			// TODO research why we must create an eventPublisher
+			DefaultAuthenticationEventPublisher eventPublisher = objectPostProcessor
+					.postProcess(new DefaultAuthenticationEventPublisher());
+			authBuilder = new AuthenticationManagerBuilder(objectPostProcessor);
+			authBuilder.authenticationEventPublisher(eventPublisher);
+
+			configure(authBuilder);
+			if (disableAuthenticationRegistry) {
+				authManager = authConfig.getAuthenticationManager();
+			} else {
+				authManager = authBuilder.build();
+			}
+		}
+		return authManager;
+	}
+
+	/**
+	 * Sub classes can override this method to register different types of
+	 * authentication. If not overridden,
+	 * {@link #configure(AuthenticationManagerBuilder)} will attempt to autowire by
+	 * type.
+	 *
+	 * @param auth
+	 *            the {@link AuthenticationManagerBuilder} used to register
+	 *            different authentication mechanisms for the global method
+	 *            security.
+	 * @throws Exception
+	 */
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		this.disableAuthenticationRegistry = true;
+	}
+
+	@Autowired
+	public void setObjectPostProcessor(ObjectPostProcessor<Object> objectPostProcessor) {
+		this.objectPostProcessor = objectPostProcessor;
 	}
 
 	private boolean isAspectJ() {
