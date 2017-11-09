@@ -13,16 +13,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import net.folivo.springframework.security.abac.demo.entities.User;
-import net.folivo.springframework.security.abac.demo.entities.UserRepository;
+import net.folivo.springframework.security.abac.demo.entities.StdUserRepository;
 
 @Service
 // @Transactional(readOnly = true)
 public class CustomUserDetailsService implements UserDetailsService {
 
-	private final UserRepository userRepo;
+	private final StdUserRepository userRepo;
 
 	@Autowired
-	public CustomUserDetailsService(UserRepository userRepo) {
+	public CustomUserDetailsService(StdUserRepository userRepo) {
 		this.userRepo = userRepo;
 	}
 

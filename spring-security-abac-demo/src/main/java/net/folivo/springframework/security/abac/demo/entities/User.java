@@ -5,8 +5,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import net.folivo.springframework.security.abac.demo.filter.Filterable;
+
 @Entity
-public class User {
+public class User implements Filterable {
 
 	@Id
 	@GeneratedValue
@@ -14,6 +18,7 @@ public class User {
 
 	private String role;
 
+	@JsonIgnore
 	private String password;
 	private String forename;
 	private String surname;

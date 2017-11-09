@@ -8,19 +8,19 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends PagingAndSortingRepository<User, Long> {
+public interface StdUserRepository extends PagingAndSortingRepository<User, Long> {
 
 	public Optional<User> findByUsernameIgnoreCase(String username);
 
-	@PreAuthorize("#entity.owner.username == principal.username && hasRole('DOCTOR')")
+	@PreAuthorize("@SecuredRepoUtil.canSaveUser(#entity)")
 	@Override
 	<S extends User> S save(S entity);
 
-	@Query("SELECT u FROM User u WHERE u.owner.username=?#{principal.id}")
+	@Query("SELECT u FROM User u WHERE u.id=?1 AND u.company=(SELECT u.company FROM User u WHERE u.username=?#{principal.username})")
 	@Override
-	Iterable<User> findAll();
+	Optional<User> findById(Long id);
 
-	@PreAuthorize("#entity.owner.username == principal.username && hasRole('DOCTOR')")
+	@PreAuthorize("@SecuredRepoUtil.canDeleteUser(#id)")
 	@Override
-	void delete(User entity);
+	void deleteById(Long id);
 }

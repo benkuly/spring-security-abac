@@ -24,13 +24,8 @@ public abstract class SimpleRestController<T, ID> {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> delete(@PathVariable ID id) {
-		Optional<T> entity = repo.findById(id);
-		if (entity.isPresent()) {
-			repo.delete(entity.get());
-			return ResponseEntity.ok().build();
-		}
-		return ResponseEntity.notFound().build();
+	public void delete(@PathVariable ID id) {
+		repo.deleteById(id);
 	}
 
 	@GetMapping("/{id}")

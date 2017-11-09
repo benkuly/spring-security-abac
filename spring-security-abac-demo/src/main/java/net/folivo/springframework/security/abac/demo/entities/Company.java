@@ -4,8 +4,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import net.folivo.springframework.security.abac.demo.filter.Filterable;
+
 @Entity
-public class Company {
+public class Company implements Filterable {
 
 	@Id
 	@GeneratedValue
