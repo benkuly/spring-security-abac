@@ -19,8 +19,10 @@ public abstract class SimpleRestController<T, ID> {
 	}
 
 	@PostMapping
-	public T save(@RequestBody T entity) {
-		return repo.save(entity);
+	public ResponseEntity<T> save(@RequestBody T entity) {
+		if (entity != null)
+			return ResponseEntity.ok(repo.save(entity));
+		return ResponseEntity.badRequest().build();
 	}
 
 	@DeleteMapping("/{id}")

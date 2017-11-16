@@ -4,15 +4,15 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ser.PropertyWriter;
 
-import net.folivo.springframework.security.abac.demo.entities.SecuredRepoUtil;
+import net.folivo.springframework.security.abac.demo.config.AuthenticationUtil;
 import net.folivo.springframework.security.abac.demo.entities.User;
 
 @Component
 public class UserPropertyFilter implements PropertyFilter {
 
-	private final SecuredRepoUtil util;
+	private final AuthenticationUtil util;
 
-	public UserPropertyFilter(SecuredRepoUtil util) {
+	public UserPropertyFilter(AuthenticationUtil util) {
 		this.util = util;
 	}
 
@@ -24,8 +24,9 @@ public class UserPropertyFilter implements PropertyFilter {
 	@Override
 	public boolean serialize(Object pojo, PropertyWriter writer) {
 		User entity = (User) pojo;
-		User subj = util.getCurrentLoggedInUser();
-		if (entity.getOwner().getId() == subj.getId() || writer.getName().equals("username"))
+		String subjUsername = util.getCurrentLoggedInUsername();
+		if (entity.getUsername() == subjUsername || writer.getName().equals("username")
+				|| writer.getName().equals("forename"))
 			return true;
 		return false;
 	}

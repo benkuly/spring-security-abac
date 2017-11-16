@@ -1,9 +1,9 @@
 package net.folivo.springframework.security.abac.demo.entities;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -22,26 +22,21 @@ public class User implements Filterable {
 	private String password;
 	private String forename;
 	private String surname;
+	@Column(unique = true)
 	private String username;
-
-	private User owner;
-
-	@ManyToOne
-	private Company company;
+	private String email;
 
 	protected User() {
 
 	}
 
-	public User(String username, String password, String role, String forename, String surname, User owner,
-			Company company) {
+	public User(String username, String password, String role, String forename, String surname, String email) {
 		this.username = username;
 		this.password = password;
 		this.role = role;
 		this.forename = forename;
 		this.surname = surname;
-		this.owner = owner;
-		this.company = company;
+		this.email = email;
 	}
 
 	public long getId() {
@@ -68,12 +63,8 @@ public class User implements Filterable {
 		return username;
 	}
 
-	public Company getCompany() {
-		return company;
-	}
-
-	public User getOwner() {
-		return owner;
+	public String getEmail() {
+		return email;
 	}
 
 }
