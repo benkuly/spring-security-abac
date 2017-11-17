@@ -17,12 +17,10 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 
 	public final static String SAVE_USER = "SAVE_USER";
 
-	private final AuthenticationUtil authn;
 	private final StdUserRepository usRep;
 
 	@Autowired
-	public SecurityPermissionEvaluator(AuthenticationUtil authn, StdUserRepository usRep) {
-		this.authn = authn;
+	public SecurityPermissionEvaluator(StdUserRepository usRep) {
 		this.usRep = usRep;
 	}
 
@@ -35,9 +33,7 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 		case SAVE_USER:
 			Assert.isInstanceOf(User.class, targetDomainObject);
 			return canSaveUser((User) targetDomainObject);
-
 		}
-
 		return false;
 	}
 
@@ -49,32 +45,30 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 
 	public boolean canSaveUser(User newUser) {
 		if (newUser != null) {
-			Optional<User> potentialOldUser = usRep.findById(newUser.getId());
-			String role = authn.getCurrentLoggedInUserRole();
+			Optional<User> potentialOldUser = usRep.findByIdInternal(newUser.getId());
+			String role = AuthenticationUtil.getCurrentLoggedInUserRole();
 			// handle save
 			if (potentialOldUser.isPresent()) {
 				User oldUser = potentialOldUser.get();
 
 				switch (role) {
-				case DataInitalizer.ROLE_ADMIN:
+				case DataInitializer.ROLE_ADMIN:
 					return true;
-				case DataInitalizer.ROLE_NORMAL:
-					System.out.println("old:" + oldUser.getUsername() + " new:" + newUser.getUsername() + " authn:"
-							+ authn.getCurrentLoggedInUsername());
+				case DataInitializer.ROLE_NORMAL:
 					if (oldUser.getRole().equals(newUser.getRole())
 							&& oldUser.getUsername().equals(newUser.getUsername())
-							&& oldUser.getUsername().equals(authn.getCurrentLoggedInUsername()))
+							&& oldUser.getUsername().equals(AuthenticationUtil.getCurrentLoggedInUsername()))
 						return true;
 				}
 			}
 			// handle create
 			else {
 				switch (role) {
-				case DataInitalizer.ROLE_ADMIN:
+				case DataInitializer.ROLE_ADMIN:
 					return true;
-				case DataInitalizer.ROLE_NORMAL:
+				case DataInitializer.ROLE_NORMAL:
 				case "ROLE_ANONYMOUS":
-					if (DataInitalizer.ROLE_NORMAL.equals(newUser.getRole()))
+					if (DataInitializer.ROLE_NORMAL.equals(newUser.getRole()))
 						return true;
 				}
 			}

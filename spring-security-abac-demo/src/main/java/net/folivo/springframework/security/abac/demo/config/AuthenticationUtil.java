@@ -24,16 +24,16 @@ public class AuthenticationUtil {
 		return usRep.findByUsernameIgnoreCase(getCurrentLoggedInUsername());
 	}
 
-	public String getCurrentLoggedInUserRole() {
+	public static String getCurrentLoggedInUserRole() {
 		return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
 				.map(a -> a.getAuthority()).findFirst().orElse("ROLE_ANONYMOUS");
 	}
 
-	public String getCurrentLoggedInUsername() {
+	public static String getCurrentLoggedInUsername() {
 		return getCurrentLoggendInUserDetails().map(d -> d.getUsername()).orElse("anonymous");
 	}
 
-	public Optional<UserDetails> getCurrentLoggendInUserDetails() {
+	public static Optional<UserDetails> getCurrentLoggendInUserDetails() {
 		if (SecurityContextHolder.getContext().getAuthentication() != null) {
 			Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 			if (principal instanceof UserDetails)

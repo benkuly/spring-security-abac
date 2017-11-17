@@ -10,7 +10,7 @@ import javax.persistence.ManyToOne;
 import net.folivo.springframework.security.abac.demo.filter.Filterable;
 
 @Entity
-public class Post implements Filterable {
+public class Posting implements Filterable {
 
 	@Id
 	@GeneratedValue
@@ -21,11 +21,11 @@ public class Post implements Filterable {
 	private LocalDateTime creationTime;
 	private String content;
 
-	protected Post() {
+	protected Posting() {
 
 	}
 
-	public Post(User creator, LocalDateTime creationTime, String content) {
+	public Posting(User creator, LocalDateTime creationTime, String content) {
 		this.creator = creator;
 		this.creationTime = creationTime;
 		this.content = content;

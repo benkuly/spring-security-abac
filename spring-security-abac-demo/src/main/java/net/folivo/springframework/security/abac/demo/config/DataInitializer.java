@@ -5,7 +5,7 @@ import org.springframework.beans.factory.InitializingBean;
 import net.folivo.springframework.security.abac.demo.entities.StdUserRepository;
 import net.folivo.springframework.security.abac.demo.entities.User;
 
-public class DataInitalizer implements InitializingBean {
+public class DataInitializer implements InitializingBean {
 
 	private final StdUserRepository userRepo;
 
@@ -13,7 +13,7 @@ public class DataInitalizer implements InitializingBean {
 	public static final String ROLE_ADMIN = "ROLE_ADMIN";
 	public static final String ROLE_NORMAL = "ROLE_NORMAL";
 
-	public DataInitalizer(StdUserRepository userRepo) {
+	public DataInitializer(StdUserRepository userRepo) {
 		this.userRepo = userRepo;
 	}
 
