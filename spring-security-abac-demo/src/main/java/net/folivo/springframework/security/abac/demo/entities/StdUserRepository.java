@@ -18,8 +18,7 @@ public interface StdUserRepository extends CrudRepository<User, Long> {
 	<S extends User> S save(@Param("entity") S entity);
 
 	@Override
-	@Query("SELECT CASE WHEN 0=?#{hasRole('ADMIN') ? 1 : 0} AND u.role!='ROLE_ADMIN' AND u.id=?1 THEN NULL "
-			+ "ELSE u END FROM User u")
+	@Query("SELECT u FROM User u WHERE ((0=?#{hasRole('ADMIN') ? 1 : 0} AND u.role!='ROLE_ADMIN') OR (1=?#{hasRole('ADMIN') ? 1 : 0})) AND u.id=?1")
 	Optional<User> findById(Long id);
 
 	@Query("SELECT u FROM User u WHERE u.id=?1")

@@ -8,11 +8,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,6 +39,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 import net.folivo.springframework.security.abac.demo.config.DataInitializer;
+import net.folivo.springframework.security.abac.demo.entities.Posting;
 import net.folivo.springframework.security.abac.demo.entities.User;
 
 @RunWith(SpringRunner.class)
@@ -181,7 +182,14 @@ public class StandardSecurityTest {
 	public void getUserAsAnyoneTest() throws Exception {
 		// get a user
 		long id = eMa.persist(userWithRole(DataInitializer.ROLE_NORMAL)).getId();
-		getUserWithAttributes(id, "role", "forename", "email", "password");
+		getUserWithForbiddenAttributes(id, "role", "surname", "email", "password");
+	}
+
+	@Test
+	@WithMockUser(username = "normalUser", authorities = { DataInitializer.ROLE_NORMAL })
+	public void getUserAsSameUser() throws Exception {
+		long id = eMa.persist(userWithUsername("normalUser", DataInitializer.ROLE_NORMAL)).getId();
+		getUserWithForbiddenAttributes(id, "password");
 	}
 
 	@Test
@@ -189,48 +197,69 @@ public class StandardSecurityTest {
 	public void getUserAsAdminTest() throws Exception {
 		// get a user
 		long id = eMa.persist(userWithRole(DataInitializer.ROLE_NORMAL)).getId();
-		getUserWithAttributes(id);
+		getUserWithForbiddenAttributes(id, "password");
 	}
 
-	private void getUserWithAttributes(long id, String... forbiddenAttributes) throws Exception {
+	private void getUserWithForbiddenAttributes(long id, String... forbiddenAttributes) throws Exception {
 		ResultActions result = mvc.perform(get("/users/" + id).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNotFound());
-		List<String> needed = new ArrayList<>();
+				.andExpect(status().isOk());
+
 		List<String> forbidden = Arrays.asList(forbiddenAttributes);
-		for (Field field : User.class.getFields()) {
-			if (!forbidden.contains(field.getName()))
-				needed.add(field.getName());
-		}
+		List<String> needed = Arrays.stream(User.class.getDeclaredFields()).map(f -> f.getName())
+				.filter(f -> !forbidden.contains(f)).collect(Collectors.toList());
+
 		for (String a : forbidden) {
 			result.andExpect(jsonPath("$." + a).doesNotExist());
 		}
 		for (String a : needed) {
-			System.out.println(a);
 			result.andExpect(jsonPath("$." + a).exists());
 		}
 	}
 
 	/*-
 	 * #############################################
-	 * create new post
+	 * create new posting
+	 * #############################################
+	 */
+
+	/*-
+	@Test
+	public void createPostAsAnyoneTest() throws Exception {
+		// create NORMAL
+		mvc.perform(postJson("/posts", userWithRole(DataInitializer.ROLE_NORMAL))).andExpect(status().isOk());
+		userRepoSize(1);
+		// try to create ADMIN
+		mvc.perform(postJson("/posts", userWithRole(DataInitializer.ROLE_ADMIN))).andExpect(status().isForbidden());
+		userRepoSize(1);
+	}
+	
+	@Test
+	@WithMockUser(authorities = { DataInitializer.ROLE_ADMIN })
+	public void createPostingAsAdminTest() throws Exception {
+		// create NORMAL
+		mvc.perform(postJson("/posts", userWithRole(DataInitializer.ROLE_NORMAL))).andExpect(status().isOk());
+		userRepoSize(1);
+		// create ADMIN
+		mvc.perform(postJson("/posts", userWithRole(DataInitializer.ROLE_ADMIN))).andExpect(status().isOk());
+		userRepoSize(2);
+	}
+	*/
+
+	/*-
+	 * #############################################
+	 * save existing posting
 	 * #############################################
 	 */
 
 	/*-
 	 * #############################################
-	 * save existing post
+	 * delete posting
 	 * #############################################
 	 */
 
 	/*-
 	 * #############################################
-	 * delete post
-	 * #############################################
-	 */
-
-	/*-
-	 * #############################################
-	 * get post
+	 * get posting
 	 * #############################################
 	 */
 
@@ -247,6 +276,10 @@ public class StandardSecurityTest {
 
 	private User userWithRole(String role) {
 		return userWithUsername(UUID.randomUUID().toString(), role);
+	}
+
+	private Posting postingWithCreator(User creator) {
+		return new Posting(creator, LocalDateTime.now(), "some text");
 	}
 
 	private User userWithUsername(String username, String role) {

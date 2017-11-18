@@ -20,8 +20,8 @@ public class UserPropertyFilter implements PropertyFilter {
 	public boolean serialize(Object pojo, PropertyWriter writer) {
 		User entity = (User) pojo;
 		String subjUsername = AuthenticationUtil.getCurrentLoggedInUsername();
-		if (entity.getUsername() == subjUsername || writer.getName().equals("username")
-				|| writer.getName().equals("forename")
+		if (entity.getUsername().equals(subjUsername) || writer.getName().equals("username")
+				|| writer.getName().equals("forename") || writer.getName().equals("id")
 				|| AuthenticationUtil.getCurrentLoggedInUserRole().equals(DataInitializer.ROLE_ADMIN))
 			return true;
 		return false;
