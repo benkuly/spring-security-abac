@@ -26,7 +26,7 @@ public class AuthenticationUtil {
 
 	public static String getCurrentLoggedInUserRole() {
 		return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-				.map(a -> a.getAuthority()).findFirst().orElse("ROLE_ANONYMOUS");
+				.map(a -> a.getAuthority().split("_")[1]).findFirst().orElse("ANONYMOUS");
 	}
 
 	public static String getCurrentLoggedInUsername() {

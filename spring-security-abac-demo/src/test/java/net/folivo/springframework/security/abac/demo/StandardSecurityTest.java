@@ -38,7 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
-import net.folivo.springframework.security.abac.demo.config.DataInitializer;
+import net.folivo.springframework.security.abac.demo.config.WebSecurityConfig;
 import net.folivo.springframework.security.abac.demo.entities.Posting;
 import net.folivo.springframework.security.abac.demo.entities.User;
 
@@ -74,21 +74,22 @@ public class StandardSecurityTest {
 	@Test
 	public void createUserAsAnyoneTest() throws Exception {
 		// create NORMAL
-		mvc.perform(postJson("/users", userWithRole(DataInitializer.ROLE_NORMAL))).andExpect(status().isOk());
+		mvc.perform(postJson("/users", userWithRole(WebSecurityConfig.ROLE_NORMAL))).andExpect(status().isOk());
 		userRepoSize(1);
 		// try to create ADMIN
-		mvc.perform(postJson("/users", userWithRole(DataInitializer.ROLE_ADMIN))).andExpect(status().isForbidden());
+		mvc.perform(postJson("/users", userWithRole(WebSecurityConfig.ROLE_ADMIN)))
+				.andExpect(status().isUnauthorized());
 		userRepoSize(1);
 	}
 
 	@Test
-	@WithMockUser(authorities = { DataInitializer.ROLE_ADMIN })
+	@WithMockUser(roles = { WebSecurityConfig.ROLE_ADMIN })
 	public void createUserAsAdminTest() throws Exception {
 		// create NORMAL
-		mvc.perform(postJson("/users", userWithRole(DataInitializer.ROLE_NORMAL))).andExpect(status().isOk());
+		mvc.perform(postJson("/users", userWithRole(WebSecurityConfig.ROLE_NORMAL))).andExpect(status().isOk());
 		userRepoSize(1);
 		// create ADMIN
-		mvc.perform(postJson("/users", userWithRole(DataInitializer.ROLE_ADMIN))).andExpect(status().isOk());
+		mvc.perform(postJson("/users", userWithRole(WebSecurityConfig.ROLE_ADMIN))).andExpect(status().isOk());
 		userRepoSize(2);
 	}
 
@@ -101,49 +102,54 @@ public class StandardSecurityTest {
 	@Test
 	public void saveUserAsAnyoneTest() throws Exception {
 		// try to change foreign user
-		changeExistingUserTest(eMa.persist(userWithRole(DataInitializer.ROLE_NORMAL)), "username", "newUsername",
-				false);
-		changeExistingUserTest(eMa.persist(userWithRole(DataInitializer.ROLE_NORMAL)), "role", "newRole", false);
+		changeExistingUserTest(eMa.persist(userWithRole(WebSecurityConfig.ROLE_NORMAL)), "username", "newUsername", 2);
+		changeExistingUserTest(eMa.persist(userWithRole(WebSecurityConfig.ROLE_NORMAL)), "role", "newRole", 2);
 	}
 
 	@Test
-	@WithMockUser(username = "normalUser", authorities = { DataInitializer.ROLE_NORMAL })
+	@WithMockUser(username = "normalUser", roles = { WebSecurityConfig.ROLE_NORMAL })
 	public void saveUserAsNormalTest() throws Exception {
-		User normalUser = eMa.persist(userWithUsername("normalUser", DataInitializer.ROLE_NORMAL));
+		User normalUser = eMa.persist(userWithUsername("normalUser", WebSecurityConfig.ROLE_NORMAL));
 		// try to change own username
-		changeExistingUserTest(normalUser, "username", "newUsername", false);
+		changeExistingUserTest(normalUser, "username", "newUsername", 1);
 		// try to change own role
-		changeExistingUserTest(normalUser, "role", "newRole", false);
+		changeExistingUserTest(normalUser, "role", "newRole", 1);
 		// change email
-		changeExistingUserTest(normalUser, "email", "newEmail", true);
+		changeExistingUserTest(normalUser, "email", "newEmail", 0);
 	}
 
 	@Test
-	@WithMockUser(authorities = { DataInitializer.ROLE_ADMIN })
+	@WithMockUser(roles = { WebSecurityConfig.ROLE_ADMIN })
 	public void saveUserAsAdminTest() throws Exception {
-		User normalUser = eMa.persist(userWithUsername("normalUser", DataInitializer.ROLE_NORMAL));
+		User normalUser = eMa.persist(userWithUsername("normalUser", WebSecurityConfig.ROLE_NORMAL));
 		// change username
-		changeExistingUserTest(normalUser, "username", "newUsername", true);
+		changeExistingUserTest(normalUser, "username", "newUsername", 0);
 		// change role
-		changeExistingUserTest(normalUser, "role", "newRole", true);
+		changeExistingUserTest(normalUser, "role", "newRole", 0);
 		// change email
-		changeExistingUserTest(normalUser, "email", "newEmail", true);
+		changeExistingUserTest(normalUser, "email", "newEmail", 0);
 	}
 
-	private void changeExistingUserTest(User user, String fieldName, Object value, boolean allowed) throws Exception {
+	// 0 allowed, 1 fobidden, 2 unauthorized
+	private void changeExistingUserTest(User user, String fieldName, Object value, int allowed) throws Exception {
 		eMa.flush();
 		eMa.clear();
 		long id = user.getId();
 		Object original = ReflectionTestUtils.getField(user, fieldName);
 		ReflectionTestUtils.setField(user, fieldName, value);
 		ResultMatcher result;
-		if (allowed)
+		if (allowed == 0)
 			result = status().isOk();
-		else
+		else if (allowed == 1)
 			result = status().isForbidden();
+		else
+			result = status().isUnauthorized();
 		mvc.perform(postJson("/users", user)).andExpect(result);
 		boolean isSame = ReflectionTestUtils.getField(eMa.find(User.class, id), fieldName).equals(original);
-		assertTrue(allowed && !isSame || !allowed && isSame);
+		if (allowed == 0)
+			assertTrue("entity wan't changed but expected", !isSame);
+		else
+			assertTrue("entity was changed but not expected", isSame);
 		ReflectionTestUtils.setField(user, fieldName, original);
 	}
 
@@ -156,17 +162,17 @@ public class StandardSecurityTest {
 	@Test
 	public void deleteUserAsAnyoneTest() throws Exception {
 		// try to delete a user
-		long id = eMa.persist(userWithRole(DataInitializer.ROLE_NORMAL)).getId();
+		long id = eMa.persist(userWithRole(WebSecurityConfig.ROLE_NORMAL)).getId();
 		userRepoSize(1);
-		mvc.perform(delete("/users/" + id)).andExpect(status().isForbidden());
+		mvc.perform(delete("/users/" + id)).andExpect(status().isUnauthorized());
 		userRepoSize(1);
 	}
 
 	@Test
-	@WithMockUser(authorities = { DataInitializer.ROLE_ADMIN })
+	@WithMockUser(roles = { WebSecurityConfig.ROLE_ADMIN })
 	public void deleteUserAsAdminTest() throws Exception {
 		// delete a user
-		long id = eMa.persist(userWithRole(DataInitializer.ROLE_NORMAL)).getId();
+		long id = eMa.persist(userWithRole(WebSecurityConfig.ROLE_NORMAL)).getId();
 		userRepoSize(1);
 		mvc.perform(delete("/users/" + id)).andExpect(status().isOk());
 		userRepoSize(0);
@@ -181,22 +187,22 @@ public class StandardSecurityTest {
 	@Test
 	public void getUserAsAnyoneTest() throws Exception {
 		// get a user
-		long id = eMa.persist(userWithRole(DataInitializer.ROLE_NORMAL)).getId();
+		long id = eMa.persist(userWithRole(WebSecurityConfig.ROLE_NORMAL)).getId();
 		getUserWithForbiddenAttributes(id, "role", "surname", "email", "password");
 	}
 
 	@Test
-	@WithMockUser(username = "normalUser", authorities = { DataInitializer.ROLE_NORMAL })
+	@WithMockUser(username = "normalUser", roles = { WebSecurityConfig.ROLE_NORMAL })
 	public void getUserAsSameUser() throws Exception {
-		long id = eMa.persist(userWithUsername("normalUser", DataInitializer.ROLE_NORMAL)).getId();
+		long id = eMa.persist(userWithUsername("normalUser", WebSecurityConfig.ROLE_NORMAL)).getId();
 		getUserWithForbiddenAttributes(id, "password");
 	}
 
 	@Test
-	@WithMockUser(authorities = { DataInitializer.ROLE_ADMIN })
+	@WithMockUser(roles = { WebSecurityConfig.ROLE_ADMIN })
 	public void getUserAsAdminTest() throws Exception {
 		// get a user
-		long id = eMa.persist(userWithRole(DataInitializer.ROLE_NORMAL)).getId();
+		long id = eMa.persist(userWithRole(WebSecurityConfig.ROLE_NORMAL)).getId();
 		getUserWithForbiddenAttributes(id, "password");
 	}
 
@@ -226,21 +232,21 @@ public class StandardSecurityTest {
 	@Test
 	public void createPostAsAnyoneTest() throws Exception {
 		// create NORMAL
-		mvc.perform(postJson("/posts", userWithRole(DataInitializer.ROLE_NORMAL))).andExpect(status().isOk());
+		mvc.perform(postJson("/posts", userWithRole(WebSecurityConfig.ROLE_NORMAL))).andExpect(status().isOk());
 		userRepoSize(1);
 		// try to create ADMIN
-		mvc.perform(postJson("/posts", userWithRole(DataInitializer.ROLE_ADMIN))).andExpect(status().isForbidden());
+		mvc.perform(postJson("/posts", userWithRole(WebSecurityConfig.ROLE_ADMIN))).andExpect(status().isForbidden());
 		userRepoSize(1);
 	}
 	
 	@Test
-	@WithMockUser(authorities = { DataInitializer.ROLE_ADMIN })
+	@WithMockUser(roles = { WebSecurityConfig.ROLE_ADMIN })
 	public void createPostingAsAdminTest() throws Exception {
 		// create NORMAL
-		mvc.perform(postJson("/posts", userWithRole(DataInitializer.ROLE_NORMAL))).andExpect(status().isOk());
+		mvc.perform(postJson("/posts", userWithRole(WebSecurityConfig.ROLE_NORMAL))).andExpect(status().isOk());
 		userRepoSize(1);
 		// create ADMIN
-		mvc.perform(postJson("/posts", userWithRole(DataInitializer.ROLE_ADMIN))).andExpect(status().isOk());
+		mvc.perform(postJson("/posts", userWithRole(WebSecurityConfig.ROLE_ADMIN))).andExpect(status().isOk());
 		userRepoSize(2);
 	}
 	*/

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ser.PropertyWriter;
 
 import net.folivo.springframework.security.abac.demo.config.AuthenticationUtil;
-import net.folivo.springframework.security.abac.demo.config.DataInitializer;
+import net.folivo.springframework.security.abac.demo.config.WebSecurityConfig;
 import net.folivo.springframework.security.abac.demo.entities.User;
 
 @Component
@@ -22,7 +22,7 @@ public class UserPropertyFilter implements PropertyFilter {
 		String subjUsername = AuthenticationUtil.getCurrentLoggedInUsername();
 		if (entity.getUsername().equals(subjUsername) || writer.getName().equals("username")
 				|| writer.getName().equals("forename") || writer.getName().equals("id")
-				|| AuthenticationUtil.getCurrentLoggedInUserRole().equals(DataInitializer.ROLE_ADMIN))
+				|| AuthenticationUtil.getCurrentLoggedInUserRole().equals(WebSecurityConfig.ROLE_ADMIN))
 			return true;
 		return false;
 	}

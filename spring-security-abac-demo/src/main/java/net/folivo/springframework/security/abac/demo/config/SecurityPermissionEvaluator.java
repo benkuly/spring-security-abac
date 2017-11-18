@@ -52,9 +52,9 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 				User oldUser = potentialOldUser.get();
 
 				switch (role) {
-				case DataInitializer.ROLE_ADMIN:
+				case WebSecurityConfig.ROLE_ADMIN:
 					return true;
-				case DataInitializer.ROLE_NORMAL:
+				case WebSecurityConfig.ROLE_NORMAL:
 					if (oldUser.getRole().equals(newUser.getRole())
 							&& oldUser.getUsername().equals(newUser.getUsername())
 							&& oldUser.getUsername().equals(AuthenticationUtil.getCurrentLoggedInUsername()))
@@ -64,11 +64,11 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 			// handle create
 			else {
 				switch (role) {
-				case DataInitializer.ROLE_ADMIN:
+				case WebSecurityConfig.ROLE_ADMIN:
 					return true;
-				case DataInitializer.ROLE_NORMAL:
-				case "ROLE_ANONYMOUS":
-					if (DataInitializer.ROLE_NORMAL.equals(newUser.getRole()))
+				case WebSecurityConfig.ROLE_NORMAL:
+				case "ANONYMOUS":
+					if (WebSecurityConfig.ROLE_NORMAL.equals(newUser.getRole()))
 						return true;
 				}
 			}
