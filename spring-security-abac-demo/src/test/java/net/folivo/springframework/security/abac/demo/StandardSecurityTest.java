@@ -74,11 +74,10 @@ public class StandardSecurityTest {
 	@Test
 	public void createUserAsAnyoneTest() throws Exception {
 		// create NORMAL
-		mvc.perform(postJson("/users", userWithRole(WebSecurityConfig.ROLE_NORMAL))).andExpect(status().isOk());
+		createEntity(userWithRole(WebSecurityConfig.ROLE_NORMAL), "/users", 0);
 		userRepoSize(1);
 		// try to create ADMIN
-		mvc.perform(postJson("/users", userWithRole(WebSecurityConfig.ROLE_ADMIN)))
-				.andExpect(status().isUnauthorized());
+		createEntity(userWithRole(WebSecurityConfig.ROLE_ADMIN), "/users", 2);
 		userRepoSize(1);
 	}
 
@@ -86,11 +85,20 @@ public class StandardSecurityTest {
 	@WithMockUser(roles = { WebSecurityConfig.ROLE_ADMIN })
 	public void createUserAsAdminTest() throws Exception {
 		// create NORMAL
-		mvc.perform(postJson("/users", userWithRole(WebSecurityConfig.ROLE_NORMAL))).andExpect(status().isOk());
+		createEntity(userWithRole(WebSecurityConfig.ROLE_NORMAL), "/users", 0);
 		userRepoSize(1);
 		// create ADMIN
-		mvc.perform(postJson("/users", userWithRole(WebSecurityConfig.ROLE_ADMIN))).andExpect(status().isOk());
+		createEntity(userWithRole(WebSecurityConfig.ROLE_ADMIN), "/users", 0);
 		userRepoSize(2);
+	}
+
+	@Test
+	public void createUserWithId() throws Exception {
+		// try to create a user with specific id
+		User user = userWithRole(WebSecurityConfig.ROLE_NORMAL);
+		ReflectionTestUtils.setField(user, "id", 24L);
+		createEntity(user, "/users", 2);
+		userRepoSize(0);
 	}
 
 	/*-
@@ -130,7 +138,7 @@ public class StandardSecurityTest {
 		changeExistingUserTest(normalUser, "email", "newEmail", 0);
 	}
 
-	// 0 allowed, 1 fobidden, 2 unauthorized
+	// 0 ok, 1 fobidden, 2 unauthorized
 	private void changeExistingUserTest(User user, String fieldName, Object value, int allowed) throws Exception {
 		eMa.flush();
 		eMa.clear();
@@ -228,28 +236,38 @@ public class StandardSecurityTest {
 	 * #############################################
 	 */
 
-	/*-
 	@Test
-	public void createPostAsAnyoneTest() throws Exception {
-		// create NORMAL
-		mvc.perform(postJson("/posts", userWithRole(WebSecurityConfig.ROLE_NORMAL))).andExpect(status().isOk());
-		userRepoSize(1);
-		// try to create ADMIN
-		mvc.perform(postJson("/posts", userWithRole(WebSecurityConfig.ROLE_ADMIN))).andExpect(status().isForbidden());
-		userRepoSize(1);
+	public void createPostingAsAnyoneTest() throws Exception {
+		// try to create postings
+		createEntity(postingWithCreator(userWithRole(WebSecurityConfig.ROLE_NORMAL)), "/postings", 2);
+		postingRepoSize(0);
+		createEntity(postingWithCreator(null), "/postings", 2);
+		postingRepoSize(0);
 	}
-	
+
 	@Test
-	@WithMockUser(roles = { WebSecurityConfig.ROLE_ADMIN })
+	@WithMockUser(username = "someUser", roles = { WebSecurityConfig.ROLE_ADMIN })
 	public void createPostingAsAdminTest() throws Exception {
-		// create NORMAL
-		mvc.perform(postJson("/posts", userWithRole(WebSecurityConfig.ROLE_NORMAL))).andExpect(status().isOk());
-		userRepoSize(1);
-		// create ADMIN
-		mvc.perform(postJson("/posts", userWithRole(WebSecurityConfig.ROLE_ADMIN))).andExpect(status().isOk());
-		userRepoSize(2);
+		// try create posting with null creator
+		createEntity(postingWithCreator(null), "/postings", 1);
+		postingRepoSize(0);
+		// try create posting with foreign creator
+		createEntity(postingWithCreator(eMa.persist(userWithUsername("another"))), "/postings", 1);
+		postingRepoSize(0);
+		// create posting
+		createEntity(postingWithCreator(eMa.persist(userWithUsername("someUser"))), "/postings", 0);
+		postingRepoSize(1);
 	}
-	*/
+
+	@Test
+	@WithMockUser(username = "someUser", roles = { WebSecurityConfig.ROLE_ADMIN })
+	public void createPostingWithId() throws Exception {
+		// try to create a posting with specific id
+		Posting posting = postingWithCreator(eMa.persist(userWithUsername("someUser")));
+		ReflectionTestUtils.setField(posting, "id", 24L);
+		createEntity(posting, "/postings", 2);
+		userRepoSize(0);
+	}
 
 	/*-
 	 * #############################################
@@ -275,6 +293,23 @@ public class StandardSecurityTest {
 	 * #############################################
 	 */
 
+	// 0 ok, 1 fobidden, 2 unauthorized
+	private void createEntity(Object entity, String url, int allowed) throws Exception {
+		ResultMatcher httpStatus;
+		if (allowed == 0)
+			httpStatus = status().isOk();
+		else if (allowed == 1)
+			httpStatus = status().isForbidden();
+		else
+			httpStatus = status().isUnauthorized();
+		ResultActions result = mvc.perform(postJson(url, entity)).andExpect(httpStatus);
+		if (allowed == 0) {
+			long id = json.readTree(result.andReturn().getResponse().getContentAsString()).get("id").asLong();
+			ReflectionTestUtils.setField(entity, "id", id);
+			compareEntities(entity, eMa.find(entity.getClass(), id));
+		}
+	}
+
 	private MockHttpServletRequestBuilder postJson(String url, Object entity) throws Exception {
 		return post(url).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(entity))
 				.accept(MediaType.APPLICATION_JSON);
@@ -292,13 +327,26 @@ public class StandardSecurityTest {
 		return new User(username, "password", role, "forename", "surname", "email");
 	}
 
+	private User userWithUsername(String username) {
+		return userWithUsername(username, null);
+	}
+
 	private void userRepoSize(long expected) {
 		assertEquals(new Long(expected),
 				eMa.getEntityManager().createQuery("SELECT COUNT(u) FROM User u", Long.class).getSingleResult());
 	}
 
-	private void postRepoSize(long expected) {
+	private void postingRepoSize(long expected) {
 		assertEquals(new Long(expected),
 				eMa.getEntityManager().createQuery("SELECT COUNT(p) FROM Post p", Long.class).getSingleResult());
+	}
+
+	private class PostingResource {
+
+	}
+
+	private void compareEntities(Object one, Object two) {
+		Arrays.stream(one.getClass().getDeclaredFields()).map(f -> f.getName())
+				.forEach(f -> assertEquals(ReflectionTestUtils.getField(one, f), ReflectionTestUtils.getField(two, f)));
 	}
 }

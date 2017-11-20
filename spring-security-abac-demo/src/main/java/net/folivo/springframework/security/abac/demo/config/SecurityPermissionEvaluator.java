@@ -9,6 +9,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import net.folivo.springframework.security.abac.demo.entities.Posting;
+import net.folivo.springframework.security.abac.demo.entities.StdPostingRepository;
 import net.folivo.springframework.security.abac.demo.entities.StdUserRepository;
 import net.folivo.springframework.security.abac.demo.entities.User;
 
@@ -16,12 +18,15 @@ import net.folivo.springframework.security.abac.demo.entities.User;
 public class SecurityPermissionEvaluator implements PermissionEvaluator {
 
 	public final static String SAVE_USER = "SAVE_USER";
+	public final static String SAVE_POSTING = "SAVE_POSTING";
 
 	private final StdUserRepository usRep;
+	private final StdPostingRepository poRep;
 
 	@Autowired
-	public SecurityPermissionEvaluator(StdUserRepository usRep) {
+	public SecurityPermissionEvaluator(StdUserRepository usRep, StdPostingRepository poRep) {
 		this.usRep = usRep;
+		this.poRep = poRep;
 	}
 
 	@Override
@@ -31,8 +36,9 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 			return false;
 		switch ((String) permission) {
 		case SAVE_USER:
-			Assert.isInstanceOf(User.class, targetDomainObject);
 			return canSaveUser((User) targetDomainObject);
+		case SAVE_POSTING:
+			return canSavePosting((Posting) targetDomainObject);
 		}
 		return false;
 	}
@@ -45,6 +51,7 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 
 	public boolean canSaveUser(User newUser) {
 		if (newUser != null) {
+			Assert.isInstanceOf(User.class, newUser);
 			Optional<User> potentialOldUser = usRep.findByIdInternal(newUser.getId());
 			String role = AuthenticationUtil.getCurrentLoggedInUserRole();
 			// handle save
@@ -68,9 +75,35 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 					return true;
 				case WebSecurityConfig.ROLE_NORMAL:
 				case "ANONYMOUS":
-					if (WebSecurityConfig.ROLE_NORMAL.equals(newUser.getRole()))
+					if (WebSecurityConfig.ROLE_NORMAL.equals(newUser.getRole()) && newUser.getId() == null)
 						return true;
 				}
+			}
+		}
+		return false;
+	}
+
+	public boolean canSavePosting(Posting newPosting) {
+		if (newPosting != null) {
+			Assert.isInstanceOf(Posting.class, newPosting);
+			Optional<Posting> potentialOldPosting = poRep.findById(newPosting.getId());
+			String role = AuthenticationUtil.getCurrentLoggedInUserRole();
+			// handle save
+			if (potentialOldPosting.isPresent()) {
+				Posting oldPosting = potentialOldPosting.get();
+
+				switch (role) {
+				case WebSecurityConfig.ROLE_ADMIN:
+					return true;
+				case WebSecurityConfig.ROLE_NORMAL:
+					if (oldPosting.getCreator().getUsername().equals(AuthenticationUtil.getCurrentLoggedInUsername()))
+						return true;
+				}
+			}
+			// handle create
+			else {
+				if (newPosting.getCreator().getUsername().equals(AuthenticationUtil.getCurrentLoggedInUsername()))
+					return true;
 			}
 		}
 		return false;

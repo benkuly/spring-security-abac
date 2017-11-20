@@ -7,7 +7,8 @@ import javax.persistence.Id;
 
 import org.springframework.hateoas.Identifiable;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import net.folivo.springframework.security.abac.demo.filter.Filterable;
 
@@ -16,11 +17,11 @@ public class User implements Filterable, Identifiable<Long> {
 
 	@Id
 	@GeneratedValue
-	private long id;
+	private Long id;
 
 	private String role;
 
-	@JsonIgnore
+	@JsonProperty(access = Access.WRITE_ONLY)
 	private String password;
 	private String forename;
 	private String surname;

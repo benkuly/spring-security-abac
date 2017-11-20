@@ -7,14 +7,16 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import org.springframework.hateoas.Identifiable;
+
 import net.folivo.springframework.security.abac.demo.filter.Filterable;
 
 @Entity
-public class Posting implements Filterable {
+public class Posting implements Filterable, Identifiable<Long> {
 
 	@Id
 	@GeneratedValue
-	private long id;
+	private Long id;
 
 	@ManyToOne
 	private User creator;
@@ -31,7 +33,8 @@ public class Posting implements Filterable {
 		this.content = content;
 	}
 
-	public long getId() {
+	@Override
+	public Long getId() {
 		return id;
 	}
 
