@@ -5,15 +5,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-import org.springframework.hateoas.Identifiable;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
-import net.folivo.springframework.security.abac.demo.filter.Filterable;
+import net.folivo.springframework.security.abac.demo.jackson.Filterable;
 
 @Entity
-public class User implements Filterable, Identifiable<Long> {
+public class User implements Filterable {
 
 	@Id
 	@GeneratedValue
@@ -42,7 +40,6 @@ public class User implements Filterable, Identifiable<Long> {
 		this.email = email;
 	}
 
-	@Override
 	public Long getId() {
 		return id;
 	}

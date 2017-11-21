@@ -7,17 +7,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
-import org.springframework.hateoas.Identifiable;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import net.folivo.springframework.security.abac.demo.filter.Filterable;
+import net.folivo.springframework.security.abac.demo.jackson.Filterable;
 
 @Entity
-public class Posting implements Filterable, Identifiable<Long> {
+public class Posting implements Filterable {
 
 	@Id
 	@GeneratedValue
 	private Long id;
 
+	@JsonIgnore
 	@ManyToOne
 	private User creator;
 	private LocalDateTime creationTime;
@@ -33,7 +34,6 @@ public class Posting implements Filterable, Identifiable<Long> {
 		this.content = content;
 	}
 
-	@Override
 	public Long getId() {
 		return id;
 	}

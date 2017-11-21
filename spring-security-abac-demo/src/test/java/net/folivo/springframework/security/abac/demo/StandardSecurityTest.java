@@ -341,7 +341,17 @@ public class StandardSecurityTest {
 				eMa.getEntityManager().createQuery("SELECT COUNT(p) FROM Post p", Long.class).getSingleResult());
 	}
 
-	private class PostingResource {
+	class PostingResource {
+
+		public String content;
+		public String creatorUsername;
+		public LocalDateTime creationTime;
+
+		public PostingResource(String content, String creatorUsername, LocalDateTime creationTime) {
+			this.content = content;
+			this.creationTime = creationTime;
+			this.creationTime = creationTime;
+		}
 
 	}
 
