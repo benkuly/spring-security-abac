@@ -17,7 +17,7 @@ public interface StdPostingRepository extends CrudRepository<Posting, Long> {
 	@Override
 	Optional<Posting> findById(Long id);
 
-	@PreAuthorize("hasRole('ADMIN') || @stdPostingRepository.findById(#id)?.creator.username=principal?.username")
+	@PreAuthorize("hasRole('ADMIN') || isAuthenticated() && @stdPostingRepository.findById(#id).orElse(null)?.creator.username==principal?.username")
 	@Override
 	void deleteById(@Param("id") Long id);
 

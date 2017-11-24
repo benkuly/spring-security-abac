@@ -1,12 +1,8 @@
 package net.folivo.springframework.security.abac.demo;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -16,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -64,7 +58,7 @@ public class StandardSecurityTest {
 
 	/*-
 	 * #############################################
-	 * testing save-method-security
+	 * user save
 	 * #############################################
 	 */
 
@@ -73,6 +67,7 @@ public class StandardSecurityTest {
 	public void createUserAsAnyoneTest() throws Exception {
 		// create NORMAL
 		userTest.testEntitySave(true, userWithRole(WebSecurityConfig.ROLE_NORMAL));
+
 		// try to create ADMIN
 		userTest.testEntitySave(false, userWithRole(WebSecurityConfig.ROLE_ADMIN));
 	}
@@ -108,7 +103,7 @@ public class StandardSecurityTest {
 	@Test
 	@WithMockUser(username = "someUser", roles = { WebSecurityConfig.ROLE_NORMAL })
 	public void saveUserAsNormalTest() throws Exception {
-		User someUser = eMa.persistAndFlush(userWithUsername("someUser", WebSecurityConfig.ROLE_NORMAL));
+		User someUser = eMa.persistAndFlush(userWithUsernameRole("someUser", WebSecurityConfig.ROLE_NORMAL));
 		eMa.detach(someUser);
 		// try to change own username
 		userTest.testEntityChange(false, someUser, "username", "newUsername");
@@ -121,7 +116,7 @@ public class StandardSecurityTest {
 	@Test
 	@WithMockUser(roles = { WebSecurityConfig.ROLE_ADMIN })
 	public void saveUserAsAdminTest() throws Exception {
-		User someUser = eMa.persistAndFlush(userWithUsername("normalUser", WebSecurityConfig.ROLE_NORMAL));
+		User someUser = eMa.persistAndFlush(userWithUsernameRole("normalUser", WebSecurityConfig.ROLE_NORMAL));
 		eMa.detach(someUser);
 		// change username
 		userTest.testEntityChange(true, someUser, "username", "newUsername");
@@ -133,7 +128,7 @@ public class StandardSecurityTest {
 
 	/*-
 	 * #############################################
-	 * delete existing user
+	 * user delete
 	 * #############################################
 	 */
 
@@ -155,7 +150,7 @@ public class StandardSecurityTest {
 
 	/*-
 	 * #############################################
-	 * get user
+	 * user get
 	 * #############################################
 	 */
 
@@ -174,7 +169,7 @@ public class StandardSecurityTest {
 		userTest.testEntityGet(false, userWithRole(WebSecurityConfig.ROLE_NORMAL));
 		userTest.testEntityGet(false, userWithRole(WebSecurityConfig.ROLE_ADMIN));
 		// try get same user
-		userTest.testEntityGet(true, userWithUsername("normalUser", WebSecurityConfig.ROLE_NORMAL));
+		userTest.testEntityGet(true, userWithUsernameRole("normalUser", WebSecurityConfig.ROLE_NORMAL));
 	}
 
 	@Test
@@ -187,7 +182,7 @@ public class StandardSecurityTest {
 
 	/*-
 	 * #############################################
-	 * save posting
+	 * posting save
 	 * #############################################
 	 */
 
@@ -202,31 +197,109 @@ public class StandardSecurityTest {
 	@WithMockUser(username = "someUser", roles = { WebSecurityConfig.ROLE_ADMIN })
 	public void createPostingAsAdminTest() throws Exception {
 		// try create posting with foreign creator
-		postingTest.testEntitySave(false, postingWithCreator(eMa.persistAndFlush(userWithUsername("another"))));
+		postingTest.testEntitySave(false, postingWithCreator(userWithUsername("another")));
 		// create posting
-		postingTest.testEntitySave(true, postingWithCreator(eMa.persistAndFlush(userWithUsername("someUser"))));
+		postingTest.testEntitySave(true, postingWithCreator(userWithUsername("someUser")));
 	}
 
 	@Test
 	@WithMockUser(username = "someUser", roles = { WebSecurityConfig.ROLE_ADMIN })
 	public void createPostingWithId() throws Exception {
 		// try to create a posting with specific id
-		Posting posting = postingWithCreator(eMa.persistAndFlush(userWithUsername("someUser")));
+		Posting posting = postingWithCreator(userWithUsername("someUser"));
 		ReflectionTestUtils.setField(posting, "id", 24L);
 		postingTest.testEntitySave(false, posting);
 	}
 
-	/*-
-	 * #############################################
-	 * delete posting
-	 * #############################################
-	 */
+	@Test
+	@WithAnonymousUser
+	public void savePostingAsAnyoneTest() throws Exception {
+		Posting somePosting = eMa.persistAndFlush(postingWithCreator(userWithRole(WebSecurityConfig.ROLE_NORMAL)));
+		eMa.detach(somePosting);
+
+		postingTest.testEntityChange(false, somePosting, "content", "newContent");
+		postingTest.testEntityChange(false, somePosting, "creationTime", LocalDateTime.now().minusDays(24));
+		postingTest.testEntityChange(false, somePosting, "creator",
+				eMa.persistAndFlush(userWithRole(WebSecurityConfig.ROLE_NORMAL)));
+	}
+
+	@Test
+	@WithMockUser(username = "someUser", roles = { WebSecurityConfig.ROLE_NORMAL })
+	public void savePostingAsNormalTest() throws Exception {
+		Posting somePosting = eMa.persistAndFlush(postingWithCreator(userWithUsername("someUser")));
+		eMa.detach(somePosting);
+
+		postingTest.testEntityChange(true, somePosting, "content", "newContent");
+		postingTest.testEntityChange(false, somePosting, "creationTime", LocalDateTime.now().minusDays(24));
+		postingTest.testEntityChange(false, somePosting, "creator",
+				eMa.persistAndFlush(userWithRole(WebSecurityConfig.ROLE_NORMAL)));
+	}
+
+	@Test
+	@WithMockUser(roles = { WebSecurityConfig.ROLE_ADMIN })
+	public void savePostingAsAdminTest() throws Exception {
+		Posting somePosting = eMa.persistAndFlush(postingWithCreator(userWithRole(WebSecurityConfig.ROLE_NORMAL)));
+		eMa.detach(somePosting);
+
+		postingTest.testEntityChange(true, somePosting, "content", "newContent");
+		postingTest.testEntityChange(true, somePosting, "creationTime", LocalDateTime.now().minusDays(24));
+		postingTest.testEntityChange(true, somePosting, "creator",
+				eMa.persistAndFlush(userWithRole(WebSecurityConfig.ROLE_NORMAL)));
+	}
 
 	/*-
 	 * #############################################
-	 * get posting
+	 * posting delete
 	 * #############################################
 	 */
+
+	@Test
+	@WithAnonymousUser
+	public void deletePostingAsAnyoneTest() throws Exception {
+		postingTest.testEntityDelete(false, postingWithCreator(userWithRole(WebSecurityConfig.ROLE_NORMAL)));
+		postingTest.testEntityDelete(false, postingWithCreator(userWithRole(WebSecurityConfig.ROLE_ADMIN)));
+	}
+
+	@Test
+	@WithMockUser(username = "someUser", roles = { WebSecurityConfig.ROLE_NORMAL })
+	public void deletePostingAsNormalTest() throws Exception {
+		postingTest.testEntityDelete(false, postingWithCreator(userWithUsername("otherUser")));
+		postingTest.testEntityDelete(true, postingWithCreator(userWithUsername("someUser")));
+	}
+
+	@Test
+	@WithMockUser(roles = { WebSecurityConfig.ROLE_ADMIN })
+	public void deletePostingAsAdminTest() throws Exception {
+		postingTest.testEntityDelete(true, postingWithCreator(userWithRole(WebSecurityConfig.ROLE_NORMAL)));
+		postingTest.testEntityDelete(true, postingWithCreator(userWithRole(WebSecurityConfig.ROLE_ADMIN)));
+	}
+
+	/*-
+	 * #############################################
+	 * posting get
+	 * #############################################
+	 */
+
+	@Test
+	@WithAnonymousUser
+	public void getPostingAsAnyoneTest() throws Exception {
+		postingTest.testEntityGet(true, postingWithCreator(userWithRole(WebSecurityConfig.ROLE_NORMAL)));
+		postingTest.testEntityGet(true, postingWithCreator(userWithRole(WebSecurityConfig.ROLE_ADMIN)));
+	}
+
+	@Test
+	@WithMockUser(username = "normalUser", roles = { WebSecurityConfig.ROLE_NORMAL })
+	public void getPostingAsNormalUser() throws Exception {
+		postingTest.testEntityGet(true, postingWithCreator(userWithRole(WebSecurityConfig.ROLE_NORMAL)));
+		postingTest.testEntityGet(true, postingWithCreator(userWithRole(WebSecurityConfig.ROLE_ADMIN)));
+	}
+
+	@Test
+	@WithMockUser(roles = { WebSecurityConfig.ROLE_ADMIN })
+	public void getPostingAsAdminTest() throws Exception {
+		postingTest.testEntityGet(true, postingWithCreator(userWithRole(WebSecurityConfig.ROLE_NORMAL)));
+		postingTest.testEntityGet(true, postingWithCreator(userWithRole(WebSecurityConfig.ROLE_ADMIN)));
+	}
 
 	/*-
 	 * #############################################
@@ -234,107 +307,20 @@ public class StandardSecurityTest {
 	 * #############################################
 	 */
 
-	protected class RepoSecurityTestHelper<T> {
-
-		private final TestEntityManager eMa;
-		private final Object repo;
-		private final String idFieldName;
-		private final Class<T> clazzT;
-
-		public RepoSecurityTestHelper(Class<T> clazzT, Object repo, String idFieldName, TestEntityManager eMa) {
-			this.eMa = eMa;
-			this.clazzT = clazzT;
-			this.repo = repo;
-			this.idFieldName = idFieldName;
-		}
-
-		public void testEntityChange(boolean allowed, T original, String fieldName, Object value) throws Exception {
-			Object originalValue = ReflectionTestUtils.getField(original, fieldName);
-			ReflectionTestUtils.setField(original, fieldName, value);
-			testEntitySave(allowed, original);
-			if (!allowed)
-				ReflectionTestUtils.setField(original, fieldName, originalValue);
-		}
-
-		public void testEntitySave(boolean allowed, T original) throws Exception {
-			Object originalId = ReflectionTestUtils.getField(original, idFieldName);
-			boolean dbIncreases = allowed
-					? original != null && (originalId == null || eMa.find(User.class, originalId) == null)
-					: false;
-			Long expectedRepoSize = getRepoSize() + (dbIncreases ? 1 : 0);
-			T saved = testMethodSecurity(allowed, repo, "save", original);
-			if (allowed)
-				compareEntities(original, saved);
-			assertEquals(expectedRepoSize, getRepoSize());
-		}
-
-		public void testEntityDelete(boolean allowed, T original) throws Exception {
-			Object originalId = ReflectionTestUtils.getField(eMa.persistAndFlush(original), idFieldName);
-			Long expectedRepoSize = getRepoSize() - (allowed ? 1 : 0);
-			testMethodSecurity(allowed, userRepo, "deleteById", originalId);
-			assertEquals(expectedRepoSize, getRepoSize());
-		}
-
-		public void testEntityGet(boolean allowed, T original) throws Exception {
-			eMa.persistAndFlush(original);
-			boolean methodAllowed = SecurityContextHolder.getContext().getAuthentication().getPrincipal()
-					.equals("anonymous") ? allowed : true;
-			Optional<T> found = testMethodSecurity(methodAllowed, userRepo, "findById",
-					ReflectionTestUtils.getField(eMa.persistAndFlush(original), idFieldName));
-			if (allowed) {
-				assertTrue(found.isPresent());
-				compareEntities(original, found.get());
-			} else
-				assertTrue(found == null || !found.isPresent());
-
-		}
-
-		public <V> V testMethodSecurity(boolean allowed, Object target, String method, Object... parameter)
-				throws Exception {
-			V result = null;
-			try {
-				result = ReflectionTestUtils.invokeMethod(target, method, parameter);
-				if (!allowed)
-					fail("AccessDeniedException not thrown.");
-			} catch (AccessDeniedException e) {
-				if (allowed)
-					fail("AccessDeniedException was thrown.");
-			}
-			return result;
-		}
-
-		public Long getRepoSize() {
-			return eMa.getEntityManager()
-					.createQuery("SELECT COUNT(t) FROM " + clazzT.getSimpleName() + " t", Long.class).getSingleResult();
-		}
-
-		public void clearRepository() {
-			eMa.getEntityManager().createQuery("DELETE FROM " + clazzT.getSimpleName()).executeUpdate();
-			eMa.flush();
-		}
-
-		public void compareEntities(Object one, Object two) {
-			if (one == two || one.equals(two))
-				return;
-			Arrays.stream(one.getClass().getDeclaredFields()).map(f -> f.getName()).forEach(
-					f -> assertEquals(ReflectionTestUtils.getField(one, f), ReflectionTestUtils.getField(two, f)));
-		}
-
-	}
-
 	private User userWithRole(String role) {
-		return userWithUsername(UUID.randomUUID().toString(), role);
+		return userWithUsernameRole(UUID.randomUUID().toString(), role);
 	}
 
-	private Posting postingWithCreator(User creator) {
-		return new Posting(creator, LocalDateTime.now(), "some text");
-	}
-
-	private User userWithUsername(String username, String role) {
+	private User userWithUsernameRole(String username, String role) {
 		return new User(username, "password", role, "forename", "surname", "email");
 	}
 
 	private User userWithUsername(String username) {
-		return userWithUsername(username, null);
+		return userWithUsernameRole(username, null);
 	}
+
+	private Posting postingWithCreator(User creator) {
+		return new Posting(eMa.persistAndFlush(creator), LocalDateTime.now(), "some text");
+	}
+
 }

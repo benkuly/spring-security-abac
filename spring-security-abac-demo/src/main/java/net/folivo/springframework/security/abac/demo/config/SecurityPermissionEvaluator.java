@@ -76,7 +76,7 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 					return true;
 				case WebSecurityConfig.ROLE_NORMAL:
 				case "ANONYMOUS":
-					if (WebSecurityConfig.ROLE_NORMAL.equals(newUser.getRole()) && newUser.getId() == null)
+					if (WebSecurityConfig.ROLE_NORMAL.equals(newUser.getRole()) && newUser.getId() == 0)
 						return true;
 				}
 			}
@@ -97,15 +97,18 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 				case WebSecurityConfig.ROLE_ADMIN:
 					return true;
 				case WebSecurityConfig.ROLE_NORMAL:
-					if (AuthenticationUtil.getCurrentLoggedInUsername()
-							.map(u -> oldPosting.getCreator().getUsername().equals(u)).orElse(false))
+					if (oldPosting.getCreationTime().equals(newPosting.getCreationTime())
+							&& oldPosting.getCreator().getUsername().equals(newPosting.getCreator().getUsername())
+							&& AuthenticationUtil.getCurrentLoggedInUsername()
+									.map(u -> oldPosting.getCreator().getUsername().equals(u)).orElse(false))
 						return true;
 				}
 			}
 			// handle create
 			else {
 				if (AuthenticationUtil.getCurrentLoggedInUsername()
-						.map(u -> newPosting.getCreator().getUsername().equals(u)).orElse(false))
+						.map(u -> newPosting.getCreator().getUsername().equals(u)).orElse(false)
+						&& newPosting.getId() == 0)
 					return true;
 			}
 		}
