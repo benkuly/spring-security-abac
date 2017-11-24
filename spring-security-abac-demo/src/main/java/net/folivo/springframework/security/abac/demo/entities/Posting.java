@@ -9,14 +9,12 @@ import javax.persistence.ManyToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import net.folivo.springframework.security.abac.demo.jackson.Filterable;
-
 @Entity
-public class Posting implements Filterable {
+public class Posting {
 
 	@Id
 	@GeneratedValue
-	private Long id;
+	private long id;
 
 	@JsonIgnore
 	@ManyToOne

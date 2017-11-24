@@ -21,7 +21,7 @@ public class AuthenticationUtil {
 	}
 
 	public Optional<User> getCurrentLoggedInUser() {
-		return usRep.findByUsernameIgnoreCase(getCurrentLoggedInUsername());
+		return getCurrentLoggedInUsername().map(n -> usRep.findByUsernameIgnoreCase(n)).orElse(Optional.empty());
 	}
 
 	public static String getCurrentLoggedInUserRole() {
@@ -30,8 +30,8 @@ public class AuthenticationUtil {
 				.orElse("ANONYMOUS");
 	}
 
-	public static String getCurrentLoggedInUsername() {
-		return getCurrentLoggendInUserDetails().map(d -> d.getUsername()).orElse("anonymous");
+	public static Optional<String> getCurrentLoggedInUsername() {
+		return getCurrentLoggendInUserDetails().map(d -> Optional.of(d.getUsername())).orElse(Optional.empty());
 	}
 
 	public static Optional<UserDetails> getCurrentLoggendInUserDetails() {

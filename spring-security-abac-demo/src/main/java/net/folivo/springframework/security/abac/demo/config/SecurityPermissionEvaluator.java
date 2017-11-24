@@ -64,7 +64,8 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 				case WebSecurityConfig.ROLE_NORMAL:
 					if (oldUser.getRole().equals(newUser.getRole())
 							&& oldUser.getUsername().equals(newUser.getUsername())
-							&& oldUser.getUsername().equals(AuthenticationUtil.getCurrentLoggedInUsername()))
+							&& AuthenticationUtil.getCurrentLoggedInUsername().map(u -> oldUser.getUsername().equals(u))
+									.orElse(false))
 						return true;
 				}
 			}
@@ -96,13 +97,15 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 				case WebSecurityConfig.ROLE_ADMIN:
 					return true;
 				case WebSecurityConfig.ROLE_NORMAL:
-					if (oldPosting.getCreator().getUsername().equals(AuthenticationUtil.getCurrentLoggedInUsername()))
+					if (AuthenticationUtil.getCurrentLoggedInUsername()
+							.map(u -> oldPosting.getCreator().getUsername().equals(u)).orElse(false))
 						return true;
 				}
 			}
 			// handle create
 			else {
-				if (newPosting.getCreator().getUsername().equals(AuthenticationUtil.getCurrentLoggedInUsername()))
+				if (AuthenticationUtil.getCurrentLoggedInUsername()
+						.map(u -> newPosting.getCreator().getUsername().equals(u)).orElse(false))
 					return true;
 			}
 		}

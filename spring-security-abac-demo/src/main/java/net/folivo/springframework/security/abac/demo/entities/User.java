@@ -8,14 +8,12 @@ import javax.persistence.Id;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
-import net.folivo.springframework.security.abac.demo.jackson.Filterable;
-
 @Entity
-public class User implements Filterable {
+public class User {
 
 	@Id
 	@GeneratedValue
-	private Long id;
+	private long id;
 
 	private String role;
 

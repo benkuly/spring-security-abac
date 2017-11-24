@@ -2,17 +2,12 @@ package net.folivo.springframework.security.abac.demo;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.Assert.fail;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,145 +15,120 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 import net.folivo.springframework.security.abac.demo.config.WebSecurityConfig;
 import net.folivo.springframework.security.abac.demo.entities.Posting;
+import net.folivo.springframework.security.abac.demo.entities.StdPostingRepository;
+import net.folivo.springframework.security.abac.demo.entities.StdUserRepository;
 import net.folivo.springframework.security.abac.demo.entities.User;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@AutoConfigureMockMvc
 @AutoConfigureTestEntityManager
 @Transactional
 public class StandardSecurityTest {
 
 	@Autowired
-	private MockMvc mvc;
-
-	private ObjectMapper json = Jackson2ObjectMapperBuilder.json()
-			.filters(new SimpleFilterProvider().setDefaultFilter(new SimpleBeanPropertyFilter() {
-			})).build().disable(MapperFeature.USE_ANNOTATIONS);
-
-	@Autowired
 	private TestEntityManager eMa;
 
+	@Autowired
+	private StdUserRepository userRepo;
+
+	@Autowired
+	private StdPostingRepository postingRepo;
+
+	private RepoSecurityTestHelper<User> userTest;
+
+	private RepoSecurityTestHelper<Posting> postingTest;
+
 	@Before
-	public void clearDatabase() {
-		eMa.getEntityManager().createQuery("DELETE FROM User").executeUpdate();
-		userRepoSize(0);
+	public void createTestHelperAndClearDatabase() {
+		if (userTest == null)
+			userTest = new RepoSecurityTestHelper<>(User.class, userRepo, "id", eMa);
+		if (postingTest == null)
+			postingTest = new RepoSecurityTestHelper<>(Posting.class, postingRepo, "id", eMa);
+
+		userTest.clearRepository();
+		postingTest.clearRepository();
+		assertEquals(Long.valueOf(0), userTest.getRepoSize());
+		assertEquals(Long.valueOf(0), postingTest.getRepoSize());
 	}
 
 	/*-
 	 * #############################################
-	 * create new user
+	 * testing save-method-security
 	 * #############################################
 	 */
 
 	@Test
+	@WithAnonymousUser
 	public void createUserAsAnyoneTest() throws Exception {
 		// create NORMAL
-		createEntity(userWithRole(WebSecurityConfig.ROLE_NORMAL), "/users", 0);
-		userRepoSize(1);
+		userTest.testEntitySave(true, userWithRole(WebSecurityConfig.ROLE_NORMAL));
 		// try to create ADMIN
-		createEntity(userWithRole(WebSecurityConfig.ROLE_ADMIN), "/users", 2);
-		userRepoSize(1);
+		userTest.testEntitySave(false, userWithRole(WebSecurityConfig.ROLE_ADMIN));
 	}
 
 	@Test
 	@WithMockUser(roles = { WebSecurityConfig.ROLE_ADMIN })
 	public void createUserAsAdminTest() throws Exception {
 		// create NORMAL
-		createEntity(userWithRole(WebSecurityConfig.ROLE_NORMAL), "/users", 0);
-		userRepoSize(1);
+		userTest.testEntitySave(true, userWithRole(WebSecurityConfig.ROLE_NORMAL));
 		// create ADMIN
-		createEntity(userWithRole(WebSecurityConfig.ROLE_ADMIN), "/users", 0);
-		userRepoSize(2);
+		userTest.testEntitySave(true, userWithRole(WebSecurityConfig.ROLE_ADMIN));
 	}
 
 	@Test
+	@WithAnonymousUser
 	public void createUserWithId() throws Exception {
 		// try to create a user with specific id
 		User user = userWithRole(WebSecurityConfig.ROLE_NORMAL);
 		ReflectionTestUtils.setField(user, "id", 24L);
-		createEntity(user, "/users", 2);
-		userRepoSize(0);
+		userTest.testEntitySave(false, user);
 	}
 
-	/*-
-	 * #############################################
-	 * save existing user
-	 * #############################################
-	 */
-
 	@Test
+	@WithAnonymousUser
 	public void saveUserAsAnyoneTest() throws Exception {
 		// try to change foreign user
-		changeExistingUserTest(eMa.persist(userWithRole(WebSecurityConfig.ROLE_NORMAL)), "username", "newUsername", 2);
-		changeExistingUserTest(eMa.persist(userWithRole(WebSecurityConfig.ROLE_NORMAL)), "role", "newRole", 2);
+		userTest.testEntityChange(false, eMa.persistAndFlush(userWithRole(WebSecurityConfig.ROLE_NORMAL)), "username",
+				"newUsername");
+		userTest.testEntityChange(false, eMa.persistAndFlush(userWithRole(WebSecurityConfig.ROLE_NORMAL)), "role",
+				"newRole");
 	}
 
 	@Test
-	@WithMockUser(username = "normalUser", roles = { WebSecurityConfig.ROLE_NORMAL })
+	@WithMockUser(username = "someUser", roles = { WebSecurityConfig.ROLE_NORMAL })
 	public void saveUserAsNormalTest() throws Exception {
-		User normalUser = eMa.persist(userWithUsername("normalUser", WebSecurityConfig.ROLE_NORMAL));
+		User someUser = eMa.persistAndFlush(userWithUsername("someUser", WebSecurityConfig.ROLE_NORMAL));
+		eMa.detach(someUser);
 		// try to change own username
-		changeExistingUserTest(normalUser, "username", "newUsername", 1);
+		userTest.testEntityChange(false, someUser, "username", "newUsername");
 		// try to change own role
-		changeExistingUserTest(normalUser, "role", "newRole", 1);
+		userTest.testEntityChange(false, someUser, "role", "newRole");
 		// change email
-		changeExistingUserTest(normalUser, "email", "newEmail", 0);
+		userTest.testEntityChange(true, someUser, "email", "newEmail");
 	}
 
 	@Test
 	@WithMockUser(roles = { WebSecurityConfig.ROLE_ADMIN })
 	public void saveUserAsAdminTest() throws Exception {
-		User normalUser = eMa.persist(userWithUsername("normalUser", WebSecurityConfig.ROLE_NORMAL));
+		User someUser = eMa.persistAndFlush(userWithUsername("normalUser", WebSecurityConfig.ROLE_NORMAL));
+		eMa.detach(someUser);
 		// change username
-		changeExistingUserTest(normalUser, "username", "newUsername", 0);
+		userTest.testEntityChange(true, someUser, "username", "newUsername");
 		// change role
-		changeExistingUserTest(normalUser, "role", "newRole", 0);
+		userTest.testEntityChange(true, someUser, "role", "newRole");
 		// change email
-		changeExistingUserTest(normalUser, "email", "newEmail", 0);
-	}
-
-	// 0 ok, 1 fobidden, 2 unauthorized
-	private void changeExistingUserTest(User user, String fieldName, Object value, int allowed) throws Exception {
-		eMa.flush();
-		eMa.clear();
-		long id = user.getId();
-		Object original = ReflectionTestUtils.getField(user, fieldName);
-		ReflectionTestUtils.setField(user, fieldName, value);
-		ResultMatcher result;
-		if (allowed == 0)
-			result = status().isOk();
-		else if (allowed == 1)
-			result = status().isForbidden();
-		else
-			result = status().isUnauthorized();
-		mvc.perform(postJson("/users", user)).andExpect(result);
-		boolean isSame = ReflectionTestUtils.getField(eMa.find(User.class, id), fieldName).equals(original);
-		if (allowed == 0)
-			assertTrue("entity wan't changed but expected", !isSame);
-		else
-			assertTrue("entity was changed but not expected", isSame);
-		ReflectionTestUtils.setField(user, fieldName, original);
+		userTest.testEntityChange(true, someUser, "email", "newEmail");
 	}
 
 	/*-
@@ -168,22 +138,19 @@ public class StandardSecurityTest {
 	 */
 
 	@Test
+	@WithAnonymousUser
 	public void deleteUserAsAnyoneTest() throws Exception {
 		// try to delete a user
-		long id = eMa.persist(userWithRole(WebSecurityConfig.ROLE_NORMAL)).getId();
-		userRepoSize(1);
-		mvc.perform(delete("/users/" + id)).andExpect(status().isUnauthorized());
-		userRepoSize(1);
+		userTest.testEntityDelete(false, userWithRole(WebSecurityConfig.ROLE_NORMAL));
+		userTest.testEntityDelete(false, userWithRole(WebSecurityConfig.ROLE_ADMIN));
 	}
 
 	@Test
 	@WithMockUser(roles = { WebSecurityConfig.ROLE_ADMIN })
 	public void deleteUserAsAdminTest() throws Exception {
 		// delete a user
-		long id = eMa.persist(userWithRole(WebSecurityConfig.ROLE_NORMAL)).getId();
-		userRepoSize(1);
-		mvc.perform(delete("/users/" + id)).andExpect(status().isOk());
-		userRepoSize(0);
+		userTest.testEntityDelete(true, userWithRole(WebSecurityConfig.ROLE_NORMAL));
+		userTest.testEntityDelete(true, userWithRole(WebSecurityConfig.ROLE_ADMIN));
 	}
 
 	/*-
@@ -193,87 +160,61 @@ public class StandardSecurityTest {
 	 */
 
 	@Test
+	@WithAnonymousUser
 	public void getUserAsAnyoneTest() throws Exception {
-		// get a user
-		long id = eMa.persist(userWithRole(WebSecurityConfig.ROLE_NORMAL)).getId();
-		getUserWithForbiddenAttributes(id, "role", "surname", "email", "password");
+		// try get a user
+		userTest.testEntityGet(false, userWithRole(WebSecurityConfig.ROLE_NORMAL));
+		userTest.testEntityGet(false, userWithRole(WebSecurityConfig.ROLE_ADMIN));
 	}
 
 	@Test
 	@WithMockUser(username = "normalUser", roles = { WebSecurityConfig.ROLE_NORMAL })
 	public void getUserAsSameUser() throws Exception {
-		long id = eMa.persist(userWithUsername("normalUser", WebSecurityConfig.ROLE_NORMAL)).getId();
-		getUserWithForbiddenAttributes(id, "password");
+		// try get a user
+		userTest.testEntityGet(false, userWithRole(WebSecurityConfig.ROLE_NORMAL));
+		userTest.testEntityGet(false, userWithRole(WebSecurityConfig.ROLE_ADMIN));
+		// try get same user
+		userTest.testEntityGet(true, userWithUsername("normalUser", WebSecurityConfig.ROLE_NORMAL));
 	}
 
 	@Test
 	@WithMockUser(roles = { WebSecurityConfig.ROLE_ADMIN })
 	public void getUserAsAdminTest() throws Exception {
 		// get a user
-		long id = eMa.persist(userWithRole(WebSecurityConfig.ROLE_NORMAL)).getId();
-		getUserWithForbiddenAttributes(id, "password");
-	}
-
-	private void getUserWithForbiddenAttributes(long id, String... forbiddenAttributes) throws Exception {
-		ResultActions result = mvc.perform(get("/users/" + id).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-
-		List<String> forbidden = Arrays.asList(forbiddenAttributes);
-		List<String> needed = Arrays.stream(User.class.getDeclaredFields()).map(f -> f.getName())
-				.filter(f -> !forbidden.contains(f)).collect(Collectors.toList());
-
-		for (String a : forbidden) {
-			result.andExpect(jsonPath("$." + a).doesNotExist());
-		}
-		for (String a : needed) {
-			result.andExpect(jsonPath("$." + a).exists());
-		}
+		userTest.testEntityGet(true, userWithRole(WebSecurityConfig.ROLE_NORMAL));
+		userTest.testEntityGet(true, userWithRole(WebSecurityConfig.ROLE_ADMIN));
 	}
 
 	/*-
 	 * #############################################
-	 * create new posting
+	 * save posting
 	 * #############################################
 	 */
 
 	@Test
+	@WithAnonymousUser
 	public void createPostingAsAnyoneTest() throws Exception {
 		// try to create postings
-		createEntity(postingWithCreator(userWithRole(WebSecurityConfig.ROLE_NORMAL)), "/postings", 2);
-		postingRepoSize(0);
-		createEntity(postingWithCreator(null), "/postings", 2);
-		postingRepoSize(0);
+		postingTest.testEntitySave(false, postingWithCreator(userWithRole(WebSecurityConfig.ROLE_NORMAL)));
 	}
 
 	@Test
 	@WithMockUser(username = "someUser", roles = { WebSecurityConfig.ROLE_ADMIN })
 	public void createPostingAsAdminTest() throws Exception {
-		// try create posting with null creator
-		createEntity(postingWithCreator(null), "/postings", 1);
-		postingRepoSize(0);
 		// try create posting with foreign creator
-		createEntity(postingWithCreator(eMa.persist(userWithUsername("another"))), "/postings", 1);
-		postingRepoSize(0);
+		postingTest.testEntitySave(false, postingWithCreator(eMa.persistAndFlush(userWithUsername("another"))));
 		// create posting
-		createEntity(postingWithCreator(eMa.persist(userWithUsername("someUser"))), "/postings", 0);
-		postingRepoSize(1);
+		postingTest.testEntitySave(true, postingWithCreator(eMa.persistAndFlush(userWithUsername("someUser"))));
 	}
 
 	@Test
 	@WithMockUser(username = "someUser", roles = { WebSecurityConfig.ROLE_ADMIN })
 	public void createPostingWithId() throws Exception {
 		// try to create a posting with specific id
-		Posting posting = postingWithCreator(eMa.persist(userWithUsername("someUser")));
+		Posting posting = postingWithCreator(eMa.persistAndFlush(userWithUsername("someUser")));
 		ReflectionTestUtils.setField(posting, "id", 24L);
-		createEntity(posting, "/postings", 2);
-		userRepoSize(0);
+		postingTest.testEntitySave(false, posting);
 	}
-
-	/*-
-	 * #############################################
-	 * save existing posting
-	 * #############################################
-	 */
 
 	/*-
 	 * #############################################
@@ -293,26 +234,92 @@ public class StandardSecurityTest {
 	 * #############################################
 	 */
 
-	// 0 ok, 1 fobidden, 2 unauthorized
-	private void createEntity(Object entity, String url, int allowed) throws Exception {
-		ResultMatcher httpStatus;
-		if (allowed == 0)
-			httpStatus = status().isOk();
-		else if (allowed == 1)
-			httpStatus = status().isForbidden();
-		else
-			httpStatus = status().isUnauthorized();
-		ResultActions result = mvc.perform(postJson(url, entity)).andExpect(httpStatus);
-		if (allowed == 0) {
-			long id = json.readTree(result.andReturn().getResponse().getContentAsString()).get("id").asLong();
-			ReflectionTestUtils.setField(entity, "id", id);
-			compareEntities(entity, eMa.find(entity.getClass(), id));
-		}
-	}
+	protected class RepoSecurityTestHelper<T> {
 
-	private MockHttpServletRequestBuilder postJson(String url, Object entity) throws Exception {
-		return post(url).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(entity))
-				.accept(MediaType.APPLICATION_JSON);
+		private final TestEntityManager eMa;
+		private final Object repo;
+		private final String idFieldName;
+		private final Class<T> clazzT;
+
+		public RepoSecurityTestHelper(Class<T> clazzT, Object repo, String idFieldName, TestEntityManager eMa) {
+			this.eMa = eMa;
+			this.clazzT = clazzT;
+			this.repo = repo;
+			this.idFieldName = idFieldName;
+		}
+
+		public void testEntityChange(boolean allowed, T original, String fieldName, Object value) throws Exception {
+			Object originalValue = ReflectionTestUtils.getField(original, fieldName);
+			ReflectionTestUtils.setField(original, fieldName, value);
+			testEntitySave(allowed, original);
+			if (!allowed)
+				ReflectionTestUtils.setField(original, fieldName, originalValue);
+		}
+
+		public void testEntitySave(boolean allowed, T original) throws Exception {
+			Object originalId = ReflectionTestUtils.getField(original, idFieldName);
+			boolean dbIncreases = allowed
+					? original != null && (originalId == null || eMa.find(User.class, originalId) == null)
+					: false;
+			Long expectedRepoSize = getRepoSize() + (dbIncreases ? 1 : 0);
+			T saved = testMethodSecurity(allowed, repo, "save", original);
+			if (allowed)
+				compareEntities(original, saved);
+			assertEquals(expectedRepoSize, getRepoSize());
+		}
+
+		public void testEntityDelete(boolean allowed, T original) throws Exception {
+			Object originalId = ReflectionTestUtils.getField(eMa.persistAndFlush(original), idFieldName);
+			Long expectedRepoSize = getRepoSize() - (allowed ? 1 : 0);
+			testMethodSecurity(allowed, userRepo, "deleteById", originalId);
+			assertEquals(expectedRepoSize, getRepoSize());
+		}
+
+		public void testEntityGet(boolean allowed, T original) throws Exception {
+			eMa.persistAndFlush(original);
+			boolean methodAllowed = SecurityContextHolder.getContext().getAuthentication().getPrincipal()
+					.equals("anonymous") ? allowed : true;
+			Optional<T> found = testMethodSecurity(methodAllowed, userRepo, "findById",
+					ReflectionTestUtils.getField(eMa.persistAndFlush(original), idFieldName));
+			if (allowed) {
+				assertTrue(found.isPresent());
+				compareEntities(original, found.get());
+			} else
+				assertTrue(found == null || !found.isPresent());
+
+		}
+
+		public <V> V testMethodSecurity(boolean allowed, Object target, String method, Object... parameter)
+				throws Exception {
+			V result = null;
+			try {
+				result = ReflectionTestUtils.invokeMethod(target, method, parameter);
+				if (!allowed)
+					fail("AccessDeniedException not thrown.");
+			} catch (AccessDeniedException e) {
+				if (allowed)
+					fail("AccessDeniedException was thrown.");
+			}
+			return result;
+		}
+
+		public Long getRepoSize() {
+			return eMa.getEntityManager()
+					.createQuery("SELECT COUNT(t) FROM " + clazzT.getSimpleName() + " t", Long.class).getSingleResult();
+		}
+
+		public void clearRepository() {
+			eMa.getEntityManager().createQuery("DELETE FROM " + clazzT.getSimpleName()).executeUpdate();
+			eMa.flush();
+		}
+
+		public void compareEntities(Object one, Object two) {
+			if (one == two || one.equals(two))
+				return;
+			Arrays.stream(one.getClass().getDeclaredFields()).map(f -> f.getName()).forEach(
+					f -> assertEquals(ReflectionTestUtils.getField(one, f), ReflectionTestUtils.getField(two, f)));
+		}
+
 	}
 
 	private User userWithRole(String role) {
@@ -329,34 +336,5 @@ public class StandardSecurityTest {
 
 	private User userWithUsername(String username) {
 		return userWithUsername(username, null);
-	}
-
-	private void userRepoSize(long expected) {
-		assertEquals(new Long(expected),
-				eMa.getEntityManager().createQuery("SELECT COUNT(u) FROM User u", Long.class).getSingleResult());
-	}
-
-	private void postingRepoSize(long expected) {
-		assertEquals(new Long(expected),
-				eMa.getEntityManager().createQuery("SELECT COUNT(p) FROM Post p", Long.class).getSingleResult());
-	}
-
-	class PostingResource {
-
-		public String content;
-		public String creatorUsername;
-		public LocalDateTime creationTime;
-
-		public PostingResource(String content, String creatorUsername, LocalDateTime creationTime) {
-			this.content = content;
-			this.creationTime = creationTime;
-			this.creationTime = creationTime;
-		}
-
-	}
-
-	private void compareEntities(Object one, Object two) {
-		Arrays.stream(one.getClass().getDeclaredFields()).map(f -> f.getName())
-				.forEach(f -> assertEquals(ReflectionTestUtils.getField(one, f), ReflectionTestUtils.getField(two, f)));
 	}
 }
