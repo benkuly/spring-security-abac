@@ -1,4 +1,4 @@
-package net.folivo.springframework.security.abac.demo.config;
+package net.folivo.springframework.security.abac.demo.stdsecurity;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;

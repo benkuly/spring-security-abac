@@ -1,4 +1,4 @@
-package net.folivo.springframework.security.abac.demo.config;
+package net.folivo.springframework.security.abac.demo.stdsecurity;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -9,10 +9,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import net.folivo.springframework.security.abac.demo.config.WebSecurityConfig;
 import net.folivo.springframework.security.abac.demo.entities.Posting;
-import net.folivo.springframework.security.abac.demo.entities.StdPostingRepository;
-import net.folivo.springframework.security.abac.demo.entities.StdUserRepository;
+import net.folivo.springframework.security.abac.demo.entities.PostingRepository;
 import net.folivo.springframework.security.abac.demo.entities.User;
+import net.folivo.springframework.security.abac.demo.entities.UserRepository;
 
 @Component
 public class SecurityPermissionEvaluator implements PermissionEvaluator {
@@ -20,11 +21,11 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 	public final static String SAVE_USER = "SAVE_USER";
 	public final static String SAVE_POSTING = "SAVE_POSTING";
 
-	private final StdUserRepository usRep;
-	private final StdPostingRepository poRep;
+	private final UserRepository usRep;
+	private final PostingRepository poRep;
 
 	@Autowired
-	public SecurityPermissionEvaluator(StdUserRepository usRep, StdPostingRepository poRep) {
+	public SecurityPermissionEvaluator(UserRepository usRep, PostingRepository poRep) {
 		this.usRep = usRep;
 		this.poRep = poRep;
 	}

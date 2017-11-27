@@ -1,4 +1,4 @@
-package net.folivo.springframework.security.abac.demo.config;
+package net.folivo.springframework.security.abac.demo.stdsecurity;
 
 import org.springframework.data.repository.query.spi.EvaluationContextExtensionSupport;
 import org.springframework.security.access.expression.SecurityExpressionRoot;

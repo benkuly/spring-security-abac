@@ -1,4 +1,4 @@
-package net.folivo.springframework.security.abac.demo.config;
+package net.folivo.springframework.security.abac.demo.stdsecurity;
 
 import java.util.Optional;
 
@@ -7,16 +7,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import net.folivo.springframework.security.abac.demo.entities.StdUserRepository;
 import net.folivo.springframework.security.abac.demo.entities.User;
+import net.folivo.springframework.security.abac.demo.entities.UserRepository;
 
 @Component
 public class AuthenticationUtil {
 
-	private final StdUserRepository usRep;
+	private final UserRepository usRep;
 
 	@Autowired
-	public AuthenticationUtil(StdUserRepository usRep) {
+	public AuthenticationUtil(UserRepository usRep) {
 		this.usRep = usRep;
 	}
 

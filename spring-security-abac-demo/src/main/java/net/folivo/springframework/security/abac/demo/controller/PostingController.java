@@ -3,30 +3,23 @@ package net.folivo.springframework.security.abac.demo.controller;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import net.folivo.springframework.security.abac.demo.entities.Posting;
-import net.folivo.springframework.security.abac.demo.entities.PostingResource;
-import net.folivo.springframework.security.abac.demo.entities.StdPostingRepository;
-import net.folivo.springframework.security.abac.demo.entities.StdUserRepository;
+import net.folivo.springframework.security.abac.demo.entities.PostingRepository;
+import net.folivo.springframework.security.abac.demo.entities.UserRepository;
 
-@RestController
-@RequestMapping("/postings")
 public class PostingController {
 
-	private final StdPostingRepository repo;
-	private final StdUserRepository userRepo;
+	private final PostingRepository repo;
+	private final UserRepository userRepo;
 
-	@Autowired
-	public PostingController(StdPostingRepository repo, StdUserRepository userRepo) {
+	public PostingController(PostingRepository repo, UserRepository userRepo) {
 		this.repo = repo;
 		this.userRepo = userRepo;
 	}

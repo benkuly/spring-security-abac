@@ -1,17 +1,17 @@
-package net.folivo.springframework.security.abac.demo.entities;
+package net.folivo.springframework.security.abac.demo.stdsecurity;
 
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface StdUserRepository extends CrudRepository<User, Long> {
+import net.folivo.springframework.security.abac.demo.entities.User;
+import net.folivo.springframework.security.abac.demo.entities.UserRepository;
 
-	public Optional<User> findByUsernameIgnoreCase(String username);
+@Repository
+public interface StdUserRepository extends UserRepository {
 
 	@PreAuthorize("hasPermission(#entity,'SAVE_USER')")
 	@Override
@@ -21,9 +21,6 @@ public interface StdUserRepository extends CrudRepository<User, Long> {
 	@PreAuthorize("isAuthenticated()")
 	@Query("SELECT u FROM User u WHERE (u.username=?#{principal.username} OR 1=?#{hasRole('ADMIN') ? 1 : 0}) AND u.id=?1")
 	Optional<User> findById(Long id);
-
-	@Query("SELECT u FROM User u WHERE u.id=?1")
-	Optional<User> findByIdInternal(Long id);
 
 	@PreAuthorize("hasRole('ADMIN')")
 	@Override

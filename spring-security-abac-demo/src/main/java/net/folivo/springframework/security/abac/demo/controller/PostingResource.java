@@ -1,6 +1,8 @@
-package net.folivo.springframework.security.abac.demo.entities;
+package net.folivo.springframework.security.abac.demo.controller;
 
 import java.time.LocalDateTime;
+
+import net.folivo.springframework.security.abac.demo.entities.Posting;
 
 public class PostingResource {
 	private Long id;
