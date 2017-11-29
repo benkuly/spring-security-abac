@@ -1,6 +1,7 @@
 package net.folivo.springframework.security.abac.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -30,13 +31,15 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 
-import net.folivo.springframework.security.abac.expression.ExpressionBasedInvocationAttributeFactory;
-import net.folivo.springframework.security.abac.expression.ExpressionBasedRequestAttributeConverter;
-import net.folivo.springframework.security.abac.pdp.RequestAttributeConverter;
+import net.folivo.springframework.security.abac.pep.RequestAttributePostProcessor;
+import net.folivo.springframework.security.abac.pep.RequestAttributeProvider;
 import net.folivo.springframework.security.abac.prepost.AbacAnnotationMethodSecurityMetadataSource;
-import net.folivo.springframework.security.abac.prepost.HierarchicalMethodSecurityMetadataSource;
+import net.folivo.springframework.security.abac.prepost.AbacAnnotationRequestAttributeProvider;
+import net.folivo.springframework.security.abac.prepost.MethodInvocationContext;
 import net.folivo.springframework.security.abac.prepost.PreInvocationAuthorizationVoter;
 import net.folivo.springframework.security.abac.prepost.PrePostInvocationAttributeFactory;
+import net.folivo.springframework.security.abac.prepost.expression.ExpressionBasedInvocationAttributeFactory;
+import net.folivo.springframework.security.abac.prepost.expression.ExpressionBasedRequestAttributePostProcessor;
 
 //TODO better segregation between methodSecurity stuff and abac -> own Configuration
 //more @Bean's?
@@ -69,8 +72,8 @@ public class PepConfiguration implements InitializingBean {
 		// TODO maybe allow multiple voters
 		// e.g. for local and remote pdp's at same time. if local pdp has no idea it can
 		// ask remote pdp.
-		decisionVoters.add(new PreInvocationAuthorizationVoter(requestAttributeConverters(),
-				pdpConfig.getRequestFactory(), pdpConfig.getPdpClient(), pdpConfig.getResponseEvaluator()));
+		decisionVoters.add(new PreInvocationAuthorizationVoter(pdpConfig.getRequestFactory(), pdpConfig.getPdpClient(),
+				pdpConfig.getResponseEvaluator(), requestAttributePostProcessors()));
 
 		return new AffirmativeBased(decisionVoters);
 	}
@@ -93,12 +96,12 @@ public class PepConfiguration implements InitializingBean {
 
 	@Bean
 	public MethodSecurityMetadataSource methodSecurityMetadataSource() {
-		List<MethodSecurityMetadataSource> sources = new ArrayList<>();
 		PrePostInvocationAttributeFactory<String> attributeFactory = new ExpressionBasedInvocationAttributeFactory(
 				methodSecurityExpressionHandler());
-		// TODO more MetadataSources! -> extra methods/beans
-		sources.add(new AbacAnnotationMethodSecurityMetadataSource(attributeFactory));
-		return new HierarchicalMethodSecurityMetadataSource(sources);
+		RequestAttributeProvider<MethodInvocationContext> annotationProvider = new AbacAnnotationRequestAttributeProvider(
+				attributeFactory);
+
+		return new AbacAnnotationMethodSecurityMetadataSource(Arrays.asList(annotationProvider));
 	}
 
 	@Bean
@@ -119,11 +122,11 @@ public class PepConfiguration implements InitializingBean {
 		return invocationProviderManager;
 	}
 
-	protected Collection<RequestAttributeConverter> requestAttributeConverters() {
-		Collection<RequestAttributeConverter> requestAttributeConverters;
-		requestAttributeConverters = new ArrayList<>();
-		requestAttributeConverters.add(new ExpressionBasedRequestAttributeConverter(methodSecurityExpressionHandler()));
-		return requestAttributeConverters;
+	protected Collection<RequestAttributePostProcessor<MethodInvocationContext>> requestAttributePostProcessors() {
+		Collection<RequestAttributePostProcessor<MethodInvocationContext>> requestAttributePostProcessors = new ArrayList<>();
+		requestAttributePostProcessors
+				.add(new ExpressionBasedRequestAttributePostProcessor(methodSecurityExpressionHandler()));
+		return requestAttributePostProcessors;
 	}
 
 	/**

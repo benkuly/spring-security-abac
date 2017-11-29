@@ -10,23 +10,19 @@ import org.springframework.security.access.prepost.PreInvocationAttribute;
 import org.springframework.security.core.Authentication;
 
 import net.folivo.springframework.security.abac.pdp.PdpClient;
-import net.folivo.springframework.security.abac.pdp.RequestHolder;
 import net.folivo.springframework.security.abac.pdp.RequestAttribute;
-import net.folivo.springframework.security.abac.pdp.RequestAttributeConverter;
 import net.folivo.springframework.security.abac.pdp.RequestFactory;
-import net.folivo.springframework.security.abac.pdp.ResponseHolder;
+import net.folivo.springframework.security.abac.pdp.RequestHolder;
 import net.folivo.springframework.security.abac.pdp.ResponseEvaluator;
+import net.folivo.springframework.security.abac.pdp.ResponseHolder;
 
 public class PreInvocationAuthorizationVoter implements AccessDecisionVoter<MethodInvocation> {
 
 	private final ResponseEvaluator eval;
 	private final RequestFactory requestFactory;
 	private final PdpClient pdpClient;
-	private final Collection<RequestAttributeConverter> attributeConverter;
 
-	public PreInvocationAuthorizationVoter(Collection<RequestAttributeConverter> attributeConverter,
-			RequestFactory requestFactory, PdpClient pdpClient, ResponseEvaluator eval) {
-		this.attributeConverter = attributeConverter;
+	public PreInvocationAuthorizationVoter(RequestFactory requestFactory, PdpClient pdpClient, ResponseEvaluator eval) {
 		this.requestFactory = requestFactory;
 		this.pdpClient = pdpClient;
 		this.eval = eval;
@@ -47,13 +43,8 @@ public class PreInvocationAuthorizationVoter implements AccessDecisionVoter<Meth
 
 		Collection<RequestAttribute> requestAttrs = new ArrayList<>();
 
-		for (ConfigAttribute a : attributes) {
-			if (isPreInvocationAttribute(a)) {
-				RequestAttribute r = (RequestAttribute) a;
-				requestAttrs.add(attributeConverter.stream().filter(c -> c.supportsValueType(r.getValue().getClass()))
-						.findFirst().map(c -> c.convert(r, authentication, method)).orElse(r));
-			}
-		}
+		// TODO post process!
+		// .filter(a -> isPreInvocationAttribute(a)).map(a -> (RequestAttribute) a)
 
 		if (requestAttrs.isEmpty()) {
 			return ACCESS_ABSTAIN;

@@ -1,10 +1,8 @@
-package net.folivo.springframework.security.abac.expression;
+package net.folivo.springframework.security.abac.prepost.expression;
 
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
-import org.springframework.security.access.prepost.PostInvocationAttribute;
-import org.springframework.security.access.prepost.PreInvocationAttribute;
 
 import net.folivo.springframework.security.abac.prepost.AbacPostInvocationAttribute;
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationAttribute;
@@ -22,8 +20,8 @@ public class ExpressionBasedInvocationAttributeFactory implements PrePostInvocat
 	}
 
 	@Override
-	public PreInvocationAttribute createPreInvocationAttributes(AttributeCategory category, String id, String datatype,
-			String value) {
+	public AbacPreInvocationAttribute createPreInvocationAttributes(AttributeCategory category, String id,
+			String datatype, String value) {
 		try {
 			return new AbacPreInvocationAttribute(category, id, datatype, getParser().parseExpression(value));
 		} catch (ParseException e) {
@@ -32,7 +30,7 @@ public class ExpressionBasedInvocationAttributeFactory implements PrePostInvocat
 	}
 
 	@Override
-	public PostInvocationAttribute createPostInvocationAttributes(AttributeCategory category, String id,
+	public AbacPostInvocationAttribute createPostInvocationAttributes(AttributeCategory category, String id,
 			String datatype, String value) {
 		try {
 			return new AbacPostInvocationAttribute(category, id, datatype, getParser().parseExpression(value));
