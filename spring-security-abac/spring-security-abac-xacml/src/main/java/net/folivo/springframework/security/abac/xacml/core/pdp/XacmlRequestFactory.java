@@ -14,14 +14,14 @@ import com.att.research.xacml.std.annotations.RequestParser;
 
 import net.folivo.springframework.security.abac.pdp.RequestAttribute;
 import net.folivo.springframework.security.abac.pdp.RequestFactory;
-import net.folivo.springframework.security.abac.pdp.RequestHolder;
-import net.folivo.springframework.security.abac.prepost.AttributeCategory;
+import net.folivo.springframework.security.abac.pdp.AttributeCategory;
+import net.folivo.springframework.security.abac.pdp.PdpRequest;
 
 public class XacmlRequestFactory implements RequestFactory {
 
 	// TODO throw exception when build didn't work
 	@Override
-	public RequestHolder build(Collection<RequestAttribute> requestAttrs) {
+	public PdpRequest build(Collection<RequestAttribute> requestAttrs) {
 		// TODO use RequestParser from at&t xaxml as reference
 		// TODO bad way to use the field when you already know how to get the value
 		List<StdMutableRequestAttributes> attributes = new ArrayList<>();

@@ -1,12 +1,16 @@
 package net.folivo.springframework.security.abac.prepost;
 
+import java.util.Collection;
+
 import org.springframework.aop.framework.AopInfrastructureBean;
+import org.springframework.security.access.prepost.PostInvocationAttribute;
+import org.springframework.security.access.prepost.PreInvocationAttribute;
 
-public interface PrePostInvocationAttributeFactory<T> extends AopInfrastructureBean {
+import net.folivo.springframework.security.abac.pdp.RequestAttribute;
 
-	AbacPreInvocationAttribute createPreInvocationAttributes(AttributeCategory category, String id, String datatype,
-			T value);
+public interface PrePostInvocationAttributeFactory extends AopInfrastructureBean {
 
-	AbacPostInvocationAttribute createPostInvocationAttributes(AttributeCategory category, String id, String datatype,
-			T value);
+	PreInvocationAttribute createPreInvocationAttributes(Collection<RequestAttribute> attrs);
+
+	PostInvocationAttribute createPostInvocationAttributes(Collection<RequestAttribute> attrs);
 }

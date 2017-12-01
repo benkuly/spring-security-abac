@@ -12,6 +12,7 @@ import com.att.research.xacml.util.XACMLProperties;
 
 import net.folivo.springframework.security.abac.config.PdpConfiguration;
 import net.folivo.springframework.security.abac.pdp.PdpClient;
+import net.folivo.springframework.security.abac.pdp.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.pdp.RequestFactory;
 import net.folivo.springframework.security.abac.pdp.ResponseEvaluator;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlPdpClient;
@@ -20,16 +21,6 @@ import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlResponseEval
 
 @Configuration
 public class XacmlPdpConfiguration implements PdpConfiguration {
-
-	private RequestFactory requestFactory;
-	private PdpClient pdpClient;
-	private ResponseEvaluator responseEvaluator;
-
-	public XacmlPdpConfiguration() {
-		requestFactory = new XacmlRequestFactory();
-		pdpClient = new XacmlPdpClient(getPdpEngine());
-		responseEvaluator = new XacmlResponseEvaluator();
-	}
 
 	public PDPEngine getPdpEngine() {
 		Properties props = new Properties();
@@ -43,17 +34,23 @@ public class XacmlPdpConfiguration implements PdpConfiguration {
 	}
 
 	@Override
-	public RequestFactory getRequestFactory() {
-		return requestFactory;
+	public RequestFactory requestFactory() {
+		return new XacmlRequestFactory();
 	}
 
 	@Override
-	public PdpClient getPdpClient() {
-		return pdpClient;
+	public PdpClient pdpClient() {
+		return new XacmlPdpClient(getPdpEngine());
 	}
 
 	@Override
-	public ResponseEvaluator getResponseEvaluator() {
-		return responseEvaluator;
+	public ResponseEvaluator responseEvaluator() {
+		return new XacmlResponseEvaluator();
+	}
+
+	@Override
+	public RequestAttributeFactory requestAttributeFactory() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

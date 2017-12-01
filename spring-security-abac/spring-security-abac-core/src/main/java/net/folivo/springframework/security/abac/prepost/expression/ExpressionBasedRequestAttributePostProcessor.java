@@ -1,21 +1,24 @@
 package net.folivo.springframework.security.abac.prepost.expression;
 
+import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
-import org.springframework.util.Assert;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import net.folivo.springframework.security.abac.pdp.RequestAttribute;
+import net.folivo.springframework.security.abac.pdp.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.pep.RequestAttributePostProcessor;
-import net.folivo.springframework.security.abac.prepost.MethodInvocationContext;
 
-public class ExpressionBasedRequestAttributePostProcessor
-		implements RequestAttributePostProcessor<MethodInvocationContext> {
+public class ExpressionBasedRequestAttributePostProcessor implements RequestAttributePostProcessor<MethodInvocation> {
 
 	private final MethodSecurityExpressionHandler expressionHandler;
+	private final RequestAttributeFactory requestAttributeFactory;
 
-	public ExpressionBasedRequestAttributePostProcessor(MethodSecurityExpressionHandler expressionHandler) {
+	public ExpressionBasedRequestAttributePostProcessor(MethodSecurityExpressionHandler expressionHandler,
+			RequestAttributeFactory requestAttributeFactory) {
 		this.expressionHandler = expressionHandler;
+		this.requestAttributeFactory = requestAttributeFactory;
 	}
 
 	@Override
@@ -24,14 +27,12 @@ public class ExpressionBasedRequestAttributePostProcessor
 	}
 
 	@Override
-	public RequestAttribute process(RequestAttribute attr, MethodInvocationContext context) {
-		Assert.isAssignable(context.getClass(), MethodInvocationContext.class, "A MethodInvocationContext is needed.");
-
+	public RequestAttribute process(RequestAttribute attr, MethodInvocation context) {
 		Expression expr = (Expression) attr.getValue();
-		EvaluationContext evaluationContext = expressionHandler.createEvaluationContext(context.getAuthentication(),
-				context.getMethodInvocation());
+		EvaluationContext evaluationContext = expressionHandler
+				.createEvaluationContext(SecurityContextHolder.getContext().getAuthentication(), context);
 
-		return new RequestAttribute(attr.getCategory(), attr.getId(), attr.getDatatype(),
+		return requestAttributeFactory.build(attr.getCategory(), attr.getId(), attr.getDatatype(),
 				expr.getValue(evaluationContext));
 	}
 }

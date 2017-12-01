@@ -2,6 +2,6 @@ package net.folivo.springframework.security.abac.pdp;
 
 public interface PdpClient {
 
-	ResponseHolder decide(RequestHolder requestHolder);
+	PdpResponse decide(PdpRequest request);
 
 }

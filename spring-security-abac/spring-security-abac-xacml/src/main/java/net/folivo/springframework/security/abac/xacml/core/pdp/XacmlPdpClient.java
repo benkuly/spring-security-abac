@@ -5,8 +5,8 @@ import com.att.research.xacml.api.pdp.PDPEngine;
 import com.att.research.xacml.api.pdp.PDPException;
 
 import net.folivo.springframework.security.abac.pdp.PdpClient;
-import net.folivo.springframework.security.abac.pdp.RequestHolder;
-import net.folivo.springframework.security.abac.pdp.ResponseHolder;
+import net.folivo.springframework.security.abac.pdp.PdpRequest;
+import net.folivo.springframework.security.abac.pdp.PdpResponse;
 
 public class XacmlPdpClient implements PdpClient {
 
@@ -18,7 +18,7 @@ public class XacmlPdpClient implements PdpClient {
 
 	// TODO should throw exception!
 	@Override
-	public ResponseHolder decide(RequestHolder requestHolder) {
+	public Response decide(PdpRequest requestHolder) {
 		// TODO I hate casting but what is the better solution?!
 		XacmlRequestHolder realRequestHolder = (XacmlRequestHolder) requestHolder;
 		Response response = null;
@@ -28,7 +28,7 @@ public class XacmlPdpClient implements PdpClient {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		ResponseHolder responseHolder = new XacmlResponseHolder(response);
+		Response responseHolder = new XacmlResponseHolder(response);
 		return responseHolder;
 	}
 

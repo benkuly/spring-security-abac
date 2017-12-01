@@ -1,13 +1,15 @@
 package net.folivo.springframework.security.abac.prepost;
 
+import java.util.Collection;
+
 import org.springframework.security.access.prepost.PreInvocationAttribute;
 
 import net.folivo.springframework.security.abac.pdp.RequestAttribute;
 
-public class AbacPreInvocationAttribute extends RequestAttribute implements PreInvocationAttribute {
+public class AbacPreInvocationAttribute extends RequestAttributeHolder implements PreInvocationAttribute {
 
-	public AbacPreInvocationAttribute(AttributeCategory category, String id, String datatype, Object value) {
-		super(category, id, datatype, value);
+	public AbacPreInvocationAttribute(Collection<RequestAttribute> attributes) {
+		super(attributes);
 	}
 
 	@Override

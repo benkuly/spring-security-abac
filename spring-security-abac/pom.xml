@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.springframework.security</groupId>
 		<artifactId>spring-security-bom</artifactId>
-		<version>5.0.0.M5</version>
+		<version>5.0.0.RELEASE</version>
 	</parent>
 
 	<properties>
