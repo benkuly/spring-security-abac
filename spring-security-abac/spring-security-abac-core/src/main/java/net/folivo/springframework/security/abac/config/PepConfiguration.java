@@ -11,34 +11,33 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 
-import net.folivo.springframework.security.abac.pep.PepEngine;
-import net.folivo.springframework.security.abac.pep.PepEngineImpl;
+import net.folivo.springframework.security.abac.pep.PepClient;
 import net.folivo.springframework.security.abac.pep.RequestAttributePostProcessor;
+import net.folivo.springframework.security.abac.pep.SimplePepClient;
 
 @Configuration
 @EnableGlobalAuthentication
 public abstract class PepConfiguration<T> {
 
-	protected final PdpConfiguration pdpConfig;
+	protected final PdpConfiguration<?, ?> pdpConfig;
 	protected AuthenticationManager authManager;
 	protected AuthenticationManagerBuilder authBuilder;
 	private final AuthenticationConfiguration authConfig;
 	protected boolean disableAuthenticationRegistry;
 	private ObjectPostProcessor<Object> objectPostProcessor = new ObjectPostProcessor<Object>() {
 		@Override
-		public <T> T postProcess(T object) {
+		public <O> O postProcess(O object) {
 			throw new IllegalStateException(ObjectPostProcessor.class.getName() + " is a required bean.");
 		}
 	};
 
-	public PepConfiguration(AuthenticationConfiguration authConfig, PdpConfiguration pdpConfig) {
+	public PepConfiguration(AuthenticationConfiguration authConfig, PdpConfiguration<?, ?> pdpConfig) {
 		this.pdpConfig = pdpConfig;
 		this.authConfig = authConfig;
 	}
 
-	protected PepEngine<T> pepEngine() {
-		return new PepEngineImpl<>(pdpConfig.pdpClient(), requestAttributePostProcessors(),
-				pdpConfig.responseEvaluator(), pdpConfig.requestFactory());
+	public PepClient<T> pepClient() {
+		return new SimplePepClient<>(pdpConfig.pepEngine(), requestAttributePostProcessors());
 	}
 
 	/**

@@ -20,9 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import net.folivo.springframework.security.abac.demo.config.WebSecurityConfig;
 import net.folivo.springframework.security.abac.demo.entities.Posting;
-import net.folivo.springframework.security.abac.demo.entities.PostingRepository;
 import net.folivo.springframework.security.abac.demo.entities.User;
-import net.folivo.springframework.security.abac.demo.entities.UserRepository;
+import net.folivo.springframework.security.abac.demo.stdsecurity.StdPostingRepository;
+import net.folivo.springframework.security.abac.demo.stdsecurity.StdUserRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -34,10 +34,10 @@ public class StandardSecurityTest {
 	private TestEntityManager eMa;
 
 	@Autowired
-	private UserRepository userRepo;
+	private StdUserRepository userRepo;
 
 	@Autowired
-	private PostingRepository postingRepo;
+	private StdPostingRepository postingRepo;
 
 	private RepoSecurityTestHelper<User> userTest;
 

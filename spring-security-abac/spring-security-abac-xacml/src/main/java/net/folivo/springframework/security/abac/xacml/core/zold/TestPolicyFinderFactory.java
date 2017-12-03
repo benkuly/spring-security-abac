@@ -1,5 +1,5 @@
 package net.folivo.springframework.security.abac.xacml.core.zold;
-
+/*-
 import java.util.Properties;
 
 import com.att.research.xacml.util.FactoryException;
@@ -23,3 +23,4 @@ public class TestPolicyFinderFactory extends PolicyFinderFactory {
 	}
 
 }
+*/

@@ -1,5 +1,6 @@
 package net.folivo.springframework.security.abac.xacml.core.zold;
 
+/*-
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -27,12 +28,7 @@ import net.folivo.spring.xacml.core.ResourceAttributeProvider;
 import net.folivo.spring.xacml.core.StaticAttributeProvider;
 
 //TODO testen
-/**
- * PEP
- * 
- * @author Benedict Benken
- *
- */
+
 @Component
 public class PEPClient {
 
@@ -53,40 +49,18 @@ public class PEPClient {
 		this.resourceAttributeProviders = resourceAttributeProviders;
 	}
 
-	/**
-	 * Checks the permission to a specific object.
-	 * 
-	 * @param authentication
-	 * @param resource
-	 * @param action
-	 * @throws AccessDeniedException
-	 */
 	public void checkPermission(Authentication authentication, Object resource, String action)
 			throws AccessDeniedException {
 		if (!hasPermission(authentication, resource, action))
 			throw new AccessDeniedException("Access is denied");
 	}
 
-	/**
-	 * Checks the permission to a specific object. Uses @{Authentication}
-	 * from @{SecurityContextHolder}.
-	 * 
-	 * @param resource
-	 * @param action
-	 * @throws AccessDeniedException
-	 */
+
 	public void checkPermission(Object resource, String action) throws AccessDeniedException {
 		checkPermission(SecurityContextHolder.getContext().getAuthentication(), resource, action);
 	}
 
-	/**
-	 * Get the permission to a specific object.
-	 * 
-	 * @param authentication
-	 * @param resource
-	 * @param action
-	 * @return True if having the permission.
-	 */
+
 	public boolean hasPermission(Authentication authentication, Object resource, String action) {
 		Response response = request(authentication, resource, action);
 
@@ -98,27 +72,12 @@ public class PEPClient {
 		return false;
 	}
 
-	/**
-	 * Get the permission to a specific object. Uses @{Authentication}
-	 * from @{SecurityContextHolder}.
-	 * 
-	 * @param resource
-	 * @param action
-	 * @return True if having the permission.
-	 * @throws AccessDeniedException
-	 */
+	
 	public boolean hasPermission(Object resource, String action) throws AccessDeniedException {
 		return hasPermission(SecurityContextHolder.getContext().getAuthentication(), resource, action);
 	}
 
-	/**
-	 * Get the response to a specific object-permission.
-	 * 
-	 * @param authentication
-	 * @param resource
-	 * @param action
-	 * @return The response
-	 */
+
 	public Response request(Authentication authentication, Object resource, String action) {
 		if (authentication != null && resource != null && action != null) {
 			StdMutableRequest request = new StdMutableRequest();
@@ -137,23 +96,12 @@ public class PEPClient {
 				new StdResult(Decision.INDETERMINATE, new StdStatus(new StdStatusCode(new IdentifierImpl("NULL")))));
 	}
 
-	/**
-	 * Get the response to a specific object-permission.
-	 * 
-	 * @param resource
-	 * @param action
-	 * @return The response
-	 */
+
 	public Response request(Object resource, String action) {
 		return request(SecurityContextHolder.getContext().getAuthentication(), resource, action);
 	}
 
-	/**
-	 * Request the XACML-PDP manually.
-	 * 
-	 * @param request
-	 * @return
-	 */
+
 	public Response request(Request request) {
 		Response response;
 		try {
@@ -173,3 +121,4 @@ public class PEPClient {
 		return response;
 	}
 }
+*/

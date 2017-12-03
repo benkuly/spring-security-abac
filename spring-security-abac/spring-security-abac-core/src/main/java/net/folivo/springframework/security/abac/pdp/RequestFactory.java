@@ -2,8 +2,8 @@ package net.folivo.springframework.security.abac.pdp;
 
 import java.util.Collection;
 
-public interface RequestFactory {
+public interface RequestFactory<R> {
 
-	PdpRequest build(Collection<RequestAttribute> requestAttrs);
+	R build(Collection<RequestAttribute> requestAttrs);
 
 }

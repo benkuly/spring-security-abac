@@ -11,9 +11,7 @@ import org.springframework.util.Assert;
 
 import net.folivo.springframework.security.abac.demo.config.WebSecurityConfig;
 import net.folivo.springframework.security.abac.demo.entities.Posting;
-import net.folivo.springframework.security.abac.demo.entities.PostingRepository;
 import net.folivo.springframework.security.abac.demo.entities.User;
-import net.folivo.springframework.security.abac.demo.entities.UserRepository;
 
 @Component
 public class SecurityPermissionEvaluator implements PermissionEvaluator {
@@ -21,11 +19,11 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 	public final static String SAVE_USER = "SAVE_USER";
 	public final static String SAVE_POSTING = "SAVE_POSTING";
 
-	private final UserRepository usRep;
-	private final PostingRepository poRep;
+	private final StdUserRepository usRep;
+	private final StdPostingRepository poRep;
 
 	@Autowired
-	public SecurityPermissionEvaluator(UserRepository usRep, PostingRepository poRep) {
+	public SecurityPermissionEvaluator(StdUserRepository usRep, StdPostingRepository poRep) {
 		this.usRep = usRep;
 		this.poRep = poRep;
 	}

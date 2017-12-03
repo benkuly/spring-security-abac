@@ -5,14 +5,14 @@ import org.springframework.security.access.prepost.PreInvocationAttribute;
 import org.springframework.security.access.prepost.PreInvocationAuthorizationAdvice;
 import org.springframework.security.core.Authentication;
 
-import net.folivo.springframework.security.abac.pep.PepEngine;
+import net.folivo.springframework.security.abac.pep.PepClient;
 
 public class AbacPreInvoacationAdvice implements PreInvocationAuthorizationAdvice {
 
-	private final PepEngine<MethodInvocation> engine;
+	private final PepClient<MethodInvocation> pep;
 
-	public AbacPreInvoacationAdvice(PepEngine<MethodInvocation> engine) {
-		this.engine = engine;
+	public AbacPreInvoacationAdvice(PepClient<MethodInvocation> pep) {
+		this.pep = pep;
 	}
 
 	@Override
@@ -20,7 +20,7 @@ public class AbacPreInvoacationAdvice implements PreInvocationAuthorizationAdvic
 			PreInvocationAttribute preInvocationAttribute) {
 		AbacPreInvocationAttribute attr = (AbacPreInvocationAttribute) preInvocationAttribute;
 
-		return engine.buildRequestAndEvaluateToBoolean(attr.getAttributes());
+		return pep.buildRequestAndEvaluateToBoolean(attr.getAttributes(), mi);
 	}
 
 }

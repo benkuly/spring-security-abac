@@ -1,7 +1,7 @@
 package net.folivo.springframework.security.abac.pdp;
 
-public interface ResponseEvaluator {
+public interface ResponseEvaluator<S> {
 
-	boolean evaluateToBoolean(PdpResponse response);
+	boolean evaluateToBoolean(S response);
 
 }

@@ -1,5 +1,5 @@
 package net.folivo.springframework.security.abac.xacml.core.zold;
-
+/*-
 import com.att.research.xacml.api.IdReferenceMatch;
 import com.att.research.xacml.std.IdentifierImpl;
 import com.att.research.xacml.std.StdStatus;
@@ -35,3 +35,4 @@ public class TestPolicyFinder implements PolicyFinder {
 	}
 
 }
+*/

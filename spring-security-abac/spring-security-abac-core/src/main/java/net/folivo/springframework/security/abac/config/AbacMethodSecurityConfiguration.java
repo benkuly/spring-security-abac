@@ -40,7 +40,7 @@ import net.folivo.springframework.security.abac.prepost.expression.ExpressionBas
 //more @Bean's?
 public class AbacMethodSecurityConfiguration extends PepConfiguration<MethodInvocation> implements InitializingBean {
 
-	public AbacMethodSecurityConfiguration(AuthenticationConfiguration authConfig, PdpConfiguration pdpConfig) {
+	public AbacMethodSecurityConfiguration(AuthenticationConfiguration authConfig, PdpConfiguration<?, ?> pdpConfig) {
 		super(authConfig, pdpConfig);
 
 	}
@@ -51,7 +51,7 @@ public class AbacMethodSecurityConfiguration extends PepConfiguration<MethodInvo
 		// TODO maybe allow multiple voters
 		// e.g. for local and remote pdp's at same time. if local pdp has no idea it can
 		// ask remote pdp.
-		decisionVoters.add(new PreInvocationAuthorizationAdviceVoter(new AbacPreInvoacationAdvice(pepEngine())));
+		decisionVoters.add(new PreInvocationAuthorizationAdviceVoter(new AbacPreInvoacationAdvice(pepClient())));
 
 		return new AffirmativeBased(decisionVoters);
 	}

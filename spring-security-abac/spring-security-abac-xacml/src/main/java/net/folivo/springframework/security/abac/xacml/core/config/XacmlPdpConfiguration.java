@@ -5,6 +5,8 @@ import java.util.Properties;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.annotation.Configuration;
 
+import com.att.research.xacml.api.Request;
+import com.att.research.xacml.api.Response;
 import com.att.research.xacml.api.pdp.PDPEngine;
 import com.att.research.xacml.api.pdp.PDPEngineFactory;
 import com.att.research.xacml.util.FactoryException;
@@ -15,12 +17,15 @@ import net.folivo.springframework.security.abac.pdp.PdpClient;
 import net.folivo.springframework.security.abac.pdp.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.pdp.RequestFactory;
 import net.folivo.springframework.security.abac.pdp.ResponseEvaluator;
+import net.folivo.springframework.security.abac.pep.PepEngine;
+import net.folivo.springframework.security.abac.pep.SimplePepEngine;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlPdpClient;
+import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlRequestAttributeFactory;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlRequestFactory;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlResponseEvaluator;
 
 @Configuration
-public class XacmlPdpConfiguration implements PdpConfiguration {
+public class XacmlPdpConfiguration implements PdpConfiguration<Request, Response> {
 
 	public PDPEngine getPdpEngine() {
 		Properties props = new Properties();
@@ -34,23 +39,27 @@ public class XacmlPdpConfiguration implements PdpConfiguration {
 	}
 
 	@Override
-	public RequestFactory requestFactory() {
+	public RequestFactory<Request> requestFactory() {
 		return new XacmlRequestFactory();
 	}
 
 	@Override
-	public PdpClient pdpClient() {
+	public PdpClient<Request, Response> pdpClient() {
 		return new XacmlPdpClient(getPdpEngine());
 	}
 
 	@Override
-	public ResponseEvaluator responseEvaluator() {
+	public ResponseEvaluator<Response> responseEvaluator() {
 		return new XacmlResponseEvaluator();
 	}
 
 	@Override
 	public RequestAttributeFactory requestAttributeFactory() {
-		// TODO Auto-generated method stub
-		return null;
+		return new XacmlRequestAttributeFactory();
+	}
+
+	@Override
+	public PepEngine pepEngine() {
+		return new SimplePepEngine<Request, Response>(pdpClient(), responseEvaluator(), requestFactory());
 	}
 }

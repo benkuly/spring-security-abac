@@ -8,15 +8,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import net.folivo.springframework.security.abac.demo.entities.User;
-import net.folivo.springframework.security.abac.demo.entities.UserRepository;
 
 @Component
 public class AuthenticationUtil {
 
-	private final UserRepository usRep;
+	private final StdUserRepository usRep;
 
 	@Autowired
-	public AuthenticationUtil(UserRepository usRep) {
+	public AuthenticationUtil(StdUserRepository usRep) {
 		this.usRep = usRep;
 	}
 

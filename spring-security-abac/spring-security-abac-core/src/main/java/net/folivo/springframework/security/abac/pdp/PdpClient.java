@@ -1,7 +1,7 @@
 package net.folivo.springframework.security.abac.pdp;
 
-public interface PdpClient {
+public interface PdpClient<R, S> {
 
-	PdpResponse decide(PdpRequest request);
+	S decide(R request);
 
 }

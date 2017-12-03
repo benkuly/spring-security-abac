@@ -42,7 +42,7 @@ public class AbacAnnotationMethodSecurityMetadataSource implements MethodSecurit
 		List<RequestAttributeProvider<MethodInvocation>> preProviders = new ArrayList<>();
 		List<RequestAttributeProvider<MethodInvocation>> postProviders = new ArrayList<>();
 
-		// should this be in pep or here?
+		// should this be in PepEngine or here?
 		providers.sort(AnnotationAwareOrderComparator.INSTANCE);
 
 		for (RequestAttributeProvider<MethodInvocation> p : providers) {
@@ -68,6 +68,7 @@ public class AbacAnnotationMethodSecurityMetadataSource implements MethodSecurit
 			MethodInvocation context) {
 		// TODO bad solution because casting and performance (instead of put, sort
 		// backwards and use containsKey)
+		// TODO maybe in PepEngine?
 		Map<String, RequestAttribute> attrs = new HashMap<>();
 		ps.stream().flatMap(p -> p.getAttributes(context).stream()).forEach(a -> attrs.put(a.getId(), a));
 		return attrs.values();

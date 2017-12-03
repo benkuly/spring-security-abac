@@ -6,22 +6,22 @@ import java.util.List;
 
 import com.att.research.xacml.api.DataTypeException;
 import com.att.research.xacml.api.Identifier;
+import com.att.research.xacml.api.Request;
 import com.att.research.xacml.api.XACML3;
 import com.att.research.xacml.std.IdentifierImpl;
 import com.att.research.xacml.std.StdMutableRequest;
 import com.att.research.xacml.std.StdMutableRequestAttributes;
 import com.att.research.xacml.std.annotations.RequestParser;
 
+import net.folivo.springframework.security.abac.pdp.AttributeCategory;
 import net.folivo.springframework.security.abac.pdp.RequestAttribute;
 import net.folivo.springframework.security.abac.pdp.RequestFactory;
-import net.folivo.springframework.security.abac.pdp.AttributeCategory;
-import net.folivo.springframework.security.abac.pdp.PdpRequest;
 
-public class XacmlRequestFactory implements RequestFactory {
+public class XacmlRequestFactory implements RequestFactory<Request> {
 
 	// TODO throw exception when build didn't work
 	@Override
-	public PdpRequest build(Collection<RequestAttribute> requestAttrs) {
+	public Request build(Collection<RequestAttribute> requestAttrs) {
 		// TODO use RequestParser from at&t xaxml as reference
 		// TODO bad way to use the field when you already know how to get the value
 		List<StdMutableRequestAttributes> attributes = new ArrayList<>();
@@ -44,7 +44,7 @@ public class XacmlRequestFactory implements RequestFactory {
 		for (StdMutableRequestAttributes a : attributes) {
 			request.add(a);
 		}
-		return new XacmlRequestHolder(request);
+		return request;
 	}
 
 	private Identifier findCategory(AttributeCategory cat) {
