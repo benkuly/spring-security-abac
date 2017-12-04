@@ -21,7 +21,8 @@ public class AbacAnnotationPostRequestAttributeProvider extends AbacAnnotationRe
 			return Collections.emptyList();
 		}
 
-		AbacPostAuthorize abacPostAuthorize = findAnnotation(method, targetClass, AbacPostAuthorize.class);
+		AbacPostAuthorize abacPostAuthorize = AbacAnnotationUtil.findAnnotation(method, targetClass,
+				AbacPostAuthorize.class);
 
 		if (abacPostAuthorize == null) {
 			// There is no meta-data so return

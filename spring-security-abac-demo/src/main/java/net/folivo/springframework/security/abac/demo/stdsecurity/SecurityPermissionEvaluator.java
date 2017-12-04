@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import net.folivo.springframework.security.abac.demo.config.WebSecurityConfig;
 import net.folivo.springframework.security.abac.demo.entities.Posting;
 import net.folivo.springframework.security.abac.demo.entities.User;
 
+@Profile("stdSecurity")
 @Component
 public class SecurityPermissionEvaluator implements PermissionEvaluator {
 

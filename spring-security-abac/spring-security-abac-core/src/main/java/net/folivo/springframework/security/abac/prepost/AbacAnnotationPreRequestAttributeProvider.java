@@ -21,7 +21,8 @@ public class AbacAnnotationPreRequestAttributeProvider extends AbacAnnotationReq
 			return Collections.emptyList();
 		}
 
-		AbacPreAuthorize abacPreAuthorize = findAnnotation(method, targetClass, AbacPreAuthorize.class);
+		AbacPreAuthorize abacPreAuthorize = AbacAnnotationUtil.findAnnotation(method, targetClass,
+				AbacPreAuthorize.class);
 
 		if (abacPreAuthorize == null) {
 			// There is no meta-data so return

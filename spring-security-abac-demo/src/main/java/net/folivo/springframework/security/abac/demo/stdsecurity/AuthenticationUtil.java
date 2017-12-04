@@ -3,12 +3,14 @@ package net.folivo.springframework.security.abac.demo.stdsecurity;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import net.folivo.springframework.security.abac.demo.entities.User;
 
+@Profile("stdSecurity")
 @Component
 public class AuthenticationUtil {
 

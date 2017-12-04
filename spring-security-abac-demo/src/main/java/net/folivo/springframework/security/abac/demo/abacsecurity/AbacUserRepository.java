@@ -2,6 +2,7 @@ package net.folivo.springframework.security.abac.demo.abacsecurity;
 
 import java.util.Optional;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -10,6 +11,7 @@ import net.folivo.springframework.security.abac.demo.entities.UserRepository;
 import net.folivo.springframework.security.abac.prepost.AbacPreAuthorize;
 import net.folivo.springframework.security.abac.prepost.AttributeMapping;
 
+@Profile("abacSecurity")
 @Repository
 public interface AbacUserRepository extends UserRepository {
 
@@ -19,7 +21,7 @@ public interface AbacUserRepository extends UserRepository {
 	@Override
 	<S extends User> S save(@Param("entity") S entity);
 
-	// TODO advice auswerten
+	// TODO evalutate advice
 	@AbacPreAuthorize(//
 			actionAttributes = { @AttributeMapping(id = "action", value = "'GET_USER'") }, //
 			resourceAttributes = { @AttributeMapping(id = "resource.id", value = "#id") })

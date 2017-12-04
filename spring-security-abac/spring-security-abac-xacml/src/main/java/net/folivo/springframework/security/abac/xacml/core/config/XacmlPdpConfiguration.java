@@ -3,7 +3,6 @@ package net.folivo.springframework.security.abac.xacml.core.config;
 import java.util.Properties;
 
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.context.annotation.Configuration;
 
 import com.att.research.xacml.api.Request;
 import com.att.research.xacml.api.Response;
@@ -24,7 +23,6 @@ import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlRequestAttri
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlRequestFactory;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlResponseEvaluator;
 
-@Configuration
 public class XacmlPdpConfiguration implements PdpConfiguration<Request, Response> {
 
 	public PDPEngine getPdpEngine() {
@@ -60,6 +58,6 @@ public class XacmlPdpConfiguration implements PdpConfiguration<Request, Response
 
 	@Override
 	public PepEngine pepEngine() {
-		return new SimplePepEngine<Request, Response>(pdpClient(), responseEvaluator(), requestFactory());
+		return new SimplePepEngine<>(pdpClient(), responseEvaluator(), requestFactory());
 	}
 }

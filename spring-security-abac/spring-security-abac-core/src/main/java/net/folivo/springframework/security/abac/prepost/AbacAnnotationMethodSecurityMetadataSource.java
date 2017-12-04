@@ -1,13 +1,16 @@
 package net.folivo.springframework.security.abac.prepost;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.method.MethodSecurityMetadataSource;
@@ -39,29 +42,43 @@ public class AbacAnnotationMethodSecurityMetadataSource implements MethodSecurit
 
 	public Collection<ConfigAttribute> getAttributes(MethodInvocation context) {
 
-		List<RequestAttributeProvider<MethodInvocation>> preProviders = new ArrayList<>();
-		List<RequestAttributeProvider<MethodInvocation>> postProviders = new ArrayList<>();
+		// TODO better check if annotations are present! this way is very inefficient
+		// and only a workaroud
+		boolean preAuthorize = hasAbacAnnotation(context, AbacPreAuthorize.class);
+		boolean postAuthorize = hasAbacAnnotation(context, AbacPostAuthorize.class);
+		if (preAuthorize || postAuthorize) {
 
-		// should this be in PepEngine or here?
-		providers.sort(AnnotationAwareOrderComparator.INSTANCE);
+			List<RequestAttributeProvider<MethodInvocation>> preProviders = new ArrayList<>();
+			List<RequestAttributeProvider<MethodInvocation>> postProviders = new ArrayList<>();
 
-		for (RequestAttributeProvider<MethodInvocation> p : providers) {
-			if (p instanceof AbacAnnotationPreRequestAttributeProvider) {
-				preProviders.add(p);
-			} else if (p instanceof AbacAnnotationPostRequestAttributeProvider) {
-				postProviders.add(p);
-			} else {
-				// TODO performance: adding to two lists vs add later an sort
-				preProviders.add(p);
-				postProviders.add(p);
+			// should this be in PepEngine or here?
+			providers.sort(AnnotationAwareOrderComparator.INSTANCE);
+
+			for (RequestAttributeProvider<MethodInvocation> p : providers) {
+				if (p instanceof AbacAnnotationPreRequestAttributeProvider && preAuthorize) {
+					preProviders.add(p);
+				} else if (p instanceof AbacAnnotationPostRequestAttributeProvider && postAuthorize) {
+					postProviders.add(p);
+				} else {
+					// TODO performance: adding to two lists vs add later an sort
+					if (preAuthorize)
+						preProviders.add(p);
+					if (postAuthorize)
+						postProviders.add(p);
+				}
 			}
+
+			List<ConfigAttribute> configAttrs = new ArrayList<>(2);
+			if (preAuthorize)
+				configAttrs.add(
+						configAttributesFactory.createPreInvocationAttributes(mergeAttribtes(preProviders, context)));
+			if (postAuthorize)
+				configAttrs.add(
+						configAttributesFactory.createPostInvocationAttributes(mergeAttribtes(postProviders, context)));
+
+			return configAttrs;
 		}
-
-		List<ConfigAttribute> configAttrs = new ArrayList<>(2);
-		configAttrs.add(configAttributesFactory.createPreInvocationAttributes(mergeAttribtes(preProviders, context)));
-		configAttrs.add(configAttributesFactory.createPostInvocationAttributes(mergeAttribtes(postProviders, context)));
-
-		return configAttrs;
+		return Collections.emptyList();
 	}
 
 	private Collection<RequestAttribute> mergeAttribtes(List<RequestAttributeProvider<MethodInvocation>> ps,
@@ -84,5 +101,24 @@ public class AbacAnnotationMethodSecurityMetadataSource implements MethodSecurit
 		if (object instanceof MethodInvocation)
 			return getAttributes((MethodInvocation) object);
 		throw new IllegalArgumentException("Object must be a non-null MethodInvocation");
+	}
+
+	// TODO baaaaad
+	private <A extends Annotation> boolean hasAbacAnnotation(MethodInvocation mi, Class<A> annotation) {
+		Object target = mi.getThis();
+		Class<?> targetClass = null;
+
+		if (target != null) {
+			targetClass = target instanceof Class<?> ? (Class<?>) target : AopProxyUtils.ultimateTargetClass(target);
+		}
+		boolean hasAnnotation = AbacAnnotationUtil.findAnnotation(mi.getMethod(), targetClass, annotation) != null;
+		if (hasAnnotation) {
+			return true;
+		}
+		if (target != null && !(target instanceof Class<?>)) {
+			hasAnnotation = AbacAnnotationUtil.findAnnotation(mi.getMethod(), target.getClass(), annotation) != null;
+			;
+		}
+		return hasAnnotation;
 	}
 }
