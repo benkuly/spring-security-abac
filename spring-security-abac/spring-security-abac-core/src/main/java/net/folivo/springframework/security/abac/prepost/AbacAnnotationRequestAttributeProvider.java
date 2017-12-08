@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.AopProxyUtils;
 
 import net.folivo.springframework.security.abac.pdp.AttributeCategory;
@@ -13,7 +14,9 @@ import net.folivo.springframework.security.abac.pdp.RequestAttribute;
 import net.folivo.springframework.security.abac.pdp.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.pep.RequestAttributeProvider;
 
-public abstract class AbacAnnotationRequestAttributeProvider implements RequestAttributeProvider<MethodInvocation> {
+//TODO implements aop needed?
+public abstract class AbacAnnotationRequestAttributeProvider
+		implements RequestAttributeProvider<MethodInvocation>, AopInfrastructureBean {
 
 	private final RequestAttributeFactory requestAttributeFactory;
 

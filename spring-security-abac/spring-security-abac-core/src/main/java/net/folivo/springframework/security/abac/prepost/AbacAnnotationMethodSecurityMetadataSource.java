@@ -29,18 +29,30 @@ public class AbacAnnotationMethodSecurityMetadataSource implements MethodSecurit
 		this.configAttributesFactory = configAttributesFactory;
 	}
 
-	// TODO urgs. why does they need that?
+	// TODO urgs. why do they need that?
+	// TODO ! a very very very bad workaournd to say aop: hey there is something.
 	@Override
 	public Collection<ConfigAttribute> getAttributes(Method method, Class<?> targetClass) {
+		boolean preAuthorize = AbacAnnotationUtil.findAnnotation(method, targetClass, AbacPreAuthorize.class) != null;
+		boolean postAuthorize = AbacAnnotationUtil.findAnnotation(method, targetClass, AbacPostAuthorize.class) != null;
+		if (preAuthorize || postAuthorize) {
+			List<ConfigAttribute> dummy = new ArrayList<>();
+			dummy.add(new AbacPreInvocationAttribute(Collections.emptyList()));
+			return dummy;
+		}
 		return null;
 	}
 
 	@Override
 	public Collection<ConfigAttribute> getAllConfigAttributes() {
-		return null;
+		return Collections.emptyList();
 	}
 
 	public Collection<ConfigAttribute> getAttributes(MethodInvocation context) {
+		// TODO why? it's from prepost source
+		if (context.getMethod().getDeclaringClass() == Object.class) {
+			return Collections.emptyList();
+		}
 
 		// TODO better check if annotations are present! this way is very inefficient
 		// and only a workaroud
@@ -103,7 +115,7 @@ public class AbacAnnotationMethodSecurityMetadataSource implements MethodSecurit
 		throw new IllegalArgumentException("Object must be a non-null MethodInvocation");
 	}
 
-	// TODO baaaaad
+	// TODO baaaaad, why not AnnotationUtils
 	private <A extends Annotation> boolean hasAbacAnnotation(MethodInvocation mi, Class<A> annotation) {
 		Object target = mi.getThis();
 		Class<?> targetClass = null;
@@ -117,7 +129,6 @@ public class AbacAnnotationMethodSecurityMetadataSource implements MethodSecurit
 		}
 		if (target != null && !(target instanceof Class<?>)) {
 			hasAnnotation = AbacAnnotationUtil.findAnnotation(mi.getMethod(), target.getClass(), annotation) != null;
-			;
 		}
 		return hasAnnotation;
 	}

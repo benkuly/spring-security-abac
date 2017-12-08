@@ -1,5 +1,6 @@
 package net.folivo.springframework.security.abac.prepost.expression;
 
+import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.util.Assert;
@@ -8,7 +9,8 @@ import net.folivo.springframework.security.abac.pdp.AttributeCategory;
 import net.folivo.springframework.security.abac.pdp.RequestAttribute;
 import net.folivo.springframework.security.abac.pdp.RequestAttributeFactory;
 
-public class ExpressionBasedRequestAttributeFactory implements RequestAttributeFactory {
+//TODO implements aop needed?
+public class ExpressionBasedRequestAttributeFactory implements RequestAttributeFactory, AopInfrastructureBean {
 
 	private final RequestAttributeFactory defaultFactory;
 	private final Object parserLock = new Object();

@@ -1,6 +1,7 @@
 package net.folivo.springframework.security.abac.prepost.expression;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
@@ -10,7 +11,9 @@ import net.folivo.springframework.security.abac.pdp.RequestAttribute;
 import net.folivo.springframework.security.abac.pdp.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.pep.RequestAttributePostProcessor;
 
-public class ExpressionBasedRequestAttributePostProcessor implements RequestAttributePostProcessor<MethodInvocation> {
+//TODO implements aop needed?
+public class ExpressionBasedRequestAttributePostProcessor
+		implements RequestAttributePostProcessor<MethodInvocation>, AopInfrastructureBean {
 
 	private final MethodSecurityExpressionHandler expressionHandler;
 	private final RequestAttributeFactory requestAttributeFactory;

@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.AfterInvocationProvider;
@@ -34,12 +34,13 @@ import net.folivo.springframework.security.abac.prepost.expression.ExpressionBas
 import net.folivo.springframework.security.abac.prepost.expression.ExpressionBasedRequestAttributePostProcessor;
 
 //this is only a workaround solution because standalone method security is so weired
+@Configuration
 public class AbacMethodSecurityConfiguration extends GlobalMethodSecurityConfiguration {
 
-	protected final PdpConfiguration<?, ?> pdpConfig;
+	protected PdpConfiguration<?, ?> pdpConfig;
 
 	@Autowired
-	public AbacMethodSecurityConfiguration(PdpConfiguration<?, ?> pdpConfig) {
+	public void setPdpConfig(PdpConfiguration<?, ?> pdpConfig) {
 		this.pdpConfig = pdpConfig;
 	}
 
@@ -70,17 +71,18 @@ public class AbacMethodSecurityConfiguration extends GlobalMethodSecurityConfigu
 
 	@Override
 	public MethodSecurityMetadataSource methodSecurityMetadataSource() {
-		PrePostInvocationAttributeFactory attributeFactory = new ExpressionBasedInvocationAttributeFactory();
 		RequestAttributeProvider<MethodInvocation> preProvider = new AbacAnnotationPreRequestAttributeProvider(
 				pdpConfig.requestAttributeFactory());
 		RequestAttributeProvider<MethodInvocation> postProvider = new AbacAnnotationPostRequestAttributeProvider(
 				pdpConfig.requestAttributeFactory());
+		// TODO more provider
 
+		PrePostInvocationAttributeFactory attributeFactory = new ExpressionBasedInvocationAttributeFactory();
 		return new AbacAnnotationMethodSecurityMetadataSource(Arrays.asList(preProvider, postProvider),
 				attributeFactory);
 	}
 
-	@Bean
+	// @Bean
 	protected Collection<RequestAttributePostProcessor<MethodInvocation>> requestAttributePostProcessors() {
 		Collection<RequestAttributePostProcessor<MethodInvocation>> requestAttributePostProcessors = new ArrayList<>();
 		requestAttributePostProcessors.add(new ExpressionBasedRequestAttributePostProcessor(getExpressionHandler(),
@@ -88,7 +90,7 @@ public class AbacMethodSecurityConfiguration extends GlobalMethodSecurityConfigu
 		return requestAttributePostProcessors;
 	}
 
-	@Bean
+	// @Bean
 	public PepClient<MethodInvocation> pepClient() {
 		return new SimplePepClient<>(pdpConfig.pepEngine(), requestAttributePostProcessors());
 	}
