@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PolicySet xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17 http://docs.oasis-open.org/xacml/3.0/xacml-core-v3-schema-wd-17.xsd"
+	PolicySetId="examplePolicySet"
+	PolicyCombiningAlgId="urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:first-applicable"
+	Version="1.0">
+
+	<Description>Example-policy for AbacPostingRepository and
+		AbacUserRepository</Description>
+	<Target />
+
+	<PolicySet PolicySetId="userSaveMethod"
+		PolicyCombiningAlgId="urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:first-applicable"
+		Version="1.0">
+		<Description>PolicySet for AbacUserRepository::Save</Description>
+		<Target>
+			<AnyOf>
+				<AllOf>
+					<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+						<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">USER_SAVE</AttributeValue>
+						<AttributeDesignator AttributeId="actionId"
+							DataType="http://www.w3.org/2001/XMLSchema#string" Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action"
+							MustBePresent="true" />
+					</Match>
+				</AllOf>
+			</AnyOf>
+		</Target>
+		<Policy
+			RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:permit-overrides"
+			PolicyId="userCreate" Version="1.0">
+			<Description>Policy to handle creation attempts</Description>
+			<Target>
+				<AnyOf>
+					<AllOf>
+						<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:boolean-equal">
+							<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#boolean">false
+							</AttributeValue>
+							<AttributeDesignator AttributeId="resource.present"
+								DataType="http://www.w3.org/2001/XMLSchema#boolean"
+								Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+								MustBePresent="true" />
+						</Match>
+					</AllOf>
+				</AnyOf>
+			</Target>
+			<Rule Effect="Permit" RuleId="userCreateAsAnyone">
+				<Description>Anyone can create an user with the role "NORMAL", when the username isn't already assigned</Description>
+				<Condition>
+					<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:any-of-any">
+						<Function FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal" />
+						<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">NORMAL
+						</AttributeValue>
+						<AttributeDesignator AttributeId="resource.role"
+							DataType="http://www.w3.org/2001/XMLSchema#string"
+							Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+							MustBePresent="false" />
+					</Apply>
+				</Condition>
+			</Rule>
+		</Policy>
+	</PolicySet>
+</PolicySet>

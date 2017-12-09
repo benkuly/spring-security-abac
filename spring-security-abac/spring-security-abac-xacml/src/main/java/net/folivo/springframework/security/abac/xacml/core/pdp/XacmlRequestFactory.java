@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.att.research.xacml.api.DataTypeException;
+import org.springframework.util.ReflectionUtils;
+
 import com.att.research.xacml.api.Identifier;
 import com.att.research.xacml.api.Request;
 import com.att.research.xacml.api.XACML3;
@@ -32,9 +33,8 @@ public class XacmlRequestFactory implements RequestFactory<Request> {
 			// TODO maybe set issuer for cloud applications
 			try {
 				RequestParser.addAttribute(attributes, findCategory(r.getCategory()), new IdentifierImpl(r.getId()),
-						false, datatype, null, null, RequestAttribute.class.getField("value"), r);
-			} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException
-					| DataTypeException e) {
+						false, datatype, null, null, ReflectionUtils.findField(r.getClass(), "value"), r);
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

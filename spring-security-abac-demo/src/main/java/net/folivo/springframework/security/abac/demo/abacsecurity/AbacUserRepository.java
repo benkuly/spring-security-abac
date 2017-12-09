@@ -16,20 +16,21 @@ import net.folivo.springframework.security.abac.prepost.AttributeMapping;
 public interface AbacUserRepository extends UserRepository {
 
 	@AbacPreAuthorize(//
-			actionAttributes = { @AttributeMapping(id = "action", value = "'SAVE_USER'") }, //
-			resourceAttributes = { @AttributeMapping(id = "resource", value = "#entity") })
+			actionAttributes = { @AttributeMapping(id = "actionId", value = "'USER_SAVE'") }, //
+			resourceAttributes = { @AttributeMapping(id = "resource.role", value = "#entity.role"),
+					@AttributeMapping(id = "resource.present", value = "@UserRepository.findByIdInternal(#entity.id).isPresent()") })
 	@Override
 	<S extends User> S save(@Param("entity") S entity);
 
 	// TODO evalutate advice
 	@AbacPreAuthorize(//
-			actionAttributes = { @AttributeMapping(id = "action", value = "'GET_USER'") }, //
+			actionAttributes = { @AttributeMapping(id = "actionId", value = "'USER_GET'") }, //
 			resourceAttributes = { @AttributeMapping(id = "resource.id", value = "#id") })
 	@Override
 	Optional<User> findById(Long id);
 
 	@AbacPreAuthorize(//
-			actionAttributes = { @AttributeMapping(id = "action", value = "'DELETE_USER'") }, //
+			actionAttributes = { @AttributeMapping(id = "actionId", value = "'USER_DELETE'") }, //
 			resourceAttributes = { @AttributeMapping(id = "resource.id", value = "#id") })
 	@Override
 	void deleteById(Long id);
