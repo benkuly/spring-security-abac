@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import net.folivo.springframework.security.abac.demo.config.AuthenticationUtil;
 import net.folivo.springframework.security.abac.demo.config.WebSecurityConfig;
 import net.folivo.springframework.security.abac.demo.entities.Posting;
 import net.folivo.springframework.security.abac.demo.entities.User;

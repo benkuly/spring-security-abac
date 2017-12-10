@@ -2,7 +2,7 @@
 <PolicySet xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17 http://docs.oasis-open.org/xacml/3.0/xacml-core-v3-schema-wd-17.xsd"
-	PolicySetId="examplePolicySet"
+	PolicySetId="demo"
 	PolicyCombiningAlgId="urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:first-applicable"
 	Version="1.0">
 
@@ -10,7 +10,7 @@
 		AbacUserRepository</Description>
 	<Target />
 
-	<PolicySet PolicySetId="userSaveMethod"
+	<PolicySet PolicySetId="demo.user.save"
 		PolicyCombiningAlgId="urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:first-applicable"
 		Version="1.0">
 		<Description>PolicySet for AbacUserRepository::Save</Description>
@@ -27,15 +27,34 @@
 			</AnyOf>
 		</Target>
 		<Policy
-			RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:permit-overrides"
-			PolicyId="userCreate" Version="1.0">
+			RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
+			PolicyId="demo.user.save.asAdmin" Version="1.0">
+			<Description>ADMIN can save everything </Description>
+			<Target>
+				<AnyOf>
+					<AllOf>
+						<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+							<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">ADMIN
+							</AttributeValue>
+							<AttributeDesignator AttributeId="role"
+								DataType="http://www.w3.org/2001/XMLSchema#string"
+								Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+								MustBePresent="true" />
+						</Match>
+					</AllOf>
+				</AnyOf>
+			</Target>
+			<Rule Effect="Permit" RuleId="demo.user.save.asAdmin.everything"></Rule>
+		</Policy>
+		<Policy
+			RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-unless-permit"
+			PolicyId="demo.user.save.create" Version="1.0">
 			<Description>Policy to handle creation attempts</Description>
 			<Target>
 				<AnyOf>
 					<AllOf>
 						<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:boolean-equal">
-							<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#boolean">false
-							</AttributeValue>
+							<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#boolean">false</AttributeValue>
 							<AttributeDesignator AttributeId="resource.present"
 								DataType="http://www.w3.org/2001/XMLSchema#boolean"
 								Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
@@ -44,17 +63,64 @@
 					</AllOf>
 				</AnyOf>
 			</Target>
-			<Rule Effect="Permit" RuleId="userCreateAsAnyone">
-				<Description>Anyone can create an user with the role "NORMAL", when the username isn't already assigned</Description>
+			<Rule Effect="Permit" RuleId="demo.user.save.create.anyNormal">
+				<Description>every user can create a NORMAL user</Description>
 				<Condition>
-					<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:any-of-any">
+					<Apply FunctionId="urn:oasis:names:tc:xacml:3.0:function:any-of">
 						<Function FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal" />
 						<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">NORMAL
 						</AttributeValue>
 						<AttributeDesignator AttributeId="resource.role"
 							DataType="http://www.w3.org/2001/XMLSchema#string"
 							Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
-							MustBePresent="false" />
+							MustBePresent="true" />
+					</Apply>
+				</Condition>
+			</Rule>
+		</Policy>
+		<Policy
+			RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-unless-permit"
+			PolicyId="demo.user.save.save" Version="1.0">
+			<Description>Policy to handle save attempts</Description>
+			<Target>
+				<AnyOf>
+					<AllOf>
+						<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:boolean-equal">
+							<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#boolean">true</AttributeValue>
+							<AttributeDesignator AttributeId="resource.present"
+								DataType="http://www.w3.org/2001/XMLSchema#boolean"
+								Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+								MustBePresent="true" />
+						</Match>
+					</AllOf>
+				</AnyOf>
+			</Target>
+			<Rule Effect="Permit" RuleId="demo.user.save.save.normalSelf">
+				<Description>a NORMAL user can't change some attributes (not role or username)</Description>
+				<Condition>
+					<Apply FunctionId="">
+						<Apply FunctionId="urn:oasis:names:tc:xacml:3.0:function:and">
+							<Function FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal" />
+							<AttributeDesignator AttributeId="username"
+								DataType="http://www.w3.org/2001/XMLSchema#string"
+								Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+								MustBePresent="true" />
+							<AttributeDesignator AttributeId="resource.username"
+								DataType="http://www.w3.org/2001/XMLSchema#string"
+								Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+								MustBePresent="true" />
+						</Apply>
+						<Apply FunctionId="urn:oasis:names:tc:xacml:3.0:function:any-of-any">
+							<Function FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal" />
+							<AttributeDesignator AttributeId="role"
+								DataType="http://www.w3.org/2001/XMLSchema#string"
+								Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+								MustBePresent="true" />
+							<AttributeDesignator AttributeId="resource.role"
+								DataType="http://www.w3.org/2001/XMLSchema#string"
+								Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+								MustBePresent="true" />
+						</Apply>
 					</Apply>
 				</Condition>
 			</Rule>

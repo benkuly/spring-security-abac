@@ -29,7 +29,7 @@ public class ExpressionBasedRequestAttributePostProcessor
 
 	@Override
 	public boolean supportsValue(Class<?> clazz) {
-		return Expression.class.equals(clazz);
+		return Expression.class.isAssignableFrom(clazz);
 	}
 
 	@Override

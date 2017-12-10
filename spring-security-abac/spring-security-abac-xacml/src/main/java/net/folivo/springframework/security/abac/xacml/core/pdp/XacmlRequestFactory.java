@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.util.ReflectionUtils;
 
 import com.att.research.xacml.api.Identifier;
@@ -20,6 +22,8 @@ import net.folivo.springframework.security.abac.pdp.RequestFactory;
 
 public class XacmlRequestFactory implements RequestFactory<Request> {
 
+	private static final Log log = LogFactory.getLog(XacmlRequestFactory.class);
+
 	// TODO throw exception when build didn't work
 	@Override
 	public Request build(Collection<RequestAttribute> requestAttrs) {
@@ -27,6 +31,7 @@ public class XacmlRequestFactory implements RequestFactory<Request> {
 		// TODO bad way to use the field when you already know how to get the value
 		List<StdMutableRequestAttributes> attributes = new ArrayList<>();
 		for (RequestAttribute r : requestAttrs) {
+			log.debug(r);
 			String datatype = "auto".equals(r.getDatatype()) ? null : r.getDatatype();
 
 			// TODO maybe use identifier base from configuration?
@@ -39,11 +44,8 @@ public class XacmlRequestFactory implements RequestFactory<Request> {
 				e.printStackTrace();
 			}
 		}
-
 		StdMutableRequest request = new StdMutableRequest();
-		for (StdMutableRequestAttributes a : attributes) {
-			request.add(a);
-		}
+		attributes.stream().forEach(request::add);
 		return request;
 	}
 
@@ -56,7 +58,7 @@ public class XacmlRequestFactory implements RequestFactory<Request> {
 		case ACTION:
 			return XACML3.ID_ATTRIBUTE_CATEGORY_ACTION;
 		case ENVIRONMENT:
-			// TODO maybe throw exception
+			// TODO maybe throw exception for default
 		default:
 			return XACML3.ID_ATTRIBUTE_CATEGORY_ENVIRONMENT;
 		}

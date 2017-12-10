@@ -28,7 +28,7 @@ public class XacmlPdpConfiguration implements PdpConfiguration<Request, Response
 	public PDPEngine getPdpEngine() {
 		Properties props = new Properties();
 		props.setProperty(XACMLProperties.PROP_ROOTPOLICIES, "policy");
-		props.setProperty("policy.file", "src/main/resources/XACML/policy.xml");
+		props.setProperty("policy.file", "src/main/resources/xacml/policy.xml");
 		try {
 			return PDPEngineFactory.newInstance().newEngine(props);
 		} catch (FactoryException e) {

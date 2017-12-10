@@ -17,8 +17,9 @@ public interface AbacUserRepository extends UserRepository {
 
 	@AbacPreAuthorize(//
 			actionAttributes = { @AttributeMapping(id = "actionId", value = "'USER_SAVE'") }, //
-			resourceAttributes = { @AttributeMapping(id = "resource.role", value = "#entity.role"),
-					@AttributeMapping(id = "resource.present", value = "@UserRepository.findByIdInternal(#entity.id).isPresent()") })
+			resourceAttributes = { @AttributeMapping(id = "resource.role", value = "#entity.role"), //
+					@AttributeMapping(id = "resource.username", value = "#entity.username"), //
+					@AttributeMapping(id = "resource.present", value = "@abacUserRepository.findByIdInternal(#entity.id).isPresent()"), })
 	@Override
 	<S extends User> S save(@Param("entity") S entity);
 

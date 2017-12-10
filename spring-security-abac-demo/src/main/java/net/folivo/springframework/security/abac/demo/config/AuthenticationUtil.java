@@ -1,4 +1,4 @@
-package net.folivo.springframework.security.abac.demo.stdsecurity;
+package net.folivo.springframework.security.abac.demo.config;
 
 import java.util.Optional;
 
@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import net.folivo.springframework.security.abac.demo.entities.User;
+import net.folivo.springframework.security.abac.demo.stdsecurity.StdUserRepository;
 
 @Profile("stdSecurity")
 @Component

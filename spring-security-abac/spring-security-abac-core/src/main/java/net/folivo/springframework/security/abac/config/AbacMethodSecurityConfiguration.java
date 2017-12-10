@@ -1,12 +1,12 @@
 package net.folivo.springframework.security.abac.config;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.AccessDecisionVoter;
@@ -20,6 +20,7 @@ import org.springframework.security.access.prepost.PreInvocationAuthorizationAdv
 import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 
+import net.folivo.springframework.security.abac.pdp.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.pep.PepClient;
 import net.folivo.springframework.security.abac.pep.RequestAttributePostProcessor;
 import net.folivo.springframework.security.abac.pep.RequestAttributeProvider;
@@ -31,6 +32,7 @@ import net.folivo.springframework.security.abac.prepost.AbacPostInvoacationAdvic
 import net.folivo.springframework.security.abac.prepost.AbacPreInvoacationAdvice;
 import net.folivo.springframework.security.abac.prepost.PrePostInvocationAttributeFactory;
 import net.folivo.springframework.security.abac.prepost.expression.ExpressionBasedInvocationAttributeFactory;
+import net.folivo.springframework.security.abac.prepost.expression.ExpressionBasedRequestAttributeFactory;
 import net.folivo.springframework.security.abac.prepost.expression.ExpressionBasedRequestAttributePostProcessor;
 
 //this is only a workaround solution because standalone method security is so weired
@@ -71,18 +73,29 @@ public class AbacMethodSecurityConfiguration extends GlobalMethodSecurityConfigu
 
 	@Override
 	public MethodSecurityMetadataSource methodSecurityMetadataSource() {
-		RequestAttributeProvider<MethodInvocation> preProvider = new AbacAnnotationPreRequestAttributeProvider(
-				pdpConfig.requestAttributeFactory());
-		RequestAttributeProvider<MethodInvocation> postProvider = new AbacAnnotationPostRequestAttributeProvider(
-				pdpConfig.requestAttributeFactory());
-		// TODO more provider
-
 		PrePostInvocationAttributeFactory attributeFactory = new ExpressionBasedInvocationAttributeFactory();
-		return new AbacAnnotationMethodSecurityMetadataSource(Arrays.asList(preProvider, postProvider),
-				attributeFactory);
+		return new AbacAnnotationMethodSecurityMetadataSource(requestAttributeProvider(), attributeFactory);
 	}
 
-	// @Bean
+	@Bean
+	public RequestAttributeFactory requestAttributeFactory() {
+		return new ExpressionBasedRequestAttributeFactory(pdpConfig.requestAttributeFactory(), getExpressionHandler());
+	}
+
+	@Bean
+	public List<RequestAttributeProvider<MethodInvocation>> requestAttributeProvider() {
+		RequestAttributeProvider<MethodInvocation> preProvider = new AbacAnnotationPreRequestAttributeProvider(
+				requestAttributeFactory());
+		RequestAttributeProvider<MethodInvocation> postProvider = new AbacAnnotationPostRequestAttributeProvider(
+				requestAttributeFactory());
+		List<RequestAttributeProvider<MethodInvocation>> providers = new ArrayList<>();
+		providers.add(preProvider);
+		providers.add(postProvider);
+		// TODO more provider
+		return providers;
+	}
+
+	@Bean
 	protected Collection<RequestAttributePostProcessor<MethodInvocation>> requestAttributePostProcessors() {
 		Collection<RequestAttributePostProcessor<MethodInvocation>> requestAttributePostProcessors = new ArrayList<>();
 		requestAttributePostProcessors.add(new ExpressionBasedRequestAttributePostProcessor(getExpressionHandler(),
@@ -90,7 +103,7 @@ public class AbacMethodSecurityConfiguration extends GlobalMethodSecurityConfigu
 		return requestAttributePostProcessors;
 	}
 
-	// @Bean
+	@Bean
 	public PepClient<MethodInvocation> pepClient() {
 		return new SimplePepClient<>(pdpConfig.pepEngine(), requestAttributePostProcessors());
 	}

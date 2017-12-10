@@ -15,7 +15,7 @@ public class XacmlPdpClient implements PdpClient<Request, Response> {
 		this.engine = engine;
 	}
 
-	// TODO should throw exception!
+	// TODO should throw a in core defined exception!
 	@Override
 	public Response decide(Request request) {
 		Response response = null;
