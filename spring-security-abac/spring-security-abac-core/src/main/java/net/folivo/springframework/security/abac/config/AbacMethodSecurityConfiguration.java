@@ -2,12 +2,14 @@ package net.folivo.springframework.security.abac.config;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.AfterInvocationProvider;
@@ -20,20 +22,22 @@ import org.springframework.security.access.prepost.PreInvocationAuthorizationAdv
 import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 
-import net.folivo.springframework.security.abac.pdp.RequestAttributeFactory;
+import net.folivo.springframework.security.abac.method.AbacAnnotationMethodSecurityMetadataSource;
+import net.folivo.springframework.security.abac.method.AbacAnnotationPostRequestAttributeProvider;
+import net.folivo.springframework.security.abac.method.AbacAnnotationPreRequestAttributeProvider;
+import net.folivo.springframework.security.abac.method.AbacPostInvoacationAdvice;
+import net.folivo.springframework.security.abac.method.AbacPreInvoacationAdvice;
+import net.folivo.springframework.security.abac.method.expression.ExpressionBasedRequestAttributePostProcessor;
+import net.folivo.springframework.security.abac.method.expression.ExpressionBasedRequestAttributePreProcessor;
 import net.folivo.springframework.security.abac.pep.PepClient;
+import net.folivo.springframework.security.abac.pep.PostProcessingPepClient;
+import net.folivo.springframework.security.abac.pep.PreProcessingProviderCollector;
+import net.folivo.springframework.security.abac.pep.ProviderCollector;
 import net.folivo.springframework.security.abac.pep.RequestAttributePostProcessor;
+import net.folivo.springframework.security.abac.pep.RequestAttributePreProcessor;
 import net.folivo.springframework.security.abac.pep.RequestAttributeProvider;
-import net.folivo.springframework.security.abac.pep.SimplePepClient;
-import net.folivo.springframework.security.abac.prepost.AbacAnnotationMethodSecurityMetadataSource;
-import net.folivo.springframework.security.abac.prepost.AbacAnnotationPostRequestAttributeProvider;
-import net.folivo.springframework.security.abac.prepost.AbacAnnotationPreRequestAttributeProvider;
-import net.folivo.springframework.security.abac.prepost.AbacPostInvoacationAdvice;
-import net.folivo.springframework.security.abac.prepost.AbacPreInvoacationAdvice;
-import net.folivo.springframework.security.abac.prepost.PrePostInvocationAttributeFactory;
-import net.folivo.springframework.security.abac.prepost.expression.ExpressionBasedInvocationAttributeFactory;
-import net.folivo.springframework.security.abac.prepost.expression.ExpressionBasedRequestAttributeFactory;
-import net.folivo.springframework.security.abac.prepost.expression.ExpressionBasedRequestAttributePostProcessor;
+import net.folivo.springframework.security.abac.prepost.AbacPostInvocationConfigAttributeFactory;
+import net.folivo.springframework.security.abac.prepost.AbacPreInvocationConfigAttributeFactory;
 
 //this is only a workaround solution because standalone method security is so weired
 @Configuration
@@ -73,39 +77,66 @@ public class AbacMethodSecurityConfiguration extends GlobalMethodSecurityConfigu
 
 	@Override
 	public MethodSecurityMetadataSource methodSecurityMetadataSource() {
-		PrePostInvocationAttributeFactory attributeFactory = new ExpressionBasedInvocationAttributeFactory();
-		return new AbacAnnotationMethodSecurityMetadataSource(requestAttributeProvider(), attributeFactory);
+		return new AbacAnnotationMethodSecurityMetadataSource(configAttributeCollectors());
 	}
 
 	@Bean
-	public RequestAttributeFactory requestAttributeFactory() {
-		return new ExpressionBasedRequestAttributeFactory(pdpConfig.requestAttributeFactory(), getExpressionHandler());
+	protected Collection<ProviderCollector<MethodInvocation>> configAttributeCollectors() {
+		Collection<ProviderCollector<MethodInvocation>> collectors = new ArrayList<>();
+		ProviderCollector<MethodInvocation> preCollector = new PreProcessingProviderCollector<>(
+				requestAttributePreInvocationProvider(), requestAttributePreProcessors(),
+				new AbacPreInvocationConfigAttributeFactory());
+		ProviderCollector<MethodInvocation> postCollector = new PreProcessingProviderCollector<>(
+				requestAttributePostInvocationProvider(), requestAttributePreProcessors(),
+				new AbacPostInvocationConfigAttributeFactory());
+		collectors.add(preCollector);
+		collectors.add(postCollector);
+		return collectors;
+
 	}
 
 	@Bean
-	public List<RequestAttributeProvider<MethodInvocation>> requestAttributeProvider() {
-		RequestAttributeProvider<MethodInvocation> preProvider = new AbacAnnotationPreRequestAttributeProvider(
-				requestAttributeFactory());
-		RequestAttributeProvider<MethodInvocation> postProvider = new AbacAnnotationPostRequestAttributeProvider(
-				requestAttributeFactory());
+	protected Collection<RequestAttributeProvider<MethodInvocation>> staticRequestAttributeProvider() {
+		return Collections.emptyList();
+	}
+
+	@Bean
+	protected List<RequestAttributeProvider<MethodInvocation>> requestAttributePreInvocationProvider() {
 		List<RequestAttributeProvider<MethodInvocation>> providers = new ArrayList<>();
-		providers.add(preProvider);
-		providers.add(postProvider);
-		// TODO more provider
+		providers.add(new AbacAnnotationPreRequestAttributeProvider(pdpConfig.requestAttributeFactory()));
+		providers.addAll(staticRequestAttributeProvider());
+		AnnotationAwareOrderComparator.sort(providers);
 		return providers;
 	}
 
 	@Bean
-	protected Collection<RequestAttributePostProcessor<MethodInvocation>> requestAttributePostProcessors() {
-		Collection<RequestAttributePostProcessor<MethodInvocation>> requestAttributePostProcessors = new ArrayList<>();
-		requestAttributePostProcessors.add(new ExpressionBasedRequestAttributePostProcessor(getExpressionHandler(),
-				pdpConfig.requestAttributeFactory()));
-		return requestAttributePostProcessors;
+	protected List<RequestAttributeProvider<MethodInvocation>> requestAttributePostInvocationProvider() {
+		List<RequestAttributeProvider<MethodInvocation>> providers = new ArrayList<>();
+		providers.add(new AbacAnnotationPostRequestAttributeProvider(pdpConfig.requestAttributeFactory()));
+		providers.addAll(staticRequestAttributeProvider());
+		AnnotationAwareOrderComparator.sort(providers);
+		return providers;
+	}
+
+	@Bean
+	protected List<RequestAttributePreProcessor<MethodInvocation>> requestAttributePreProcessors() {
+		List<RequestAttributePreProcessor<MethodInvocation>> processors = new ArrayList<>();
+		processors.add(new ExpressionBasedRequestAttributePreProcessor(getExpressionHandler()));
+		AnnotationAwareOrderComparator.sort(processors);
+		return processors;
+	}
+
+	@Bean
+	protected List<RequestAttributePostProcessor<MethodInvocation>> requestAttributePostProcessors() {
+		List<RequestAttributePostProcessor<MethodInvocation>> processors = new ArrayList<>();
+		processors.add(new ExpressionBasedRequestAttributePostProcessor(getExpressionHandler()));
+		AnnotationAwareOrderComparator.sort(processors);
+		return processors;
 	}
 
 	@Bean
 	public PepClient<MethodInvocation> pepClient() {
-		return new SimplePepClient<>(pdpConfig.pepEngine(), requestAttributePostProcessors());
+		return new PostProcessingPepClient<>(pdpConfig.pepEngine(), requestAttributePostProcessors());
 	}
 
 }

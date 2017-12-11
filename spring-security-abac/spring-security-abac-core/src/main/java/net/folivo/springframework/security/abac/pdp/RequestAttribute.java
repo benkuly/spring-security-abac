@@ -10,4 +10,6 @@ public interface RequestAttribute {
 
 	public Object getValue();
 
+	public void setValue(Object value);
+
 }

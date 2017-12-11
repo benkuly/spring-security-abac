@@ -1,4 +1,4 @@
-package net.folivo.springframework.security.abac.prepost;
+package net.folivo.springframework.security.abac.method;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.security.access.prepost.PreInvocationAttribute;
@@ -6,6 +6,7 @@ import org.springframework.security.access.prepost.PreInvocationAuthorizationAdv
 import org.springframework.security.core.Authentication;
 
 import net.folivo.springframework.security.abac.pep.PepClient;
+import net.folivo.springframework.security.abac.prepost.AbacPreInvocationAttribute;
 
 public class AbacPreInvoacationAdvice implements PreInvocationAuthorizationAdvice {
 

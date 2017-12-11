@@ -5,8 +5,9 @@ import java.util.Collection;
 import org.springframework.security.access.prepost.PostInvocationAttribute;
 
 import net.folivo.springframework.security.abac.pdp.RequestAttribute;
+import net.folivo.springframework.security.abac.pep.RequestAttributesHolder;
 
-public class AbacPostInvocationAttribute extends RequestAttributeHolder implements PostInvocationAttribute {
+public class AbacPostInvocationAttribute extends RequestAttributesHolder implements PostInvocationAttribute {
 
 	public AbacPostInvocationAttribute(Collection<RequestAttribute> attributes) {
 		super(attributes);

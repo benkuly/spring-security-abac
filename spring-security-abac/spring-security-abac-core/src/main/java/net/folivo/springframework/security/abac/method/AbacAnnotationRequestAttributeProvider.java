@@ -1,8 +1,9 @@
-package net.folivo.springframework.security.abac.prepost;
+package net.folivo.springframework.security.abac.method;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.aopalliance.intercept.MethodInvocation;
@@ -15,6 +16,7 @@ import net.folivo.springframework.security.abac.pdp.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.pep.RequestAttributeProvider;
 
 //TODO implements aop needed?
+//TODO caching
 public abstract class AbacAnnotationRequestAttributeProvider
 		implements RequestAttributeProvider<MethodInvocation>, AopInfrastructureBean {
 
@@ -37,6 +39,11 @@ public abstract class AbacAnnotationRequestAttributeProvider
 	// TODO a bit copy paste from AbstractMethodSecurityMetadataSource
 	@Override
 	public Collection<RequestAttribute> getAttributes(MethodInvocation mi) {
+		// TODO why? it's from prepost source
+		if (mi.getMethod().getDeclaringClass() == Object.class) {
+			return Collections.emptyList();
+		}
+
 		Object target = mi.getThis();
 		Class<?> targetClass = null;
 

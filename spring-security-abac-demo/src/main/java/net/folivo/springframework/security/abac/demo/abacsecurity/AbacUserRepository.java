@@ -8,18 +8,18 @@ import org.springframework.stereotype.Repository;
 
 import net.folivo.springframework.security.abac.demo.entities.User;
 import net.folivo.springframework.security.abac.demo.entities.UserRepository;
-import net.folivo.springframework.security.abac.prepost.AbacPreAuthorize;
-import net.folivo.springframework.security.abac.prepost.AttributeMapping;
+import net.folivo.springframework.security.abac.method.AbacPreAuthorize;
+import net.folivo.springframework.security.abac.method.AttributeMapping;
 
 @Profile("abacSecurity")
 @Repository
 public interface AbacUserRepository extends UserRepository {
 
 	@AbacPreAuthorize(//
-			actionAttributes = { @AttributeMapping(id = "actionId", value = "'USER_SAVE'") }, //
-			resourceAttributes = { @AttributeMapping(id = "resource.role", value = "#entity.role"), //
-					@AttributeMapping(id = "resource.username", value = "#entity.username"), //
-					@AttributeMapping(id = "resource.present", value = "@abacUserRepository.findByIdInternal(#entity.id).isPresent()"), })
+			actionAttributes = { @AttributeMapping(id = "actionId", value = "USER_SAVE") }, //
+			resourceAttributes = { @AttributeMapping(id = "resource.role", value = "${#entity.role}"), //
+					@AttributeMapping(id = "resource.username", value = "${#entity.username}"), //
+					@AttributeMapping(id = "resource.present", value = "${@abacUserRepository.findByIdInternal(#entity.id).isPresent()}"), })
 	@Override
 	<S extends User> S save(@Param("entity") S entity);
 

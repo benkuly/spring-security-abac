@@ -1,4 +1,4 @@
-package net.folivo.springframework.security.abac.prepost.expression;
+package net.folivo.springframework.security.abac.method.expression;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -11,7 +11,6 @@ import org.springframework.security.access.expression.method.MethodSecurityExpre
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import net.folivo.springframework.security.abac.pdp.RequestAttribute;
-import net.folivo.springframework.security.abac.pdp.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.pep.RequestAttributePostProcessor;
 
 //TODO implements aop needed?
@@ -19,12 +18,9 @@ public class ExpressionBasedRequestAttributePostProcessor
 		implements RequestAttributePostProcessor<MethodInvocation>, AopInfrastructureBean {
 
 	private final MethodSecurityExpressionHandler expressionHandler;
-	private final RequestAttributeFactory requestAttributeFactory;
 
-	public ExpressionBasedRequestAttributePostProcessor(MethodSecurityExpressionHandler expressionHandler,
-			RequestAttributeFactory requestAttributeFactory) {
+	public ExpressionBasedRequestAttributePostProcessor(MethodSecurityExpressionHandler expressionHandler) {
 		this.expressionHandler = expressionHandler;
-		this.requestAttributeFactory = requestAttributeFactory;
 	}
 
 	@Override
@@ -37,8 +33,7 @@ public class ExpressionBasedRequestAttributePostProcessor
 		Expression expr = (Expression) attr.getValue();
 		EvaluationContext evaluationContext = expressionHandler
 				.createEvaluationContext(SecurityContextHolder.getContext().getAuthentication(), context);
-
-		return Collections.singleton(requestAttributeFactory.build(attr.getCategory(), attr.getId(), attr.getDatatype(),
-				expr.getValue(evaluationContext)));
+		attr.setValue(expr.getValue(evaluationContext));
+		return Collections.singleton(attr);
 	}
 }

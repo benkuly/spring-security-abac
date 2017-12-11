@@ -1,4 +1,4 @@
-package net.folivo.springframework.security.abac.prepost;
+package net.folivo.springframework.security.abac.method;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

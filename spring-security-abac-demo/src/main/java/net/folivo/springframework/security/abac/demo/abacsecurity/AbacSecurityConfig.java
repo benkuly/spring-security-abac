@@ -2,7 +2,7 @@ package net.folivo.springframework.security.abac.demo.abacsecurity;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.context.annotation.Bean;
@@ -23,17 +23,14 @@ import net.folivo.springframework.security.abac.xacml.core.config.XacmlPdpConfig
 @Import({ XacmlPdpConfiguration.class })
 public class AbacSecurityConfig extends AbacMethodSecurityConfiguration {
 
-	@Bean
 	@Override
-	public List<RequestAttributeProvider<MethodInvocation>> requestAttributeProvider() {
-		List<RequestAttributeProvider<MethodInvocation>> providers = super.requestAttributeProvider();
-		providers.add(subjProvider());
-		return providers;
+	protected Collection<RequestAttributeProvider<MethodInvocation>> staticRequestAttributeProvider() {
+		return Collections.singleton(subjProvider());
 	}
 
 	@Bean
 	public SubjectAttributeProvider subjProvider() {
-		return new SubjectAttributeProvider(requestAttributeFactory());
+		return new SubjectAttributeProvider(pdpConfig.requestAttributeFactory());
 	}
 
 	class SubjectAttributeProvider implements RequestAttributeProvider<MethodInvocation> {

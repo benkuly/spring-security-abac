@@ -3,12 +3,13 @@ package net.folivo.springframework.security.abac.xacml.core.pdp;
 import net.folivo.springframework.security.abac.pdp.AttributeCategory;
 import net.folivo.springframework.security.abac.pdp.RequestAttribute;
 
+//TODO this into core?
 public class XacmlRequestAttribute implements RequestAttribute {
 
 	private final AttributeCategory category;
 	private final String id;
 	private final String datatype;
-	private final Object value;
+	private Object value;
 
 	public XacmlRequestAttribute(AttributeCategory category, String id, String datatype, Object value) {
 		this.category = category;
@@ -38,6 +39,11 @@ public class XacmlRequestAttribute implements RequestAttribute {
 	}
 
 	@Override
+	public void setValue(Object value) {
+		this.value = value;
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder("{");
 		stringBuilder.append("id=");
@@ -62,4 +68,5 @@ public class XacmlRequestAttribute implements RequestAttribute {
 		stringBuilder.append("}");
 		return stringBuilder.toString();
 	}
+
 }

@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository;
 
 import net.folivo.springframework.security.abac.demo.entities.Posting;
 import net.folivo.springframework.security.abac.demo.entities.PostingRepository;
-import net.folivo.springframework.security.abac.prepost.AbacPreAuthorize;
-import net.folivo.springframework.security.abac.prepost.AttributeMapping;
+import net.folivo.springframework.security.abac.method.AbacPreAuthorize;
+import net.folivo.springframework.security.abac.method.AttributeMapping;
 
 @Profile("abacSecurity")
 @Repository

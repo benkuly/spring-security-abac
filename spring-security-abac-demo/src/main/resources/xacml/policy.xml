@@ -34,8 +34,7 @@
 				<AnyOf>
 					<AllOf>
 						<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
-							<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">ADMIN
-							</AttributeValue>
+							<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">ADMIN</AttributeValue>
 							<AttributeDesignator AttributeId="role"
 								DataType="http://www.w3.org/2001/XMLSchema#string"
 								Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
@@ -68,8 +67,7 @@
 				<Condition>
 					<Apply FunctionId="urn:oasis:names:tc:xacml:3.0:function:any-of">
 						<Function FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal" />
-						<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">NORMAL
-						</AttributeValue>
+						<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">NORMAL</AttributeValue>
 						<AttributeDesignator AttributeId="resource.role"
 							DataType="http://www.w3.org/2001/XMLSchema#string"
 							Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
