@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import net.folivo.springframework.security.abac.demo.config.WebSecurityConfig;
@@ -79,15 +78,6 @@ public abstract class SimpleSecurityTest {
 		userTest.testEntitySave(true, userWithRole(WebSecurityConfig.ROLE_NORMAL));
 		// create ADMIN
 		userTest.testEntitySave(true, userWithRole(WebSecurityConfig.ROLE_ADMIN));
-	}
-
-	@Test
-	@WithAnonymousUser
-	public void createUserWithId() throws Exception {
-		// try to create a user with specific id
-		User user = userWithRole(WebSecurityConfig.ROLE_NORMAL);
-		ReflectionTestUtils.setField(user, "id", 24L);
-		userTest.testEntitySave(false, user);
 	}
 
 	@Test
@@ -200,15 +190,6 @@ public abstract class SimpleSecurityTest {
 		postingTest.testEntitySave(false, postingWithCreator(userWithUsername("another")));
 		// create posting
 		postingTest.testEntitySave(true, postingWithCreator(userWithUsername("someUser")));
-	}
-
-	@Test
-	@WithMockUser(username = "someUser", roles = { WebSecurityConfig.ROLE_ADMIN })
-	public void createPostingWithId() throws Exception {
-		// try to create a posting with specific id
-		Posting posting = postingWithCreator(userWithUsername("someUser"));
-		ReflectionTestUtils.setField(posting, "id", 24L);
-		postingTest.testEntitySave(false, posting);
 	}
 
 	@Test

@@ -14,11 +14,17 @@ import net.folivo.springframework.security.abac.pep.CollectingSecurityMetadataSo
 import net.folivo.springframework.security.abac.pep.ProviderCollector;
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationAttribute;
 
+//TODO this class is so outrageous ugly
 public class AbacAnnotationMethodSecurityMetadataSource extends CollectingSecurityMetadataSource<MethodInvocation>
 		implements MethodSecurityMetadataSource {
 
-	public AbacAnnotationMethodSecurityMetadataSource(Collection<ProviderCollector<MethodInvocation>> collectors) {
-		super(collectors);
+	private final Collection<ProviderCollector<MethodInvocation>> preCollectors;
+	private final Collection<ProviderCollector<MethodInvocation>> postCollectors;
+
+	public AbacAnnotationMethodSecurityMetadataSource(Collection<ProviderCollector<MethodInvocation>> preCollectors,
+			Collection<ProviderCollector<MethodInvocation>> postCollectors) {
+		this.preCollectors = preCollectors;
+		this.postCollectors = postCollectors;
 	}
 
 	// TODO urgs. why do they need that?
@@ -35,10 +41,20 @@ public class AbacAnnotationMethodSecurityMetadataSource extends CollectingSecuri
 		return null;
 	}
 
+	// is there a better solution?
 	@Override
 	public Collection<ConfigAttribute> getAttributes(Object object) throws IllegalArgumentException {
-		if (object instanceof MethodInvocation)
-			return collectConfigAttributes((MethodInvocation) object);
+		if (object instanceof MethodInvocation) {
+			MethodInvocation context = (MethodInvocation) object;
+			Collection<ConfigAttribute> attrs = new ArrayList<>();
+			if (AbacAnnotationUtil.findAnnotation(context, AbacPreAuthorize.class) != null) {
+				attrs.addAll(collectConfigAttributes(context, preCollectors));
+			}
+			if (AbacAnnotationUtil.findAnnotation(context, AbacPostAuthorize.class) != null) {
+				attrs.addAll(collectConfigAttributes(context, postCollectors));
+			}
+			return attrs;
+		}
 		throw new IllegalArgumentException("Object must be a non-null MethodInvocation");
 	}
 

@@ -31,17 +31,26 @@ public class XacmlRequestFactory implements RequestFactory<Request> {
 		// TODO bad way to use the field when you already know how to get the value
 		List<StdMutableRequestAttributes> attributes = new ArrayList<>();
 		for (RequestAttribute r : requestAttrs) {
-			log.debug(r);
+
 			String datatype = "auto".equals(r.getDatatype()) ? null : r.getDatatype();
 
-			// TODO maybe use identifier base from configuration?
-			// TODO maybe set issuer for cloud applications
-			try {
-				RequestParser.addAttribute(attributes, findCategory(r.getCategory()), new IdentifierImpl(r.getId()),
-						false, datatype, null, null, ReflectionUtils.findField(r.getClass(), "value"), r);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			// TODO this check should not be here
+			if (r.getValue() != null) {
+				log.debug(r);
+				// TODO maybe use identifier base from configuration?
+				// TODO maybe set issuer for cloud applications
+				try {
+					RequestParser.addAttribute(attributes, findCategory(r.getCategory()), new IdentifierImpl(r.getId()),
+							false, datatype, null, null, ReflectionUtils.findField(r.getClass(), "value"), r);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else {
+				// TODO that should really never be happened
+				if (log.isDebugEnabled())
+					log.debug("RequestAttribute with id '" + r.getId()
+							+ "' will not be used in request because its value is null!");
 			}
 		}
 		StdMutableRequest request = new StdMutableRequest();

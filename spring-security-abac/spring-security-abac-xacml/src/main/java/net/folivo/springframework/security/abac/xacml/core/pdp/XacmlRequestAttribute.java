@@ -47,20 +47,22 @@ public class XacmlRequestAttribute implements RequestAttribute {
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder("{");
 		stringBuilder.append("id=");
-		stringBuilder.append(id.toString());
+		stringBuilder.append(id);
 		stringBuilder.append(',');
 
 		stringBuilder.append("category=");
-		stringBuilder.append(category.toString());
+		stringBuilder.append(category);
 		stringBuilder.append(',');
 
 		stringBuilder.append("value=");
-		stringBuilder.append(value.toString());
+		stringBuilder.append(value);
 		stringBuilder.append(',');
 
-		stringBuilder.append("valueClassName=");
-		stringBuilder.append(value.getClass().getSimpleName());
-		stringBuilder.append(',');
+		if (value != null) {
+			stringBuilder.append("valueClassName=");
+			stringBuilder.append(value.getClass().getSimpleName());
+			stringBuilder.append(',');
+		}
 
 		stringBuilder.append("datatype=");
 		stringBuilder.append(datatype.toString());

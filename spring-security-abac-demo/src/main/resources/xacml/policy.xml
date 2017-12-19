@@ -96,8 +96,8 @@
 			<Rule Effect="Permit" RuleId="demo.user.save.save.normalSelf">
 				<Description>a NORMAL user can't change some attributes (not role or username)</Description>
 				<Condition>
-					<Apply FunctionId="">
-						<Apply FunctionId="urn:oasis:names:tc:xacml:3.0:function:and">
+					<Apply FunctionId="urn:oasis:names:tc:xacml:3.0:function:and">
+						<Apply FunctionId="urn:oasis:names:tc:xacml:3.0:function:any-of-any">
 							<Function FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal" />
 							<AttributeDesignator AttributeId="username"
 								DataType="http://www.w3.org/2001/XMLSchema#string"

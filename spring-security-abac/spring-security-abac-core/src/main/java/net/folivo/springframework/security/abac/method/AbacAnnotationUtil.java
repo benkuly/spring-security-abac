@@ -2,11 +2,64 @@ package net.folivo.springframework.security.abac.method;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.function.BiFunction;
 
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ClassUtils;
 
 public class AbacAnnotationUtil {
+
+	// TODO caching
+	// TODO a bit copy paste from AbstractMethodSecurityMetadataSource
+	// TODO better name
+	public static <T> Collection<T> callMethod(MethodInvocation mi,
+			BiFunction<Method, Class<?>, Collection<T>> function) {
+		// TODO why? it's from prepost source
+		if (mi.getMethod().getDeclaringClass() == Object.class) {
+			// TODO logging?
+			return Collections.emptyList();
+		}
+
+		Object target = mi.getThis();
+		Class<?> targetClass = null;
+
+		if (target != null) {
+			targetClass = target instanceof Class<?> ? (Class<?>) target : AopProxyUtils.ultimateTargetClass(target);
+		}
+		Collection<T> attrs = function.apply(mi.getMethod(), targetClass);
+		if (attrs != null && !attrs.isEmpty()) {
+			return attrs;
+		}
+		if (target != null && !(target instanceof Class<?>)) {
+			attrs = function.apply(mi.getMethod(), target.getClass());
+		}
+		return attrs;
+	}
+
+	public static <A extends Annotation> A findAnnotation(MethodInvocation mi, Class<A> annotationClass) {
+		if (mi.getMethod().getDeclaringClass() == Object.class) {
+			return null;
+		}
+
+		Object target = mi.getThis();
+		Class<?> targetClass = null;
+
+		if (target != null) {
+			targetClass = target instanceof Class<?> ? (Class<?>) target : AopProxyUtils.ultimateTargetClass(target);
+		}
+		A annotation = findAnnotation(mi.getMethod(), targetClass, annotationClass);
+		if (annotation != null) {
+			return annotation;
+		}
+		if (target != null && !(target instanceof Class<?>)) {
+			annotation = findAnnotation(mi.getMethod(), target.getClass(), annotationClass);
+		}
+		return annotation;
+	}
 
 	// TODO the following method is copy paste from
 	// org.springframework.security.access.prepost.PrePostAnnotationSecurityMetadataSource

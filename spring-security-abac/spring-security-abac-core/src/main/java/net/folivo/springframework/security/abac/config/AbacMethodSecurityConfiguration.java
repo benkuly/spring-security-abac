@@ -77,22 +77,17 @@ public class AbacMethodSecurityConfiguration extends GlobalMethodSecurityConfigu
 
 	@Override
 	public MethodSecurityMetadataSource methodSecurityMetadataSource() {
-		return new AbacAnnotationMethodSecurityMetadataSource(configAttributeCollectors());
-	}
-
-	@Bean
-	protected Collection<ProviderCollector<MethodInvocation>> configAttributeCollectors() {
-		Collection<ProviderCollector<MethodInvocation>> collectors = new ArrayList<>();
+		Collection<ProviderCollector<MethodInvocation>> preCollectors = new ArrayList<>();
+		Collection<ProviderCollector<MethodInvocation>> postCollectors = new ArrayList<>();
 		ProviderCollector<MethodInvocation> preCollector = new PreProcessingProviderCollector<>(
 				requestAttributePreInvocationProvider(), requestAttributePreProcessors(),
 				new AbacPreInvocationConfigAttributeFactory());
 		ProviderCollector<MethodInvocation> postCollector = new PreProcessingProviderCollector<>(
 				requestAttributePostInvocationProvider(), requestAttributePreProcessors(),
 				new AbacPostInvocationConfigAttributeFactory());
-		collectors.add(preCollector);
-		collectors.add(postCollector);
-		return collectors;
-
+		preCollectors.add(preCollector);
+		postCollectors.add(postCollector);
+		return new AbacAnnotationMethodSecurityMetadataSource(preCollectors, postCollectors);
 	}
 
 	@Bean
