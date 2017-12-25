@@ -20,7 +20,6 @@ public class AbacPreInvoacationAdvice implements PreInvocationAuthorizationAdvic
 	public boolean before(Authentication authentication, MethodInvocation mi,
 			PreInvocationAttribute preInvocationAttribute) {
 		AbacPreInvocationAttribute attr = (AbacPreInvocationAttribute) preInvocationAttribute;
-
 		return pep.buildRequestAndEvaluateToBoolean(attr.getAttributes(), mi);
 	}
 

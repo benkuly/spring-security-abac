@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import net.folivo.springframework.security.abac.demo.entities.User;
 import net.folivo.springframework.security.abac.demo.entities.UserRepository;
+import net.folivo.springframework.security.abac.method.AbacPostAuthorize;
 import net.folivo.springframework.security.abac.method.AbacPreAuthorize;
 import net.folivo.springframework.security.abac.method.AttributeMapping;
 
@@ -23,16 +24,16 @@ public interface AbacUserRepository extends UserRepository {
 	@Override
 	<S extends User> S save(@Param("entity") S entity);
 
-	// TODO evalutate advice
-	@AbacPreAuthorize(//
-			actionAttributes = { @AttributeMapping(id = "actionId", value = "'USER_GET'") }, //
-			resourceAttributes = { @AttributeMapping(id = "resource.id", value = "#id") })
+	@AbacPostAuthorize(//
+			actionAttributes = { @AttributeMapping(id = "actionId", value = "USER_GET") }, //
+			resourceAttributes = { @AttributeMapping(id = "resource.present", value = "${returnObject.isPresent()}"), //
+					@AttributeMapping(id = "resource.username", value = "${returnObject.orElse(null)?.username}") })
 	@Override
 	Optional<User> findById(Long id);
 
 	@AbacPreAuthorize(//
-			actionAttributes = { @AttributeMapping(id = "actionId", value = "'USER_DELETE'") }, //
-			resourceAttributes = { @AttributeMapping(id = "resource.id", value = "#id") })
+			actionAttributes = { @AttributeMapping(id = "actionId", value = "USER_DELETE") }, //
+			resourceAttributes = { @AttributeMapping(id = "resource.id", value = "${#id}") })
 	@Override
 	void deleteById(Long id);
 }

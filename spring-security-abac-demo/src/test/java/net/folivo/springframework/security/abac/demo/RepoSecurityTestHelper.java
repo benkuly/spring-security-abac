@@ -9,7 +9,6 @@ import java.util.Optional;
 
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 class RepoSecurityTestHelper<T> {
@@ -54,10 +53,11 @@ class RepoSecurityTestHelper<T> {
 	}
 
 	public void testEntityGet(boolean allowed, T original) throws Exception {
-		eMa.persistAndFlush(original);
-		boolean methodAllowed = SecurityContextHolder.getContext().getAuthentication().getPrincipal()
-				.equals("anonymous") ? allowed : true;
-		Optional<T> found = testMethodSecurity(methodAllowed, repo, "findById",
+		// eMa.persistAndFlush(original);
+		// boolean methodAllowed =
+		// SecurityContextHolder.getContext().getAuthentication().getPrincipal()
+		// .equals("anonymous") ? allowed : true;
+		Optional<T> found = testMethodSecurity(allowed, repo, "findById",
 				ReflectionTestUtils.getField(eMa.persistAndFlush(original), idFieldName));
 		if (allowed) {
 			assertTrue(found.isPresent());

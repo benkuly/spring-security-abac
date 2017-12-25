@@ -11,9 +11,9 @@ import net.folivo.springframework.security.abac.prepost.AbacPostInvocationAttrib
 
 public class AbacPostInvoacationAdvice implements PostInvocationAuthorizationAdvice {
 
-	private final PepClient<MethodInvocation> pep;
+	private final PepClient<MethodInvocationContext> pep;
 
-	public AbacPostInvoacationAdvice(PepClient<MethodInvocation> pep) {
+	public AbacPostInvoacationAdvice(PepClient<MethodInvocationContext> pep) {
 		this.pep = pep;
 	}
 
@@ -24,7 +24,8 @@ public class AbacPostInvoacationAdvice implements PostInvocationAuthorizationAdv
 
 		// TODO wtf does the ExpressionBasedPostInvocationAdvice. Why he throws an
 		// exception. thats dirty. The AccessDecisionManager should do that.
-		if (pep.buildRequestAndEvaluateToBoolean(attr.getAttributes(), mi))
+		if (!pep.buildRequestAndEvaluateToBoolean(attr.getAttributes(),
+				new MethodInvocationContext(mi, returnedObject)))
 			throw new AccessDeniedException("Access is denied");
 		return returnedObject;
 	}

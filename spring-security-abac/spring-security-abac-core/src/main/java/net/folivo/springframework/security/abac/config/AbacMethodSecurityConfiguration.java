@@ -19,6 +19,7 @@ import org.springframework.security.access.method.MethodSecurityMetadataSource;
 import org.springframework.security.access.prepost.PostInvocationAdviceProvider;
 import org.springframework.security.access.prepost.PostInvocationAuthorizationAdvice;
 import org.springframework.security.access.prepost.PreInvocationAuthorizationAdviceVoter;
+import org.springframework.security.access.vote.AbstractAccessDecisionManager;
 import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 
@@ -27,7 +28,9 @@ import net.folivo.springframework.security.abac.method.AbacAnnotationPostRequest
 import net.folivo.springframework.security.abac.method.AbacAnnotationPreRequestAttributeProvider;
 import net.folivo.springframework.security.abac.method.AbacPostInvoacationAdvice;
 import net.folivo.springframework.security.abac.method.AbacPreInvoacationAdvice;
-import net.folivo.springframework.security.abac.method.expression.ExpressionBasedRequestAttributePostProcessor;
+import net.folivo.springframework.security.abac.method.MethodInvocationContext;
+import net.folivo.springframework.security.abac.method.expression.ExpressionBasedRequestAttributeAfterPostProcessor;
+import net.folivo.springframework.security.abac.method.expression.ExpressionBasedRequestAttributeBeforePostProcessor;
 import net.folivo.springframework.security.abac.method.expression.ExpressionBasedRequestAttributePreProcessor;
 import net.folivo.springframework.security.abac.pep.PepClient;
 import net.folivo.springframework.security.abac.pep.PostProcessingPepClient;
@@ -57,8 +60,11 @@ public class AbacMethodSecurityConfiguration extends GlobalMethodSecurityConfigu
 		// TODO maybe allow multiple voters
 		// e.g. for local and remote pdp's at same time. if local pdp has no idea it can
 		// ask remote pdp.
-		decisionVoters.add(new PreInvocationAuthorizationAdviceVoter(new AbacPreInvoacationAdvice(pepClient())));
-		return new AffirmativeBased(decisionVoters);
+		decisionVoters.add(new PreInvocationAuthorizationAdviceVoter(new AbacPreInvoacationAdvice(prePepClient())));
+		AbstractAccessDecisionManager acdm = new AffirmativeBased(decisionVoters);
+		// TODO bad workaound
+		acdm.setAllowIfAllAbstainDecisions(true);
+		return acdm;
 	}
 
 	@Override
@@ -67,7 +73,7 @@ public class AbacMethodSecurityConfiguration extends GlobalMethodSecurityConfigu
 		// TODO maybe allow multiple voters
 		// e.g. for local and remote pdp's at same time. if local pdp has no idea it can
 		// ask remote pdp.
-		PostInvocationAuthorizationAdvice postAdvice = new AbacPostInvoacationAdvice(pepClient());
+		PostInvocationAuthorizationAdvice postAdvice = new AbacPostInvoacationAdvice(postPepClient());
 		PostInvocationAdviceProvider postInvocationAdviceProvider = new PostInvocationAdviceProvider(postAdvice);
 		List<AfterInvocationProvider> afterInvocationProviders = new ArrayList<>();
 		afterInvocationProviders.add(postInvocationAdviceProvider);
@@ -122,16 +128,29 @@ public class AbacMethodSecurityConfiguration extends GlobalMethodSecurityConfigu
 	}
 
 	@Bean
-	protected List<RequestAttributePostProcessor<MethodInvocation>> requestAttributePostProcessors() {
+	protected List<RequestAttributePostProcessor<MethodInvocation>> requestAttributeBeforePostProcessors() {
 		List<RequestAttributePostProcessor<MethodInvocation>> processors = new ArrayList<>();
-		processors.add(new ExpressionBasedRequestAttributePostProcessor(getExpressionHandler()));
+		processors.add(new ExpressionBasedRequestAttributeBeforePostProcessor(getExpressionHandler()));
 		AnnotationAwareOrderComparator.sort(processors);
 		return processors;
 	}
 
 	@Bean
-	public PepClient<MethodInvocation> pepClient() {
-		return new PostProcessingPepClient<>(pdpConfig.pepEngine(), requestAttributePostProcessors());
+	protected List<RequestAttributePostProcessor<MethodInvocationContext>> requestAttributeAfterPostProcessors() {
+		List<RequestAttributePostProcessor<MethodInvocationContext>> processors = new ArrayList<>();
+		processors.add(new ExpressionBasedRequestAttributeAfterPostProcessor(getExpressionHandler()));
+		AnnotationAwareOrderComparator.sort(processors);
+		return processors;
+	}
+
+	@Bean
+	public PepClient<MethodInvocation> prePepClient() {
+		return new PostProcessingPepClient<>(pdpConfig.pepEngine(), requestAttributeBeforePostProcessors());
+	}
+
+	@Bean
+	public PepClient<MethodInvocationContext> postPepClient() {
+		return new PostProcessingPepClient<>(pdpConfig.pepEngine(), requestAttributeAfterPostProcessors());
 	}
 
 }

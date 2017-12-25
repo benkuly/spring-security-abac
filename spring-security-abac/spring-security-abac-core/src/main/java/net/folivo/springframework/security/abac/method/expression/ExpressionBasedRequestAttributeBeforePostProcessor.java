@@ -14,12 +14,12 @@ import net.folivo.springframework.security.abac.pdp.RequestAttribute;
 import net.folivo.springframework.security.abac.pep.RequestAttributePostProcessor;
 
 //TODO implements aop needed?
-public class ExpressionBasedRequestAttributePostProcessor
+public class ExpressionBasedRequestAttributeBeforePostProcessor
 		implements RequestAttributePostProcessor<MethodInvocation>, AopInfrastructureBean {
 
 	private final MethodSecurityExpressionHandler expressionHandler;
 
-	public ExpressionBasedRequestAttributePostProcessor(MethodSecurityExpressionHandler expressionHandler) {
+	public ExpressionBasedRequestAttributeBeforePostProcessor(MethodSecurityExpressionHandler expressionHandler) {
 		this.expressionHandler = expressionHandler;
 	}
 

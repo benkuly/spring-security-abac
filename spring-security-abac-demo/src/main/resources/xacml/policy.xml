@@ -29,7 +29,7 @@
 		<Policy
 			RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
 			PolicyId="demo.user.save.asAdmin" Version="1.0">
-			<Description>ADMIN can save everything </Description>
+			<Description>ADMIN can save everything</Description>
 			<Target>
 				<AnyOf>
 					<AllOf>
@@ -46,7 +46,7 @@
 			<Rule Effect="Permit" RuleId="demo.user.save.asAdmin.everything"></Rule>
 		</Policy>
 		<Policy
-			RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-unless-permit"
+			RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
 			PolicyId="demo.user.save.create" Version="1.0">
 			<Description>Policy to handle creation attempts</Description>
 			<Target>
@@ -77,7 +77,7 @@
 			</Rule>
 		</Policy>
 		<Policy
-			RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-unless-permit"
+			RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
 			PolicyId="demo.user.save.save" Version="1.0">
 			<Description>Policy to handle save attempts</Description>
 			<Target>
@@ -124,4 +124,102 @@
 			</Rule>
 		</Policy>
 	</PolicySet>
+	<Policy PolicyId="demo.user.delete"
+		RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
+		Version="1.0">
+		<Description>PolicySet for AbacUserRepository::Delete</Description>
+		<Target>
+			<AnyOf>
+				<AllOf>
+					<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+						<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">USER_DELETE
+						</AttributeValue>
+						<AttributeDesignator AttributeId="actionId"
+							DataType="http://www.w3.org/2001/XMLSchema#string" Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action"
+							MustBePresent="true" />
+					</Match>
+				</AllOf>
+			</AnyOf>
+		</Target>
+		<Rule Effect="Permit" RuleId="demo.user.delete.asAdmin">
+			<Description>ADMIN can delete everything</Description>
+			<Target>
+				<AnyOf>
+					<AllOf>
+						<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+							<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">ADMIN</AttributeValue>
+							<AttributeDesignator AttributeId="role"
+								DataType="http://www.w3.org/2001/XMLSchema#string"
+								Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+								MustBePresent="true" />
+						</Match>
+					</AllOf>
+				</AnyOf>
+			</Target>
+		</Rule>
+		<Rule Effect="Deny" RuleId="demo.user.delete.asAnyone"></Rule>
+	</Policy>
+	<Policy PolicyId="demo.user.get"
+		RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
+		Version="1.0">
+		<Description>PolicySet for AbacUserRepository::Get</Description>
+		<Target>
+			<AnyOf>
+				<AllOf>
+					<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+						<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">USER_GET</AttributeValue>
+						<AttributeDesignator AttributeId="actionId"
+							DataType="http://www.w3.org/2001/XMLSchema#string" Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action"
+							MustBePresent="true" />
+					</Match>
+				</AllOf>
+			</AnyOf>
+		</Target>
+		<Rule Effect="Permit" RuleId="demo.user.get.asAdmin">
+			<Description>ADMIN can get everything</Description>
+			<Target>
+				<AnyOf>
+					<AllOf>
+						<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+							<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">ADMIN</AttributeValue>
+							<AttributeDesignator AttributeId="role"
+								DataType="http://www.w3.org/2001/XMLSchema#string"
+								Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+								MustBePresent="true" />
+						</Match>
+					</AllOf>
+				</AnyOf>
+			</Target>
+		</Rule>
+		<Rule Effect="Permit" RuleId="demo.user.get.isSame">
+			<Description>someone can get himself</Description>
+			<Target>
+				<AnyOf>
+					<AllOf>
+						<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:boolean-equal">
+							<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#boolean">true</AttributeValue>
+							<AttributeDesignator AttributeId="resource.present"
+								DataType="http://www.w3.org/2001/XMLSchema#boolean"
+								Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+								MustBePresent="true" />
+						</Match>
+					</AllOf>
+				</AnyOf>
+			</Target>
+			<Condition>
+				<Apply FunctionId="urn:oasis:names:tc:xacml:3.0:function:any-of-any">
+					<Function FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal" />
+					<AttributeDesignator AttributeId="username"
+						DataType="http://www.w3.org/2001/XMLSchema#string"
+						Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+						MustBePresent="true" />
+					<AttributeDesignator AttributeId="resource.username"
+						DataType="http://www.w3.org/2001/XMLSchema#string"
+						Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+						MustBePresent="true" />
+				</Apply>
+			</Condition>
+		</Rule>
+		<Rule Effect="Deny" RuleId="demo.user.get.notSame"></Rule>
+	</Policy>
 </PolicySet>
