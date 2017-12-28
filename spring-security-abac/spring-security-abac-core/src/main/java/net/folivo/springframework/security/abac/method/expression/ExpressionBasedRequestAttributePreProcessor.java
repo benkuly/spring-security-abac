@@ -24,17 +24,21 @@ public class ExpressionBasedRequestAttributePreProcessor
 	}
 
 	@Override
-	public boolean supportsValue(Class<?> clazz) {
-		return String.class.isAssignableFrom(clazz);
+	public boolean supports(RequestAttribute a) {
+		// TODO null check?
+		if (String.class.isAssignableFrom(a.getValue().getClass())) {
+			String value = (String) a.getValue();
+			if (value.startsWith("${") && value.endsWith("}"))
+				return true;
+		}
+		return false;
 	}
 
 	@Override
 	public Collection<RequestAttribute> process(RequestAttribute attr, MethodInvocation context) {
 		String value = (String) attr.getValue();
-		if (value.startsWith("${") && value.endsWith("}")) {
-			String expressionString = value.substring(2, value.length() - 1);
-			attr.setValue(getParser().parseExpression(expressionString));
-		}
+		String expressionString = value.substring(2, value.length() - 1);
+		attr.setValue(getParser().parseExpression(expressionString));
 		return Collections.singleton(attr);
 	}
 

@@ -31,7 +31,7 @@ public class PostProcessingPepClient<T> implements PepClient<T> {
 							+ "' will not be postprocessed because its value is null!");
 				return false;
 			}
-			return p.supportsValue(a.getValue().getClass());
+			return p.supports(a);
 		}).findFirst().map(p -> p.process(a, context)).orElse(Collections.singleton(a)).stream())
 				.collect(Collectors.toList());
 	}

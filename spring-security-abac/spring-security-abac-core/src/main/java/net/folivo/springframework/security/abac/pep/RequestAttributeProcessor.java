@@ -6,7 +6,7 @@ import net.folivo.springframework.security.abac.pdp.RequestAttribute;
 
 public interface RequestAttributeProcessor<T> {
 
-	boolean supportsValue(Class<?> clazz);
+	boolean supports(RequestAttribute attr);
 
 	Collection<RequestAttribute> process(RequestAttribute attr, T context);
 

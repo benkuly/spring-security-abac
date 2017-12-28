@@ -52,7 +52,7 @@ public class PreProcessingProviderCollector<T> implements ProviderCollector<T> {
 							+ "' will not be preprocessed because its value is null!");
 				return false;
 			}
-			return p.supportsValue(a.getValue().getClass());
+			return p.supports(a);
 		}).findFirst().map(p -> p.process(a, context)).orElse(Collections.singleton(a)).stream())
 				.collect(Collectors.toList());
 	}

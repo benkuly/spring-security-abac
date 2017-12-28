@@ -1,17 +1,13 @@
-package net.folivo.springframework.security.abac.xacml.core.pdp;
+package net.folivo.springframework.security.abac.pdp;
 
-import net.folivo.springframework.security.abac.pdp.AttributeCategory;
-import net.folivo.springframework.security.abac.pdp.RequestAttribute;
-
-//TODO this into core?
-public class XacmlRequestAttribute implements RequestAttribute {
+public class SimpleRequestAttribute implements RequestAttribute {
 
 	private final AttributeCategory category;
 	private final String id;
 	private final String datatype;
 	private Object value;
 
-	public XacmlRequestAttribute(AttributeCategory category, String id, String datatype, Object value) {
+	public SimpleRequestAttribute(AttributeCategory category, String id, String datatype, Object value) {
 		this.category = category;
 		this.id = id;
 		this.datatype = datatype;

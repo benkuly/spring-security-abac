@@ -24,8 +24,9 @@ public class ExpressionBasedRequestAttributeAfterPostProcessor
 	}
 
 	@Override
-	public boolean supportsValue(Class<?> clazz) {
-		return Expression.class.isAssignableFrom(clazz);
+	public boolean supports(RequestAttribute a) {
+		// TODO null check?
+		return Expression.class.isAssignableFrom(a.getValue().getClass());
 	}
 
 	@Override

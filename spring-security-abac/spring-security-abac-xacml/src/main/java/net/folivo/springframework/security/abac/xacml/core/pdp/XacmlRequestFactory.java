@@ -36,7 +36,7 @@ public class XacmlRequestFactory implements RequestFactory<Request> {
 
 			// TODO this check should not be here
 			if (r.getValue() != null) {
-				log.debug(r);
+				// log.debug(r);
 				// TODO maybe use identifier base from configuration?
 				// TODO maybe set issuer for cloud applications
 				try {
@@ -54,7 +54,10 @@ public class XacmlRequestFactory implements RequestFactory<Request> {
 			}
 		}
 		StdMutableRequest request = new StdMutableRequest();
-		attributes.stream().forEach(request::add);
+		attributes.stream().peek(a -> {
+			if (log.isDebugEnabled())
+				a.getAttributes().stream().forEach(b -> log.debug(b));
+		}).forEach(request::add);
 		return request;
 	}
 

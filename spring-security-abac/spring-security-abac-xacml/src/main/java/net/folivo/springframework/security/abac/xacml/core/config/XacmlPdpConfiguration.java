@@ -16,10 +16,10 @@ import net.folivo.springframework.security.abac.pdp.PdpClient;
 import net.folivo.springframework.security.abac.pdp.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.pdp.RequestFactory;
 import net.folivo.springframework.security.abac.pdp.ResponseEvaluator;
+import net.folivo.springframework.security.abac.pdp.SimpleRequestAttributeFactory;
 import net.folivo.springframework.security.abac.pep.PepEngine;
 import net.folivo.springframework.security.abac.pep.SimplePepEngine;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlPdpClient;
-import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlRequestAttributeFactory;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlRequestFactory;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlResponseEvaluator;
 
@@ -53,7 +53,7 @@ public class XacmlPdpConfiguration implements PdpConfiguration<Request, Response
 
 	@Override
 	public RequestAttributeFactory requestAttributeFactory() {
-		return new XacmlRequestAttributeFactory();
+		return new SimpleRequestAttributeFactory();
 	}
 
 	@Override

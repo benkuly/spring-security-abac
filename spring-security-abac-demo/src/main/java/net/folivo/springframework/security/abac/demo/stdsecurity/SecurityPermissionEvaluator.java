@@ -110,13 +110,16 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 
 				switch (role) {
 				case WebSecurityConfig.ROLE_ADMIN:
-					return true;
+					if (oldPosting.getCreator().getUsername().equals(newPosting.getCreator().getUsername()))
+						return true;
+					break;
 				case WebSecurityConfig.ROLE_NORMAL:
 					if (oldPosting.getCreationTime().equals(newPosting.getCreationTime())
 							&& oldPosting.getCreator().getUsername().equals(newPosting.getCreator().getUsername())
 							&& AuthenticationUtil.getCurrentLoggedInUsername()
 									.map(u -> oldPosting.getCreator().getUsername().equals(u)).orElse(false))
 						return true;
+					break;
 				}
 			}
 			// handle create

@@ -20,7 +20,7 @@ public interface AbacUserRepository extends UserRepository {
 			actionAttributes = { @AttributeMapping(id = "actionId", value = "USER_SAVE") }, //
 			resourceAttributes = { @AttributeMapping(id = "resource.role", value = "${#entity.role}"), //
 					@AttributeMapping(id = "resource.username", value = "${#entity.username}"), //
-					@AttributeMapping(id = "resource.present", value = "${@abacUserRepository.findByIdInternal(#entity.id).isPresent()}"), })
+					@AttributeMapping(id = "resource.present", value = "${@abacUserRepository.findByIdInternal(#entity.id).isPresent()}") })
 	@Override
 	<S extends User> S save(@Param("entity") S entity);
 
@@ -32,8 +32,7 @@ public interface AbacUserRepository extends UserRepository {
 	Optional<User> findById(Long id);
 
 	@AbacPreAuthorize(//
-			actionAttributes = { @AttributeMapping(id = "actionId", value = "USER_DELETE") }, //
-			resourceAttributes = { @AttributeMapping(id = "resource.id", value = "${#id}") })
+			actionAttributes = { @AttributeMapping(id = "actionId", value = "USER_DELETE") })
 	@Override
 	void deleteById(Long id);
 }

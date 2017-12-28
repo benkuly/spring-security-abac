@@ -224,7 +224,7 @@ public abstract class SimpleSecurityTest {
 
 		postingTest.testEntityChange(true, somePosting, "content", "newContent");
 		postingTest.testEntityChange(true, somePosting, "creationTime", LocalDateTime.now().minusDays(24));
-		postingTest.testEntityChange(true, somePosting, "creator",
+		postingTest.testEntityChange(false, somePosting, "creator",
 				eMa.persistAndFlush(userWithRole(WebSecurityConfig.ROLE_NORMAL)));
 	}
 
