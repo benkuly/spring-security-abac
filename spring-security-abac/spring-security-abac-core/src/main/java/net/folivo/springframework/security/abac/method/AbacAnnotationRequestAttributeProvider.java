@@ -8,10 +8,10 @@ import java.util.List;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.framework.AopInfrastructureBean;
 
+import net.folivo.springframework.security.abac.attributes.RequestAttribute;
+import net.folivo.springframework.security.abac.attributes.RequestAttributeFactory;
+import net.folivo.springframework.security.abac.attributes.RequestAttributeProvider;
 import net.folivo.springframework.security.abac.pdp.AttributeCategory;
-import net.folivo.springframework.security.abac.pdp.RequestAttribute;
-import net.folivo.springframework.security.abac.pdp.RequestAttributeFactory;
-import net.folivo.springframework.security.abac.pep.RequestAttributeProvider;
 
 //TODO implements aop needed?
 //TODO caching

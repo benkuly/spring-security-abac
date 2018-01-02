@@ -5,7 +5,7 @@ import java.util.Collections;
 
 import org.springframework.security.access.ConfigAttribute;
 
-import net.folivo.springframework.security.abac.pdp.RequestAttribute;
+import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 import net.folivo.springframework.security.abac.pep.ConfigAttributeFactory;
 
 public class AbacPreInvocationConfigAttributeFactory implements ConfigAttributeFactory {

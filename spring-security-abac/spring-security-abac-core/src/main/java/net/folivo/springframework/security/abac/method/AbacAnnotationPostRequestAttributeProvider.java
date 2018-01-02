@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import net.folivo.springframework.security.abac.attributes.RequestAttribute;
+import net.folivo.springframework.security.abac.attributes.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.pdp.AttributeCategory;
-import net.folivo.springframework.security.abac.pdp.RequestAttribute;
-import net.folivo.springframework.security.abac.pdp.RequestAttributeFactory;
 
 //TODO caching
 public class AbacAnnotationPostRequestAttributeProvider extends AbacAnnotationRequestAttributeProvider {

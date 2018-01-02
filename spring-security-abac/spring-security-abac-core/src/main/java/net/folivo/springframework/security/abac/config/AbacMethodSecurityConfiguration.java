@@ -23,6 +23,8 @@ import org.springframework.security.access.vote.AbstractAccessDecisionManager;
 import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 
+import net.folivo.springframework.security.abac.attributes.RequestAttributeProcessor;
+import net.folivo.springframework.security.abac.attributes.RequestAttributeProvider;
 import net.folivo.springframework.security.abac.method.AbacAnnotationMethodSecurityMetadataSource;
 import net.folivo.springframework.security.abac.method.AbacAnnotationPostRequestAttributeProvider;
 import net.folivo.springframework.security.abac.method.AbacAnnotationPreRequestAttributeProvider;
@@ -36,9 +38,6 @@ import net.folivo.springframework.security.abac.pep.PepClient;
 import net.folivo.springframework.security.abac.pep.PostProcessingPepClient;
 import net.folivo.springframework.security.abac.pep.PreProcessingProviderCollector;
 import net.folivo.springframework.security.abac.pep.ProviderCollector;
-import net.folivo.springframework.security.abac.pep.RequestAttributePostProcessor;
-import net.folivo.springframework.security.abac.pep.RequestAttributePreProcessor;
-import net.folivo.springframework.security.abac.pep.RequestAttributeProvider;
 import net.folivo.springframework.security.abac.prepost.AbacPostInvocationConfigAttributeFactory;
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationConfigAttributeFactory;
 
@@ -120,24 +119,24 @@ public class AbacMethodSecurityConfiguration extends GlobalMethodSecurityConfigu
 	}
 
 	@Bean
-	protected List<RequestAttributePreProcessor<MethodInvocation>> requestAttributePreProcessors() {
-		List<RequestAttributePreProcessor<MethodInvocation>> processors = new ArrayList<>();
+	protected List<RequestAttributeProcessor<MethodInvocation>> requestAttributePreProcessors() {
+		List<RequestAttributeProcessor<MethodInvocation>> processors = new ArrayList<>();
 		processors.add(new ExpressionBasedRequestAttributePreProcessor(getExpressionHandler()));
 		AnnotationAwareOrderComparator.sort(processors);
 		return processors;
 	}
 
 	@Bean
-	protected List<RequestAttributePostProcessor<MethodInvocation>> requestAttributeBeforePostProcessors() {
-		List<RequestAttributePostProcessor<MethodInvocation>> processors = new ArrayList<>();
+	protected List<RequestAttributeProcessor<MethodInvocation>> requestAttributeBeforePostProcessors() {
+		List<RequestAttributeProcessor<MethodInvocation>> processors = new ArrayList<>();
 		processors.add(new ExpressionBasedRequestAttributeBeforePostProcessor(getExpressionHandler()));
 		AnnotationAwareOrderComparator.sort(processors);
 		return processors;
 	}
 
 	@Bean
-	protected List<RequestAttributePostProcessor<MethodInvocationContext>> requestAttributeAfterPostProcessors() {
-		List<RequestAttributePostProcessor<MethodInvocationContext>> processors = new ArrayList<>();
+	protected List<RequestAttributeProcessor<MethodInvocationContext>> requestAttributeAfterPostProcessors() {
+		List<RequestAttributeProcessor<MethodInvocationContext>> processors = new ArrayList<>();
 		processors.add(new ExpressionBasedRequestAttributeAfterPostProcessor(getExpressionHandler()));
 		AnnotationAwareOrderComparator.sort(processors);
 		return processors;

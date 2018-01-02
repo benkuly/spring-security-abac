@@ -1,8 +1,6 @@
-package net.folivo.springframework.security.abac.pep;
+package net.folivo.springframework.security.abac.attributes;
 
 import java.util.Collection;
-
-import net.folivo.springframework.security.abac.pdp.RequestAttribute;
 
 public interface RequestAttributeProvider<T> {
 

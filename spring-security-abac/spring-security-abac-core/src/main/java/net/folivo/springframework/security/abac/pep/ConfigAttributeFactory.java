@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import org.springframework.security.access.ConfigAttribute;
 
-import net.folivo.springframework.security.abac.pdp.RequestAttribute;
+import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 
 public interface ConfigAttributeFactory {
 

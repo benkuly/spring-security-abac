@@ -16,8 +16,8 @@ import com.att.research.xacml.std.StdMutableRequest;
 import com.att.research.xacml.std.StdMutableRequestAttributes;
 import com.att.research.xacml.std.annotations.RequestParser;
 
+import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 import net.folivo.springframework.security.abac.pdp.AttributeCategory;
-import net.folivo.springframework.security.abac.pdp.RequestAttribute;
 import net.folivo.springframework.security.abac.pdp.RequestFactory;
 
 public class XacmlRequestFactory implements RequestFactory<Request> {

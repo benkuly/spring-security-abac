@@ -6,7 +6,7 @@ import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.security.access.prepost.PostInvocationAttribute;
 import org.springframework.security.access.prepost.PreInvocationAttribute;
 
-import net.folivo.springframework.security.abac.pdp.RequestAttribute;
+import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 
 public interface PrePostInvocationAttributeFactory extends AopInfrastructureBean {
 

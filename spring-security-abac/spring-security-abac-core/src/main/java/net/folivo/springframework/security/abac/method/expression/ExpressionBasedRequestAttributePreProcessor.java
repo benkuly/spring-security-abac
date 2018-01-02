@@ -8,12 +8,12 @@ import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 
-import net.folivo.springframework.security.abac.pdp.RequestAttribute;
-import net.folivo.springframework.security.abac.pep.RequestAttributePreProcessor;
+import net.folivo.springframework.security.abac.attributes.RequestAttribute;
+import net.folivo.springframework.security.abac.attributes.RequestAttributeProcessor;
 
 //TODO implements aop needed?
 public class ExpressionBasedRequestAttributePreProcessor
-		implements RequestAttributePreProcessor<MethodInvocation>, AopInfrastructureBean {
+		implements RequestAttributeProcessor<MethodInvocation>, AopInfrastructureBean {
 
 	private final Object parserLock = new Object();
 	private ExpressionParser parser;

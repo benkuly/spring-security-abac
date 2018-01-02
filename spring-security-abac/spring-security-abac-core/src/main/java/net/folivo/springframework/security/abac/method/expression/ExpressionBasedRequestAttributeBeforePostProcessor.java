@@ -10,12 +10,12 @@ import org.springframework.expression.Expression;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import net.folivo.springframework.security.abac.pdp.RequestAttribute;
-import net.folivo.springframework.security.abac.pep.RequestAttributePostProcessor;
+import net.folivo.springframework.security.abac.attributes.RequestAttribute;
+import net.folivo.springframework.security.abac.attributes.RequestAttributeProcessor;
 
 //TODO implements aop needed?
 public class ExpressionBasedRequestAttributeBeforePostProcessor
-		implements RequestAttributePostProcessor<MethodInvocation>, AopInfrastructureBean {
+		implements RequestAttributeProcessor<MethodInvocation>, AopInfrastructureBean {
 
 	private final MethodSecurityExpressionHandler expressionHandler;
 
