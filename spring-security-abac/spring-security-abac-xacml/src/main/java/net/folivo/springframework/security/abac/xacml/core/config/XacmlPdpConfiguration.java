@@ -1,16 +1,20 @@
 package net.folivo.springframework.security.abac.xacml.core.config;
 
-import java.util.Properties;
+import java.io.IOException;
+import java.util.Collections;
 
+import org.ow2.authzforce.core.pdp.api.DecisionRequest;
+import org.ow2.authzforce.core.pdp.api.DecisionResult;
+import org.ow2.authzforce.core.pdp.api.EnvironmentProperties;
+import org.ow2.authzforce.core.pdp.api.EnvironmentPropertyName;
+import org.ow2.authzforce.core.pdp.api.PdpEngine;
+import org.ow2.authzforce.core.pdp.impl.BasePdpEngine;
+import org.ow2.authzforce.core.pdp.impl.DefaultEnvironmentProperties;
+import org.ow2.authzforce.core.pdp.impl.PdpEngineConfiguration;
+import org.ow2.authzforce.core.xmlns.pdp.Pdp;
+import org.ow2.authzforce.core.xmlns.pdp.StaticRootPolicyProvider;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.annotation.Bean;
-
-import com.att.research.xacml.api.Request;
-import com.att.research.xacml.api.Response;
-import com.att.research.xacml.api.pdp.PDPEngine;
-import com.att.research.xacml.api.pdp.PDPEngineFactory;
-import com.att.research.xacml.util.FactoryException;
-import com.att.research.xacml.util.XACMLProperties;
 
 import net.folivo.springframework.security.abac.attributes.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.attributes.SimpleRequestAttributeFactory;
@@ -24,32 +28,34 @@ import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlPdpClient;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlRequestFactory;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlResponseEvaluator;
 
-public class XacmlPdpConfiguration implements PdpConfiguration<Request, Response> {
+public class XacmlPdpConfiguration implements PdpConfiguration<DecisionRequest, DecisionResult> {
 
 	@Bean
-	public PDPEngine getPdpEngine() {
-		Properties props = new Properties();
-		props.setProperty(XACMLProperties.PROP_ROOTPOLICIES, "policy");
-		props.setProperty("policy.file", "src/main/resources/xacml/policy.xml");
+	public PdpEngine pdpEngine() {
+		Pdp pdpConf = new Pdp();
+		pdpConf.setRootPolicyProvider(new StaticRootPolicyProvider("${PARENT_DIR}/policy.xml"));
+		EnvironmentProperties envProps = new DefaultEnvironmentProperties(
+				Collections.singletonMap(EnvironmentPropertyName.PARENT_DIR, "src/main/resources/xacml"));
 		try {
-			return PDPEngineFactory.newInstance().newEngine(props);
-		} catch (FactoryException e) {
-			throw new BeanCreationException("PDPEngine", "Failed to create a PDPEngine", e);
+			PdpEngineConfiguration pdpEngineConf = new PdpEngineConfiguration(pdpConf, envProps);
+			return new BasePdpEngine(pdpEngineConf);
+		} catch (IllegalArgumentException | IOException e) {
+			throw new BeanCreationException("Couldn't create PdpEngine", e);
 		}
 	}
 
 	@Override
-	public RequestFactory<Request> requestFactory() {
-		return new XacmlRequestFactory();
+	public RequestFactory<DecisionRequest> requestFactory() {
+		return new XacmlRequestFactory(pdpEngine());
 	}
 
 	@Override
-	public PdpClient<Request, Response> pdpClient() {
-		return new XacmlPdpClient(getPdpEngine());
+	public PdpClient<DecisionRequest, DecisionResult> pdpClient() {
+		return new XacmlPdpClient(pdpEngine());
 	}
 
 	@Override
-	public ResponseEvaluator<Response> responseEvaluator() {
+	public ResponseEvaluator<DecisionResult> responseEvaluator() {
 		return new XacmlResponseEvaluator();
 	}
 

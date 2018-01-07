@@ -28,8 +28,7 @@ public abstract class AbacAnnotationRequestAttributeProvider
 
 	protected void createAndAddRequestAttribute(AttributeCategory category, AttributeMapping[] attributes,
 			List<RequestAttribute> listToAdd) {
-		Arrays.asList(attributes).stream()
-				.map(a -> requestAttributeFactory.build(category, a.id(), a.datatype(), a.value()))
+		Arrays.asList(attributes).stream().map(a -> requestAttributeFactory.build(category, a.id(), a.value()))
 				.forEach(listToAdd::add);
 	}
 

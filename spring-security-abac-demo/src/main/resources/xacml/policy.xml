@@ -125,40 +125,6 @@
 			</Rule>
 		</Policy>
 	</PolicySet>
-	<Policy PolicyId="demo.user.delete"
-		RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
-		Version="1.0">
-		<Description>PolicySet for AbacUserRepository::Delete</Description>
-		<Target>
-			<AnyOf>
-				<AllOf>
-					<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
-						<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">USER_DELETE</AttributeValue>
-						<AttributeDesignator AttributeId="actionId"
-							DataType="http://www.w3.org/2001/XMLSchema#string" Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action"
-							MustBePresent="true" />
-					</Match>
-				</AllOf>
-			</AnyOf>
-		</Target>
-		<Rule Effect="Permit" RuleId="demo.user.delete.asAdmin">
-			<Description>ADMIN can delete everything</Description>
-			<Target>
-				<AnyOf>
-					<AllOf>
-						<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
-							<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">ADMIN</AttributeValue>
-							<AttributeDesignator AttributeId="role"
-								DataType="http://www.w3.org/2001/XMLSchema#string"
-								Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
-								MustBePresent="true" />
-						</Match>
-					</AllOf>
-				</AnyOf>
-			</Target>
-		</Rule>
-		<Rule Effect="Deny" RuleId="demo.user.delete.asAnyone"></Rule>
-	</Policy>
 	<Policy PolicyId="demo.user.get"
 		RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
 		Version="1.0">

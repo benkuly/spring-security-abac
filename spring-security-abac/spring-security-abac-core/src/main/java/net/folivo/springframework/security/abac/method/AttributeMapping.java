@@ -12,6 +12,4 @@ public @interface AttributeMapping {
 	public String id();
 
 	public String value();
-
-	public String datatype() default "auto";
 }

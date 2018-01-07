@@ -22,9 +22,9 @@ public class SubjectAttributeProvider implements RequestAttributeProvider<Method
 	@Override
 	public Collection<RequestAttribute> getAttributes(MethodInvocation context) {
 		Collection<RequestAttribute> attrs = new ArrayList<>();
-		attrs.add(attrFactory.build(AttributeCategory.SUBJECT, "role", "auto",
-				AuthenticationUtil.getCurrentLoggedInUserRole()));
-		attrs.add(attrFactory.build(AttributeCategory.SUBJECT, "username", "auto",
+		attrs.add(
+				attrFactory.build(AttributeCategory.SUBJECT, "role", AuthenticationUtil.getCurrentLoggedInUserRole()));
+		attrs.add(attrFactory.build(AttributeCategory.SUBJECT, "username",
 				AuthenticationUtil.getCurrentLoggedInUsername().orElse(null)));
 		// provider sollten unabhängig von expressions sein!
 		return attrs;

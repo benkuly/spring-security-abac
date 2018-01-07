@@ -6,13 +6,11 @@ public class SimpleRequestAttribute implements RequestAttribute {
 
 	private final AttributeCategory category;
 	private final String id;
-	private final String datatype;
 	private Object value;
 
-	public SimpleRequestAttribute(AttributeCategory category, String id, String datatype, Object value) {
+	public SimpleRequestAttribute(AttributeCategory category, String id, Object value) {
 		this.category = category;
 		this.id = id;
-		this.datatype = datatype;
 		this.value = value;
 	}
 
@@ -24,11 +22,6 @@ public class SimpleRequestAttribute implements RequestAttribute {
 	@Override
 	public String getId() {
 		return id;
-	}
-
-	@Override
-	public String getDatatype() {
-		return datatype;
 	}
 
 	@Override
@@ -61,9 +54,6 @@ public class SimpleRequestAttribute implements RequestAttribute {
 			stringBuilder.append(value.getClass().getSimpleName());
 			stringBuilder.append(',');
 		}
-
-		stringBuilder.append("datatype=");
-		stringBuilder.append(datatype.toString());
 
 		stringBuilder.append("}");
 		return stringBuilder.toString();

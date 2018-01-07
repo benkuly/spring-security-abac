@@ -7,6 +7,4 @@ public interface RequestAttributeMetadata {
 	public AttributeCategory getCategory();
 
 	public String getId();
-
-	public String getDatatype();
 }
