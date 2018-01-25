@@ -1,27 +1,21 @@
 package net.folivo.springframework.security.abac.attributes;
 
-import net.folivo.springframework.security.abac.pdp.AttributeCategory;
+import org.springframework.util.Assert;
 
 public class SimpleRequestAttribute implements RequestAttribute {
 
-	private final AttributeCategory category;
-	private final String id;
+	private final RequestAttributeMetadata metadata;
 	private Object value;
 
-	public SimpleRequestAttribute(AttributeCategory category, String id, Object value) {
-		this.category = category;
-		this.id = id;
+	public SimpleRequestAttribute(RequestAttributeMetadata metadata, Object value) {
+		Assert.notNull(metadata, "Metadata must not be null!");
+		this.metadata = metadata;
 		this.value = value;
 	}
 
 	@Override
-	public AttributeCategory getCategory() {
-		return category;
-	}
-
-	@Override
-	public String getId() {
-		return id;
+	public RequestAttributeMetadata getMetadata() {
+		return metadata;
 	}
 
 	@Override
@@ -37,12 +31,8 @@ public class SimpleRequestAttribute implements RequestAttribute {
 	@Override
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder("{");
-		stringBuilder.append("id=");
-		stringBuilder.append(id);
-		stringBuilder.append(',');
-
-		stringBuilder.append("category=");
-		stringBuilder.append(category);
+		stringBuilder.append("metadata=");
+		stringBuilder.append(metadata);
 		stringBuilder.append(',');
 
 		stringBuilder.append("value=");

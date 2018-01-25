@@ -9,6 +9,7 @@ import org.springframework.security.access.ConfigAttribute;
 
 import net.folivo.springframework.security.abac.attributes.ProcessorUtils;
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
+import net.folivo.springframework.security.abac.attributes.RequestAttributeMetadata;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProcessor;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProvider;
 
@@ -33,8 +34,8 @@ public class PreProcessingProviderCollector<T> implements ProviderCollector<T> {
 
 	protected Collection<RequestAttribute> mergeAttribtesFromProvider(T context) {
 		// TODO bad solution (instead of put, go backwards and use containsKey)
-		Map<String, RequestAttribute> attrs = new HashMap<>();
-		providers.stream().flatMap(p -> p.getAttributes(context).stream()).forEach(a -> attrs.put(a.getId(), a));
+		Map<RequestAttributeMetadata, RequestAttribute> attrs = new HashMap<>();
+		providers.stream().flatMap(p -> p.getAttributes(context).stream()).forEach(a -> attrs.put(a.getMetadata(), a));
 		return attrs.values();
 	}
 

@@ -5,14 +5,16 @@ import java.util.Collection;
 import net.folivo.springframework.security.abac.attributes.ProcessorUtils;
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProcessor;
+import net.folivo.springframework.security.abac.contexthandler.RequestContextHandler;
 
-public class PostProcessingPepClient<T> implements PepClient<T> {
+public class PostProcessingPepEngine<T> implements PepEngine<T> {
 
-	private final PepEngine pep;
+	private final RequestContextHandler<T> handler;
 	private final Collection<RequestAttributeProcessor<T>> processors;
 
-	public PostProcessingPepClient(PepEngine pep, Collection<RequestAttributeProcessor<T>> processors) {
-		this.pep = pep;
+	public PostProcessingPepEngine(RequestContextHandler<T> handler,
+			Collection<RequestAttributeProcessor<T>> processors) {
+		this.handler = handler;
 		this.processors = processors;
 	}
 
@@ -22,6 +24,6 @@ public class PostProcessingPepClient<T> implements PepClient<T> {
 
 	@Override
 	public boolean buildRequestAndEvaluateToBoolean(Collection<RequestAttribute> attributes, T context) {
-		return pep.buildRequestAndEvaluateToBoolean(postProcess(attributes, context));
+		return handler.buildRequestAndEvaluateToBoolean(postProcess(attributes, context), context);
 	}
 }

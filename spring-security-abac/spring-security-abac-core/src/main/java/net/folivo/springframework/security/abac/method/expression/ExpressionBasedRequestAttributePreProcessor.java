@@ -3,17 +3,17 @@ package net.folivo.springframework.security.abac.method.expression;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProcessor;
+import net.folivo.springframework.security.abac.method.MethodInvocationContext;
 
 //TODO implements aop needed?
 public class ExpressionBasedRequestAttributePreProcessor
-		implements RequestAttributeProcessor<MethodInvocation>, AopInfrastructureBean {
+		implements RequestAttributeProcessor<MethodInvocationContext>, AopInfrastructureBean {
 
 	private final Object parserLock = new Object();
 	private ExpressionParser parser;
@@ -35,7 +35,7 @@ public class ExpressionBasedRequestAttributePreProcessor
 	}
 
 	@Override
-	public Collection<RequestAttribute> process(RequestAttribute attr, MethodInvocation context) {
+	public Collection<RequestAttribute> process(RequestAttribute attr, MethodInvocationContext context) {
 		String value = (String) attr.getValue();
 		String expressionString = value.substring(2, value.length() - 1);
 		attr.setValue(getParser().parseExpression(expressionString));

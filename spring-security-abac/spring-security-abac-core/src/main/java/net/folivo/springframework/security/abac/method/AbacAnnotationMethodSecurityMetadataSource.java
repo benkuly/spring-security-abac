@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.method.MethodSecurityMetadataSource;
 
@@ -15,14 +14,15 @@ import net.folivo.springframework.security.abac.pep.ProviderCollector;
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationAttribute;
 
 //TODO this class is so outrageous ugly
-public class AbacAnnotationMethodSecurityMetadataSource extends CollectingSecurityMetadataSource<MethodInvocation>
-		implements MethodSecurityMetadataSource {
+public class AbacAnnotationMethodSecurityMetadataSource
+		extends CollectingSecurityMetadataSource<MethodInvocationContext> implements MethodSecurityMetadataSource {
 
-	private final Collection<ProviderCollector<MethodInvocation>> preCollectors;
-	private final Collection<ProviderCollector<MethodInvocation>> postCollectors;
+	private final Collection<ProviderCollector<MethodInvocationContext>> preCollectors;
+	private final Collection<ProviderCollector<MethodInvocationContext>> postCollectors;
 
-	public AbacAnnotationMethodSecurityMetadataSource(Collection<ProviderCollector<MethodInvocation>> preCollectors,
-			Collection<ProviderCollector<MethodInvocation>> postCollectors) {
+	public AbacAnnotationMethodSecurityMetadataSource(
+			Collection<ProviderCollector<MethodInvocationContext>> preCollectors,
+			Collection<ProviderCollector<MethodInvocationContext>> postCollectors) {
 		this.preCollectors = preCollectors;
 		this.postCollectors = postCollectors;
 	}
@@ -44,22 +44,22 @@ public class AbacAnnotationMethodSecurityMetadataSource extends CollectingSecuri
 	// is there a better solution?
 	@Override
 	public Collection<ConfigAttribute> getAttributes(Object object) throws IllegalArgumentException {
-		if (object instanceof MethodInvocation) {
-			MethodInvocation context = (MethodInvocation) object;
+		if (object instanceof MethodInvocationContext) {
+			MethodInvocationContext context = (MethodInvocationContext) object;
 			Collection<ConfigAttribute> attrs = new ArrayList<>();
-			if (AbacAnnotationUtil.findAnnotation(context, AbacPreAuthorize.class) != null) {
+			if (AbacAnnotationUtil.findAnnotation(context.getMethodInvocation(), AbacPreAuthorize.class) != null) {
 				attrs.addAll(collectConfigAttributes(context, preCollectors));
 			}
-			if (AbacAnnotationUtil.findAnnotation(context, AbacPostAuthorize.class) != null) {
+			if (AbacAnnotationUtil.findAnnotation(context.getMethodInvocation(), AbacPostAuthorize.class) != null) {
 				attrs.addAll(collectConfigAttributes(context, postCollectors));
 			}
 			return attrs;
 		}
-		throw new IllegalArgumentException("Object must be a non-null MethodInvocation");
+		throw new IllegalArgumentException("Object must be a non-null MethodInvocationContext");
 	}
 
 	@Override
 	public boolean supports(Class<?> clazz) {
-		return MethodInvocation.class.isAssignableFrom(clazz);
+		return MethodInvocationContext.class.isAssignableFrom(clazz);
 	}
 }

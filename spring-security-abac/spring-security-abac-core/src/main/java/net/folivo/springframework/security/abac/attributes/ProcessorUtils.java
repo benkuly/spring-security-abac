@@ -19,7 +19,7 @@ public final class ProcessorUtils {
 			Object value = a.getValue();
 			if (value == null) {
 				if (log.isDebugEnabled())
-					log.debug("RequestAttribute with id '" + a.getId()
+					log.debug("RequestAttribute with id '" + a.getMetadata().getId()
 							+ "' will not be processed because its value is null!");
 				return false;
 			}

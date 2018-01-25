@@ -5,18 +5,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.framework.AopInfrastructureBean;
 
+import net.folivo.springframework.security.abac.attributes.AttributeCategory;
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProvider;
-import net.folivo.springframework.security.abac.pdp.AttributeCategory;
 
 //TODO implements aop needed?
 //TODO caching
 public abstract class AbacAnnotationRequestAttributeProvider
-		implements RequestAttributeProvider<MethodInvocation>, AopInfrastructureBean {
+		implements RequestAttributeProvider<MethodInvocationContext>, AopInfrastructureBean {
 
 	private final RequestAttributeFactory requestAttributeFactory;
 
@@ -33,8 +32,8 @@ public abstract class AbacAnnotationRequestAttributeProvider
 	}
 
 	@Override
-	public Collection<RequestAttribute> getAttributes(MethodInvocation mi) {
-		return AbacAnnotationUtil.callMethod(mi, this::getAttributes);
+	public Collection<RequestAttribute> getAttributes(MethodInvocationContext mi) {
+		return AbacAnnotationUtil.callMethod(mi.getMethodInvocation(), this::getAttributes);
 	}
 
 }

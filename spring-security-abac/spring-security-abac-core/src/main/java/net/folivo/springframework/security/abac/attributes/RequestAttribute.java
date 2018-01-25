@@ -1,6 +1,8 @@
 package net.folivo.springframework.security.abac.attributes;
 
-public interface RequestAttribute extends RequestAttributeMetadata {
+public interface RequestAttribute {
+
+	public RequestAttributeMetadata getMetadata();
 
 	public Object getValue();
 

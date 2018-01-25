@@ -2,7 +2,7 @@ package net.folivo.springframework.security.abac.xacml.core.config;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,16 +37,18 @@ import org.springframework.util.ResourceUtils;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.attributes.SimpleRequestAttributeFactory;
 import net.folivo.springframework.security.abac.config.PdpConfiguration;
+import net.folivo.springframework.security.abac.contexthandler.RequestContextHandler;
+import net.folivo.springframework.security.abac.contexthandler.SimpleRequestContextHandler;
+import net.folivo.springframework.security.abac.method.MethodInvocationContext;
 import net.folivo.springframework.security.abac.pdp.PdpClient;
 import net.folivo.springframework.security.abac.pdp.RequestFactory;
 import net.folivo.springframework.security.abac.pdp.ResponseEvaluator;
-import net.folivo.springframework.security.abac.pep.PepEngine;
-import net.folivo.springframework.security.abac.pep.SimplePepEngine;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlPdpClient;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlRequestFactory;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlResponseEvaluator;
 
-public class XacmlPdpConfiguration implements PdpConfiguration<DecisionRequest, DecisionResult> {
+public class XacmlPdpConfiguration
+		implements PdpConfiguration<DecisionRequest, DecisionResult, MethodInvocationContext> {
 
 	// I do things here, that are from PdpEngineConfiguration
 	@Bean
@@ -67,7 +69,7 @@ public class XacmlPdpConfiguration implements PdpConfiguration<DecisionRequest, 
 		boolean strictAttributeIssuerMatch = false;
 
 		// TODO
-		List<DependencyAwareFactory> attProviderFactories = Collections.emptyList();
+		List<DependencyAwareFactory> attProviderFactories = new ArrayList<>();
 
 		/*
 		 * XACML Expression factory/parser
@@ -137,7 +139,8 @@ public class XacmlPdpConfiguration implements PdpConfiguration<DecisionRequest, 
 	}
 
 	@Override
-	public PepEngine pepEngine() {
-		return new SimplePepEngine<>(pdpClient(), responseEvaluator(), requestFactory());
+	public RequestContextHandler<MethodInvocationContext> requestContextHandler() {
+		return new SimpleRequestContextHandler<>(pdpClient(),
+				responseEvaluator(), requestFactory());
 	}
 }
