@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.security.access.ConfigAttribute;
-
 import net.folivo.springframework.security.abac.attributes.ProcessorUtils;
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeMetadata;
@@ -18,18 +16,16 @@ public class PreProcessingProviderCollector<T> implements ProviderCollector<T> {
 
 	private final List<RequestAttributeProvider<T>> providers;
 	private final List<RequestAttributeProcessor<T>> processors;
-	private final ConfigAttributeFactory factory;
 
 	public PreProcessingProviderCollector(List<RequestAttributeProvider<T>> providers,
-			List<RequestAttributeProcessor<T>> processors, ConfigAttributeFactory factory) {
+			List<RequestAttributeProcessor<T>> processors) {
 		this.providers = providers;
 		this.processors = processors;
-		this.factory = factory;
 	}
 
 	@Override
-	public Collection<ConfigAttribute> collect(T context) {
-		return factory.createConfigAttributes(preProcessAttributes(mergeAttribtesFromProvider(context), context));
+	public Collection<RequestAttribute> collect(T context) {
+		return preProcessAttributes(mergeAttribtesFromProvider(context), context);
 	}
 
 	protected Collection<RequestAttribute> mergeAttribtesFromProvider(T context) {

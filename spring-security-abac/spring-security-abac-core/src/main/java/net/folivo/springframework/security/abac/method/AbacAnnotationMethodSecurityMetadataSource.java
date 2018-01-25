@@ -10,6 +10,7 @@ import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.method.MethodSecurityMetadataSource;
 
 import net.folivo.springframework.security.abac.pep.CollectingSecurityMetadataSource;
+import net.folivo.springframework.security.abac.pep.ConfigAttributeFactory;
 import net.folivo.springframework.security.abac.pep.ProviderCollector;
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationAttribute;
 
@@ -17,14 +18,18 @@ import net.folivo.springframework.security.abac.prepost.AbacPreInvocationAttribu
 public class AbacAnnotationMethodSecurityMetadataSource
 		extends CollectingSecurityMetadataSource<MethodInvocationContext> implements MethodSecurityMetadataSource {
 
-	private final Collection<ProviderCollector<MethodInvocationContext>> preCollectors;
-	private final Collection<ProviderCollector<MethodInvocationContext>> postCollectors;
+	private final ProviderCollector<MethodInvocationContext> preCollector;
+	private final ProviderCollector<MethodInvocationContext> postCollector;
+	private final ConfigAttributeFactory preAttributeFactory;
+	private final ConfigAttributeFactory postAttributeFactory;
 
-	public AbacAnnotationMethodSecurityMetadataSource(
-			Collection<ProviderCollector<MethodInvocationContext>> preCollectors,
-			Collection<ProviderCollector<MethodInvocationContext>> postCollectors) {
-		this.preCollectors = preCollectors;
-		this.postCollectors = postCollectors;
+	public AbacAnnotationMethodSecurityMetadataSource(ProviderCollector<MethodInvocationContext> preCollector,
+			ProviderCollector<MethodInvocationContext> postCollector, ConfigAttributeFactory preAttributeFactory,
+			ConfigAttributeFactory postAttributeFactory) {
+		this.preCollector = preCollector;
+		this.postCollector = postCollector;
+		this.preAttributeFactory = preAttributeFactory;
+		this.postAttributeFactory = postAttributeFactory;
 	}
 
 	// TODO urgs. why do they need that?
@@ -48,10 +53,10 @@ public class AbacAnnotationMethodSecurityMetadataSource
 			MethodInvocationContext context = (MethodInvocationContext) object;
 			Collection<ConfigAttribute> attrs = new ArrayList<>();
 			if (AbacAnnotationUtil.findAnnotation(context.getMethodInvocation(), AbacPreAuthorize.class) != null) {
-				attrs.addAll(collectConfigAttributes(context, preCollectors));
+				attrs.addAll(collectConfigAttributes(context, preCollector, preAttributeFactory));
 			}
 			if (AbacAnnotationUtil.findAnnotation(context.getMethodInvocation(), AbacPostAuthorize.class) != null) {
-				attrs.addAll(collectConfigAttributes(context, postCollectors));
+				attrs.addAll(collectConfigAttributes(context, postCollector, postAttributeFactory));
 			}
 			return attrs;
 		}
