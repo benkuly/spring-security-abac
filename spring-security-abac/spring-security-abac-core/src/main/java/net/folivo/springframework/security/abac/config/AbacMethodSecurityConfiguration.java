@@ -22,6 +22,8 @@ import org.springframework.security.access.vote.AbstractAccessDecisionManager;
 import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 
+import net.folivo.springframework.security.abac.attributes.PreProcessingProviderCollector;
+import net.folivo.springframework.security.abac.attributes.ProviderCollector;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProcessor;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProvider;
 import net.folivo.springframework.security.abac.method.AbacAnnotationMethodSecurityMetadataSource;
@@ -34,8 +36,6 @@ import net.folivo.springframework.security.abac.method.expression.ExpressionBase
 import net.folivo.springframework.security.abac.method.expression.ExpressionBasedRequestAttributePreProcessor;
 import net.folivo.springframework.security.abac.pep.PepEngine;
 import net.folivo.springframework.security.abac.pep.PostProcessingPepEngine;
-import net.folivo.springframework.security.abac.pep.PreProcessingProviderCollector;
-import net.folivo.springframework.security.abac.pep.ProviderCollector;
 import net.folivo.springframework.security.abac.prepost.AbacPostInvocationConfigAttributeFactory;
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationConfigAttributeFactory;
 

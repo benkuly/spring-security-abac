@@ -1,15 +1,9 @@
-package net.folivo.springframework.security.abac.pep;
+package net.folivo.springframework.security.abac.attributes;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import net.folivo.springframework.security.abac.attributes.ProcessorUtils;
-import net.folivo.springframework.security.abac.attributes.RequestAttribute;
-import net.folivo.springframework.security.abac.attributes.RequestAttributeMetadata;
-import net.folivo.springframework.security.abac.attributes.RequestAttributeProcessor;
-import net.folivo.springframework.security.abac.attributes.RequestAttributeProvider;
 
 //TODO force that providers and processors are sorted!
 public class PreProcessingProviderCollector<T> implements ProviderCollector<T> {

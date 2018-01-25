@@ -9,9 +9,9 @@ import java.util.List;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.method.MethodSecurityMetadataSource;
 
+import net.folivo.springframework.security.abac.attributes.ProviderCollector;
 import net.folivo.springframework.security.abac.pep.CollectingSecurityMetadataSource;
 import net.folivo.springframework.security.abac.pep.ConfigAttributeFactory;
-import net.folivo.springframework.security.abac.pep.ProviderCollector;
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationAttribute;
 
 //TODO this class is so outrageous ugly

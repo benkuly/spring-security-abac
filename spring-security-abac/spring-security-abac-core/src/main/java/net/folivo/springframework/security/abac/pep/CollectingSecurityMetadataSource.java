@@ -6,6 +6,8 @@ import java.util.Collections;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityMetadataSource;
 
+import net.folivo.springframework.security.abac.attributes.ProviderCollector;
+
 //TODO i don't like that
 public abstract class CollectingSecurityMetadataSource<T> implements SecurityMetadataSource {
 
