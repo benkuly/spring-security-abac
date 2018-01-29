@@ -1,4 +1,4 @@
-package net.folivo.springframework.security.abac.pdp;
+package net.folivo.springframework.security.abac.contexthandler;
 
 public interface ResponseEvaluator<S> {
 

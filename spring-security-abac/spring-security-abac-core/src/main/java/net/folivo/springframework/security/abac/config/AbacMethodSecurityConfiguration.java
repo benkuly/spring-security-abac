@@ -40,6 +40,7 @@ import net.folivo.springframework.security.abac.prepost.AbacPostInvocationConfig
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationConfigAttributeFactory;
 
 //this is only a workaround solution because standalone method security is so weired
+//TODO custom AccessDecisionManager, AfterInvocationManager, SecurityInterceptor
 @Configuration
 public class AbacMethodSecurityConfiguration extends GlobalMethodSecurityConfiguration {
 

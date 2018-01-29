@@ -3,9 +3,6 @@ package net.folivo.springframework.security.abac.contexthandler;
 import java.util.Collection;
 
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
-import net.folivo.springframework.security.abac.pdp.PdpClient;
-import net.folivo.springframework.security.abac.pdp.RequestFactory;
-import net.folivo.springframework.security.abac.pdp.ResponseEvaluator;
 
 public class SimpleRequestContextHandler<R, S, T> implements RequestContextHandler<T> {
 

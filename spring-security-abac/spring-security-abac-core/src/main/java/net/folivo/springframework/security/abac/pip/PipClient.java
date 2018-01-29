@@ -7,6 +7,7 @@ import net.folivo.springframework.security.abac.attributes.RequestAttributeMetad
 
 public interface PipClient<T> {
 
+	// TODO maybe ProviderContext?
 	Collection<RequestAttribute> resolve(RequestAttributeMetadata meta, T context);
 
 }

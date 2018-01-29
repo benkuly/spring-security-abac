@@ -23,7 +23,7 @@ import org.ow2.authzforce.xacml.identifiers.XacmlAttributeCategory;
 import net.folivo.springframework.security.abac.attributes.AttributeCategory;
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeMetadata;
-import net.folivo.springframework.security.abac.pdp.RequestFactory;
+import net.folivo.springframework.security.abac.contexthandler.RequestFactory;
 
 public class XacmlRequestFactory implements RequestFactory<DecisionRequest> {
 
