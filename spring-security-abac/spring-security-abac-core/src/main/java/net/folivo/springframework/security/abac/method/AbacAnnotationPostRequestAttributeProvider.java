@@ -45,4 +45,9 @@ public class AbacAnnotationPostRequestAttributeProvider extends AbacAnnotationRe
 		return attrs;
 	}
 
+	@Override
+	public boolean supports(MethodInvocationContext context) {
+		return AbacAnnotationUtil.findAnnotation(context.getMethodInvocation(), AbacPostAuthorize.class) != null;
+	}
+
 }

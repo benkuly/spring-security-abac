@@ -5,7 +5,6 @@ import java.util.Collection;
 import org.springframework.security.access.prepost.PreInvocationAttribute;
 
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
-import net.folivo.springframework.security.abac.pep.RequestAttributesHolder;
 
 public class AbacPreInvocationAttribute extends RequestAttributesHolder implements PreInvocationAttribute {
 

@@ -33,7 +33,7 @@ public abstract class AbacAnnotationRequestAttributeProvider
 
 	@Override
 	public Collection<RequestAttribute> getAttributes(MethodInvocationContext mi) {
-		return AbacAnnotationUtil.callMethod(mi.getMethodInvocation(), this::getAttributes);
+		return AbacAnnotationUtil.callMethod(this::getAttributes, mi.getMethodInvocation());
 	}
 
 }

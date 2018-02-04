@@ -44,4 +44,9 @@ public class AbacAnnotationPreRequestAttributeProvider extends AbacAnnotationReq
 
 		return attrs;
 	}
+
+	@Override
+	public boolean supports(MethodInvocationContext context) {
+		return AbacAnnotationUtil.findAnnotation(context.getMethodInvocation(), AbacPreAuthorize.class) != null;
+	}
 }

@@ -16,8 +16,8 @@ public class AbacAnnotationUtil {
 	// TODO caching
 	// TODO a bit copy paste from AbstractMethodSecurityMetadataSource
 	// TODO better name
-	public static <T> Collection<T> callMethod(MethodInvocation mi,
-			BiFunction<Method, Class<?>, Collection<T>> function) {
+	public static <T> Collection<T> callMethod(BiFunction<Method, Class<?>, Collection<T>> function,
+			MethodInvocation mi) {
 		// TODO why? it's from prepost source
 		if (mi.getMethod().getDeclaringClass() == Object.class) {
 			// TODO logging?

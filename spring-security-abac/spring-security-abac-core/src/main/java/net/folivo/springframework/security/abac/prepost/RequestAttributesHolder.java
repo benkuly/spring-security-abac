@@ -1,11 +1,12 @@
-package net.folivo.springframework.security.abac.pep;
+package net.folivo.springframework.security.abac.prepost;
 
 import java.util.Collection;
 
+import org.springframework.security.access.ConfigAttribute;
+
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 
-//TODO maybe other package
-public abstract class RequestAttributesHolder {
+public abstract class RequestAttributesHolder implements ConfigAttribute {
 
 	private final Collection<RequestAttribute> attributes;
 
