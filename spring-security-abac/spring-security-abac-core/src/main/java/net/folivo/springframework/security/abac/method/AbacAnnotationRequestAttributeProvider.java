@@ -1,8 +1,6 @@
 package net.folivo.springframework.security.abac.method;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.springframework.aop.framework.AopInfrastructureBean;
@@ -23,17 +21,10 @@ public abstract class AbacAnnotationRequestAttributeProvider
 		this.requestAttributeFactory = requestAttributeFactory;
 	}
 
-	protected abstract Collection<RequestAttribute> getAttributes(Method method, Class<?> targetClass);
-
 	protected void createAndAddRequestAttribute(AttributeCategory category, AttributeMapping[] attributes,
 			List<RequestAttribute> listToAdd) {
 		Arrays.asList(attributes).stream().map(a -> requestAttributeFactory.build(category, a.id(), a.value()))
 				.forEach(listToAdd::add);
-	}
-
-	@Override
-	public Collection<RequestAttribute> getAttributes(MethodInvocationContext mi) {
-		return AbacAnnotationUtil.callMethod(this::getAttributes, mi.getMethodInvocation());
 	}
 
 }

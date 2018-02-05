@@ -1,6 +1,5 @@
 package net.folivo.springframework.security.abac.method;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,12 +16,12 @@ public class AbacAnnotationPostRequestAttributeProvider extends AbacAnnotationRe
 	}
 
 	@Override
-	protected Collection<RequestAttribute> getAttributes(Method method, Class<?> targetClass) {
-		if (method.getDeclaringClass() == Object.class) {
+	public Collection<RequestAttribute> getAttributes(MethodInvocationContext context) {
+		if (context.getMethodInvocation().getMethod().getDeclaringClass() == Object.class) {
 			return Collections.emptyList();
 		}
 
-		AbacPostAuthorize abacPostAuthorize = AbacAnnotationUtil.findAnnotation(method, targetClass,
+		AbacPostAuthorize abacPostAuthorize = AbacAnnotationUtil.findAnnotation(context.getMethodInvocation(),
 				AbacPostAuthorize.class);
 
 		if (abacPostAuthorize == null) {
@@ -43,11 +42,6 @@ public class AbacAnnotationPostRequestAttributeProvider extends AbacAnnotationRe
 		attrs.trimToSize();
 
 		return attrs;
-	}
-
-	@Override
-	public boolean supports(MethodInvocationContext context) {
-		return AbacAnnotationUtil.findAnnotation(context.getMethodInvocation(), AbacPostAuthorize.class) != null;
 	}
 
 }

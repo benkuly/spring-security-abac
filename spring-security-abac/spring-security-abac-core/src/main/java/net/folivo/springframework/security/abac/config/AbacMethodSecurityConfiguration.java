@@ -7,10 +7,12 @@ import java.util.List;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.config.AopConfigUtils;
+import org.springframework.aop.support.AbstractPointcutAdvisor;
+import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,14 +28,11 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.intercept.AfterInvocationManager;
 import org.springframework.security.access.intercept.AfterInvocationProviderManager;
 import org.springframework.security.access.intercept.RunAsManager;
-import org.springframework.security.access.intercept.aopalliance.MethodSecurityInterceptor;
-import org.springframework.security.access.intercept.aopalliance.MethodSecurityMetadataSourceAdvisor;
 import org.springframework.security.access.vote.AbstractAccessDecisionManager;
 import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 
 import net.folivo.springframework.security.abac.attributes.PreProcessingProviderCollector;
 import net.folivo.springframework.security.abac.attributes.ProviderCollector;
@@ -43,6 +42,9 @@ import net.folivo.springframework.security.abac.method.AbacAnnotationMethodSecur
 import net.folivo.springframework.security.abac.method.AbacAnnotationPostRequestAttributeProvider;
 import net.folivo.springframework.security.abac.method.AbacAnnotationPreRequestAttributeProvider;
 import net.folivo.springframework.security.abac.method.MethodInvocationContext;
+import net.folivo.springframework.security.abac.method.aopalliance.AbacMethodSecurityInterceptor;
+import net.folivo.springframework.security.abac.method.aopalliance.AbacMethodSecurityPointcut;
+import net.folivo.springframework.security.abac.method.aopalliance.AbacMethodSecurityPointcutAdvisor;
 import net.folivo.springframework.security.abac.method.expression.ExpressionBasedRequestAttributePostProcessor;
 import net.folivo.springframework.security.abac.method.expression.ExpressionBasedRequestAttributePreProcessor;
 import net.folivo.springframework.security.abac.pep.AttributeBasedAccessDecisionVoter;
@@ -55,12 +57,12 @@ import net.folivo.springframework.security.abac.prepost.AbacPreInvocationAttribu
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationConfigAttributeFactory;
 
 //TODO AutoProxyRegistrar.class MethodSecurityMetadataSourceAdvisorRegistrar.class
-@EnableGlobalAuthentication
 @Configuration
-public class AbacMethodSecurityConfiguration {
+public class AbacMethodSecurityConfiguration implements SmartInitializingSingleton {
 
 	protected final PdpConfiguration<?, ?, MethodInvocationContext> pdpConfig;
 	protected final AuthenticationConfiguration authConfig;
+	private ApplicationContext context;
 
 	@Autowired
 	public AbacMethodSecurityConfiguration(PdpConfiguration<?, ?, MethodInvocationContext> pdpConfig,
@@ -70,9 +72,10 @@ public class AbacMethodSecurityConfiguration {
 	}
 
 	// TODO aspectJ
+	// TODO catch?
 	@Bean
 	protected MethodInterceptor methodSecurityInterceptor() throws Exception {
-		MethodSecurityInterceptor methodSecurityInterceptor = new MethodSecurityInterceptor();
+		AbacMethodSecurityInterceptor methodSecurityInterceptor = new AbacMethodSecurityInterceptor();
 		methodSecurityInterceptor.setAccessDecisionManager(accessDecisionManager());
 		methodSecurityInterceptor.setAfterInvocationManager(afterInvocationManager());
 		methodSecurityInterceptor.setSecurityMetadataSource(methodSecurityMetadataSource());
@@ -84,6 +87,7 @@ public class AbacMethodSecurityConfiguration {
 		return methodSecurityInterceptor;
 	}
 
+	// TODO catch?
 	@Bean
 	protected AuthenticationManager authenticationManager() throws Exception {
 		return authConfig.getAuthenticationManager();
@@ -182,48 +186,23 @@ public class AbacMethodSecurityConfiguration {
 		}
 	}
 
-	/**
-	 * Provide a custom {@link RunAsManager} for the default implementation of
-	 * {@link #methodSecurityInterceptor()}. The default is null.
-	 *
-	 * @return
-	 */
 	protected RunAsManager runAsManager() {
 		return null;
 	}
 
-	// TODO make it configurable
-	@Autowired
-	protected void enableAutoProxy(BeanDefinitionRegistry registry) {
-		if (getAdviceMode() == AdviceMode.PROXY) {
-			AopConfigUtils.registerAutoProxyCreatorIfNecessary(registry);
-			if (isProxyTargetClass()) {
-				AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
-			}
-			// TODO is order relevant? originally it is added
-			BeanDefinitionBuilder advisor = BeanDefinitionBuilder
-					.rootBeanDefinition(MethodSecurityMetadataSourceAdvisor.class);
-			advisor.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			advisor.addConstructorArgValue("methodSecurityInterceptor");
-			advisor.addConstructorArgReference("methodSecurityMetadataSource");
-			advisor.addConstructorArgValue("methodSecurityMetadataSource");
+	// TODO make aspectJ-compatible
+	// TODO catch?
+	// TODO interface as return type?
+	@Bean
+	protected AbstractPointcutAdvisor abacMethodSecurityPointcutAdvisor() throws Exception {
+		// TODO is order of this(config) relevant? originally it is added
+		return new AbacMethodSecurityPointcutAdvisor(abacMethodSecurityPointcut(), methodSecurityInterceptor());
+	}
 
-			registry.registerBeanDefinition("metaDataSourceAdvisor", advisor.getBeanDefinition());
-		}
-		// TODO nicer way
-		// else if (mode == AdviceMode.ASPECTJ) {
-		// BeanDefinition interceptor =
-		// registry.getBeanDefinition("methodSecurityInterceptor");
-		//
-		// BeanDefinitionBuilder aspect = BeanDefinitionBuilder.rootBeanDefinition(
-		// "org.springframework.security.access.intercept.aspectj.aspect.AnnotationSecurityAspect");
-		// aspect.setFactoryMethod("aspectOf");
-		// aspect.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		// aspect.addPropertyValue("securityInterceptor", interceptor);
-		//
-		// registry.registerBeanDefinition("annotationSecurityAspect$0",
-		// aspect.getBeanDefinition());
-		// }
+	// TODO interface as return type?
+	@Bean
+	protected StaticMethodMatcherPointcut abacMethodSecurityPointcut() {
+		return new AbacMethodSecurityPointcut();
 	}
 
 	protected AdviceMode getAdviceMode() {
@@ -232,5 +211,31 @@ public class AbacMethodSecurityConfiguration {
 
 	protected boolean isProxyTargetClass() {
 		return false;
+	}
+
+	// TODO make aspectJ-compatible
+	// TODO make it configurable
+	@Override
+	public void afterSingletonsInstantiated() {
+		BeanDefinitionRegistry registry = getSingleBeanOrNull(BeanDefinitionRegistry.class);
+		if (getAdviceMode() == AdviceMode.PROXY) {
+			AopConfigUtils.registerAutoProxyCreatorIfNecessary(registry);
+			if (isProxyTargetClass()) {
+				AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
+			}
+		}
+	}
+
+	private <T> T getSingleBeanOrNull(Class<T> type) {
+		String[] beanNamesForType = this.context.getBeanNamesForType(type);
+		if (beanNamesForType == null || beanNamesForType.length != 1) {
+			return null;
+		}
+		return this.context.getBean(beanNamesForType[0], type);
+	}
+
+	@Autowired
+	public void setApplicationContext(ApplicationContext context) {
+		this.context = context;
 	}
 }

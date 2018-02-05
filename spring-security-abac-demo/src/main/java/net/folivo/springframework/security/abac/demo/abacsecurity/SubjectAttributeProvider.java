@@ -3,15 +3,14 @@ package net.folivo.springframework.security.abac.demo.abacsecurity;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.aopalliance.intercept.MethodInvocation;
-
+import net.folivo.springframework.security.abac.attributes.AttributeCategory;
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProvider;
 import net.folivo.springframework.security.abac.demo.config.AuthenticationUtil;
-import net.folivo.springframework.security.abac.pdp.AttributeCategory;
+import net.folivo.springframework.security.abac.method.MethodInvocationContext;
 
-public class SubjectAttributeProvider implements RequestAttributeProvider<MethodInvocation> {
+public class SubjectAttributeProvider implements RequestAttributeProvider<MethodInvocationContext> {
 
 	private final RequestAttributeFactory attrFactory;
 
@@ -20,7 +19,7 @@ public class SubjectAttributeProvider implements RequestAttributeProvider<Method
 	}
 
 	@Override
-	public Collection<RequestAttribute> getAttributes(MethodInvocation context) {
+	public Collection<RequestAttribute> getAttributes(MethodInvocationContext context) {
 		Collection<RequestAttribute> attrs = new ArrayList<>();
 		attrs.add(
 				attrFactory.build(AttributeCategory.SUBJECT, "role", AuthenticationUtil.getCurrentLoggedInUserRole()));

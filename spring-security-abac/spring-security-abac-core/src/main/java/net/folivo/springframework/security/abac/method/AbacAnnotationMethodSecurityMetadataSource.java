@@ -28,16 +28,16 @@ public class AbacAnnotationMethodSecurityMetadataSource
 		this.postAttributeFactory = postAttributeFactory;
 	}
 
-	// is there a better solution?
+	// is there a better solution with only one collector or are two better?
 	@Override
 	public Collection<ConfigAttribute> getAttributes(Object object) throws IllegalArgumentException {
 		if (object instanceof MethodInvocationContext) {
 			MethodInvocationContext context = (MethodInvocationContext) object;
 			Collection<ConfigAttribute> attrs = new ArrayList<>();
-			if (AbacAnnotationUtil.findAnnotation(context.getMethodInvocation(), AbacPreAuthorize.class) != null) {
+			if (context.isPreAuthorize()) {
 				attrs.addAll(collectConfigAttributes(context, preCollector, preAttributeFactory));
 			}
-			if (AbacAnnotationUtil.findAnnotation(context.getMethodInvocation(), AbacPostAuthorize.class) != null) {
+			if (context.isPostAuthorize()) {
 				attrs.addAll(collectConfigAttributes(context, postCollector, postAttributeFactory));
 			}
 			return attrs;
@@ -49,4 +49,5 @@ public class AbacAnnotationMethodSecurityMetadataSource
 	public boolean supports(Class<?> clazz) {
 		return MethodInvocationContext.class.isAssignableFrom(clazz);
 	}
+
 }
