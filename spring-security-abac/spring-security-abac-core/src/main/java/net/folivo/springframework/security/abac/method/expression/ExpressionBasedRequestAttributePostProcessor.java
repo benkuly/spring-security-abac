@@ -34,8 +34,7 @@ public class ExpressionBasedRequestAttributePostProcessor
 		Expression expr = (Expression) attr.getValue();
 		EvaluationContext evaluationContext = expressionHandler.createEvaluationContext(
 				SecurityContextHolder.getContext().getAuthentication(), context.getMethodInvocation());
-		if (context.getReturnedObject().isPresent())
-			expressionHandler.setReturnObject(context.getReturnedObject(), evaluationContext);
+		context.getReturnedObject().ifPresent(r -> expressionHandler.setReturnObject(r, evaluationContext));
 		attr.setValue(expr.getValue(evaluationContext));
 		return Collections.singleton(attr);
 	}

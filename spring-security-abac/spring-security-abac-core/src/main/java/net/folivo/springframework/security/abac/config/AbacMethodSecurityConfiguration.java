@@ -4,19 +4,24 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.aopalliance.intercept.MethodInterceptor;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
-import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.context.annotation.Role;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.AfterInvocationProvider;
@@ -33,6 +38,9 @@ import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
+import org.springframework.util.Assert;
 
 import net.folivo.springframework.security.abac.attributes.PreProcessingProviderCollector;
 import net.folivo.springframework.security.abac.attributes.ProviderCollector;
@@ -56,13 +64,13 @@ import net.folivo.springframework.security.abac.prepost.AbacPostInvocationConfig
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationAttribute;
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationConfigAttributeFactory;
 
-//TODO AutoProxyRegistrar.class MethodSecurityMetadataSourceAdvisorRegistrar.class
 @Configuration
-public class AbacMethodSecurityConfiguration implements SmartInitializingSingleton {
+@EnableGlobalAuthentication
+public class AbacMethodSecurityConfiguration implements ImportBeanDefinitionRegistrar {
 
+	private final Log log = LogFactory.getLog(AbacMethodSecurityConfiguration.class);
 	protected final PdpConfiguration<?, ?, MethodInvocationContext> pdpConfig;
 	protected final AuthenticationConfiguration authConfig;
-	private ApplicationContext context;
 
 	@Autowired
 	public AbacMethodSecurityConfiguration(PdpConfiguration<?, ?, MethodInvocationContext> pdpConfig,
@@ -83,13 +91,12 @@ public class AbacMethodSecurityConfiguration implements SmartInitializingSinglet
 		if (runAsManager != null) {
 			methodSecurityInterceptor.setRunAsManager(runAsManager);
 		}
-		methodSecurityInterceptor.setAuthenticationManager(authenticationManager());
+		methodSecurityInterceptor.setAuthenticationManager(getAuthenticationManager());
 		return methodSecurityInterceptor;
 	}
 
 	// TODO catch?
-	@Bean
-	protected AuthenticationManager authenticationManager() throws Exception {
+	protected AuthenticationManager getAuthenticationManager() throws Exception {
 		return authConfig.getAuthenticationManager();
 	}
 
@@ -175,14 +182,16 @@ public class AbacMethodSecurityConfiguration implements SmartInitializingSinglet
 
 	@Autowired
 	protected void configureExpressionHandler(MethodSecurityExpressionHandler expressionHandler,
-			PermissionEvaluator permissionEvaluator, RoleHierarchy roleHierarchy, String defaultRolePrefix,
-			AuthenticationTrustResolver trustResolver) {
+			Optional<PermissionEvaluator> permissionEvaluator, Optional<RoleHierarchy> roleHierarchy,
+			Optional<GrantedAuthorityDefaults> grantedAuthorityDefaults,
+			Optional<AuthenticationTrustResolver> trustResolver) {
 		if (expressionHandler instanceof DefaultMethodSecurityExpressionHandler) {
 			DefaultMethodSecurityExpressionHandler defaultExpressionHandler = (DefaultMethodSecurityExpressionHandler) expressionHandler;
-			defaultExpressionHandler.setPermissionEvaluator(permissionEvaluator);
-			defaultExpressionHandler.setRoleHierarchy(roleHierarchy);
-			defaultExpressionHandler.setDefaultRolePrefix(defaultRolePrefix);
-			defaultExpressionHandler.setTrustResolver(trustResolver);
+			permissionEvaluator.ifPresent(defaultExpressionHandler::setPermissionEvaluator);
+			roleHierarchy.ifPresent(defaultExpressionHandler::setRoleHierarchy);
+			trustResolver.ifPresent(defaultExpressionHandler::setTrustResolver);
+			grantedAuthorityDefaults.map(GrantedAuthorityDefaults::getRolePrefix)
+					.ifPresent(defaultExpressionHandler::setDefaultRolePrefix);
 		}
 	}
 
@@ -194,6 +203,7 @@ public class AbacMethodSecurityConfiguration implements SmartInitializingSinglet
 	// TODO catch?
 	// TODO interface as return type?
 	@Bean
+	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	protected AbstractPointcutAdvisor abacMethodSecurityPointcutAdvisor() throws Exception {
 		// TODO is order of this(config) relevant? originally it is added
 		return new AbacMethodSecurityPointcutAdvisor(abacMethodSecurityPointcut(), methodSecurityInterceptor());
@@ -213,29 +223,17 @@ public class AbacMethodSecurityConfiguration implements SmartInitializingSinglet
 		return false;
 	}
 
+	// TODO no good way with this interface
 	// TODO make aspectJ-compatible
 	// TODO make it configurable
 	@Override
-	public void afterSingletonsInstantiated() {
-		BeanDefinitionRegistry registry = getSingleBeanOrNull(BeanDefinitionRegistry.class);
+	public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		if (getAdviceMode() == AdviceMode.PROXY) {
 			AopConfigUtils.registerAutoProxyCreatorIfNecessary(registry);
 			if (isProxyTargetClass()) {
 				AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
 			}
 		}
-	}
-
-	private <T> T getSingleBeanOrNull(Class<T> type) {
-		String[] beanNamesForType = this.context.getBeanNamesForType(type);
-		if (beanNamesForType == null || beanNamesForType.length != 1) {
-			return null;
-		}
-		return this.context.getBean(beanNamesForType[0], type);
-	}
-
-	@Autowired
-	public void setApplicationContext(ApplicationContext context) {
-		this.context = context;
 	}
 }

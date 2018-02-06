@@ -23,18 +23,20 @@ public class AttributeBasedAccessDecisionVoter<T> implements AccessDecisionVoter
 
 	@Override
 	public boolean supports(ConfigAttribute attribute) {
-		return attribute.getClass().isAssignableFrom(supportedAttribute.getClass());
+		return attribute.getClass().isAssignableFrom(supportedAttribute);
 	}
 
 	@Override
 	public boolean supports(Class<?> clazz) {
-		return clazz.getClass().isAssignableFrom(supportedContext.getClass());
+		return clazz.isAssignableFrom(supportedContext);
 	}
 
 	@Override
-	public int vote(Authentication authentication, T object, Collection<ConfigAttribute> attributes) {
+	public int vote(Authentication authentication, T context, Collection<ConfigAttribute> attributes) {
 		RequestAttributesHolder holder = findRequestAttributeHolder(attributes);
-		if (holder != null && pep.buildRequestAndEvaluateToBoolean(holder.getAttributes(), object))
+		if (holder == null)
+			return ACCESS_ABSTAIN;
+		if (pep.buildRequestAndEvaluateToBoolean(holder.getAttributes(), context))
 			return ACCESS_GRANTED;
 		return ACCESS_DENIED;
 	}

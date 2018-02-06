@@ -21,13 +21,12 @@ public class AbacAnnotationPostRequestAttributeProvider extends AbacAnnotationRe
 			return Collections.emptyList();
 		}
 
-		AbacPostAuthorize abacPostAuthorize = AbacAnnotationUtil.findAnnotation(context.getMethodInvocation(),
-				AbacPostAuthorize.class);
-
-		if (abacPostAuthorize == null) {
+		// TODO you've already checked this in metadatasource...
+		if (!context.getPostAuthorize().isPresent())
 			// There is no meta-data so return
 			return Collections.emptyList();
-		}
+
+		AbacPostAuthorize abacPostAuthorize = context.getPostAuthorize().get();
 
 		ArrayList<RequestAttribute> attrs = new ArrayList<>();
 

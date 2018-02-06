@@ -34,10 +34,10 @@ public class AbacAnnotationMethodSecurityMetadataSource
 		if (object instanceof MethodInvocationContext) {
 			MethodInvocationContext context = (MethodInvocationContext) object;
 			Collection<ConfigAttribute> attrs = new ArrayList<>();
-			if (context.isPreAuthorize()) {
+			if (context.getPreAuthorize().isPresent()) {
 				attrs.addAll(collectConfigAttributes(context, preCollector, preAttributeFactory));
 			}
-			if (context.isPostAuthorize()) {
+			if (context.getPostAuthorize().isPresent()) {
 				attrs.addAll(collectConfigAttributes(context, postCollector, postAttributeFactory));
 			}
 			return attrs;

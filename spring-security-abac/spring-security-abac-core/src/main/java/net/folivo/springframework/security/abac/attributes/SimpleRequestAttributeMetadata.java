@@ -29,7 +29,6 @@ public class SimpleRequestAttributeMetadata implements RequestAttributeMetadata 
 
 		stringBuilder.append("category=");
 		stringBuilder.append(category);
-		stringBuilder.append(',');
 
 		stringBuilder.append("}");
 		return stringBuilder.toString();

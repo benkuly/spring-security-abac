@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -16,6 +17,7 @@ import net.folivo.springframework.security.abac.xacml.core.config.XacmlPdpConfig
 
 @Profile("abacSecurity")
 @Import({ XacmlPdpConfiguration.class })
+@Configuration
 public class AbacSecurityConfig extends AbacMethodSecurityConfiguration {
 
 	@Autowired

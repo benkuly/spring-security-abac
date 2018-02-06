@@ -25,7 +25,6 @@ public class SubjectAttributeProvider implements RequestAttributeProvider<Method
 				attrFactory.build(AttributeCategory.SUBJECT, "role", AuthenticationUtil.getCurrentLoggedInUserRole()));
 		attrs.add(attrFactory.build(AttributeCategory.SUBJECT, "username",
 				AuthenticationUtil.getCurrentLoggedInUsername().orElse(null)));
-		// provider sollten unabhängig von expressions sein!
 		return attrs;
 	}
 

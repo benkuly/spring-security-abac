@@ -24,12 +24,12 @@ public class AttributeBasedAfterInvocationProvider<T> implements AfterInvocation
 
 	@Override
 	public boolean supports(ConfigAttribute attribute) {
-		return attribute.getClass().isAssignableFrom(supportedAttribute.getClass());
+		return attribute.getClass().isAssignableFrom(supportedAttribute);
 	}
 
 	@Override
 	public boolean supports(Class<?> clazz) {
-		return clazz.getClass().isAssignableFrom(supportedContext.getClass());
+		return clazz.isAssignableFrom(supportedContext);
 	}
 
 	// TODO urgs
@@ -38,7 +38,7 @@ public class AttributeBasedAfterInvocationProvider<T> implements AfterInvocation
 	public Object decide(Authentication authentication, Object object, Collection<ConfigAttribute> attributes,
 			Object returnedObject) throws AccessDeniedException {
 		RequestAttributesHolder holder = findRequestAttributeHolder(attributes);
-		if (holder == null || !pep.buildRequestAndEvaluateToBoolean(holder.getAttributes(), (T) object))
+		if (holder != null && !pep.buildRequestAndEvaluateToBoolean(holder.getAttributes(), (T) object))
 			throw new AccessDeniedException("Access is denied");
 		return returnedObject;
 	}

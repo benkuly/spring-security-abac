@@ -19,15 +19,16 @@ public class AbacMethodSecurityInterceptor extends AbstractSecurityInterceptor i
 
 	@Override
 	public Class<?> getSecureObjectClass() {
-		return MethodInvocation.class;
+		return MethodInvocationContext.class;
 	}
 
+	// TODO caching
 	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
-		boolean preAuthorize = AbacAnnotationUtil.findAnnotation(mi, AbacPreAuthorize.class) != null;
-		boolean postAuthorize = AbacAnnotationUtil.findAnnotation(mi, AbacPostAuthorize.class) != null;
-		MethodInvocationContext context = new MethodInvocationContext(mi, Optional.empty(), preAuthorize,
-				postAuthorize);
+
+		MethodInvocationContext context = new MethodInvocationContext(mi, Optional.empty(),
+				Optional.ofNullable(AbacAnnotationUtil.findAnnotation(mi, AbacPreAuthorize.class)),
+				Optional.ofNullable(AbacAnnotationUtil.findAnnotation(mi, AbacPostAuthorize.class)));
 
 		InterceptorStatusToken token = super.beforeInvocation(context);
 
@@ -37,7 +38,7 @@ public class AbacMethodSecurityInterceptor extends AbstractSecurityInterceptor i
 		} finally {
 			super.finallyInvocation(token);
 		}
-		context.setReturnedObject(Optional.of(result));
+		context.setReturnedObject(Optional.ofNullable(result));
 		return super.afterInvocation(token, result);
 	}
 

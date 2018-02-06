@@ -9,13 +9,14 @@ import oasis.names.tc.xacml._3_0.core.schema.wd_17.DecisionType;
 
 public class XacmlResponseEvaluator implements ResponseEvaluator<DecisionResult> {
 
-	Log log = LogFactory.getLog(XacmlResponseEvaluator.class);
+	private final Log log = LogFactory.getLog(XacmlResponseEvaluator.class);
 
 	// TODO throw exception if problems
 	@Override
 	public boolean evaluateToBoolean(DecisionResult response) {
 		DecisionType result = response.getDecision();
-		log.debug(result);
+		if (log.isDebugEnabled())
+			log.debug("The decison result was " + result);
 		return result == DecisionType.PERMIT;
 	}
 

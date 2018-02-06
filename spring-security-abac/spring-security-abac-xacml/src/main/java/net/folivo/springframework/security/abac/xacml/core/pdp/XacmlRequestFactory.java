@@ -52,11 +52,15 @@ public class XacmlRequestFactory implements RequestFactory<DecisionRequest> {
 						Optional.empty(), meta.getId());
 				final AttributeBag<?> attributeValues = findAttributes(r.getValue());
 				requestBuilder.putNamedAttributeIfAbsent(attributeId, attributeValues);
+				if (log.isDebugEnabled())
+					log.debug(
+							"RequestAttribute with id:'" + meta.getId() + "' and value:'" + r.getValue() + "' added.");
+			} else {
+				// TODO that should really never happen, so: warn?
+				if (log.isDebugEnabled())
+					log.debug("RequestAttribute with id '" + meta.getId()
+							+ "' will not be used in request because its value is null!");
 			}
-			// TODO that should really never happen
-			if (log.isDebugEnabled())
-				log.debug("RequestAttribute with id '" + meta.getId()
-						+ "' will not be used in request because its value is null!");
 		}
 		return requestBuilder.build(false);
 	}

@@ -8,11 +8,11 @@ public class MethodInvocationContext {
 
 	private final MethodInvocation methodInvocation;
 	private Optional<Object> returnedObject;
-	private final boolean preAuthorize;
-	private final boolean postAuthorize;
+	private final Optional<AbacPreAuthorize> preAuthorize;
+	private final Optional<AbacPostAuthorize> postAuthorize;
 
 	public MethodInvocationContext(MethodInvocation methodInvocation, Optional<Object> returnedObject,
-			boolean preAuthorize, boolean postAuthorize) {
+			Optional<AbacPreAuthorize> preAuthorize, Optional<AbacPostAuthorize> postAuthorize) {
 		this.methodInvocation = methodInvocation;
 		this.returnedObject = returnedObject;
 		this.preAuthorize = preAuthorize;
@@ -31,11 +31,11 @@ public class MethodInvocationContext {
 		this.returnedObject = returnedObject;
 	}
 
-	public boolean isPreAuthorize() {
+	public Optional<AbacPreAuthorize> getPreAuthorize() {
 		return preAuthorize;
 	}
 
-	public boolean isPostAuthorize() {
+	public Optional<AbacPostAuthorize> getPostAuthorize() {
 		return postAuthorize;
 	}
 

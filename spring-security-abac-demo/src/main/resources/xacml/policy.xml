@@ -335,13 +335,13 @@
 								MustBePresent="true" />
 						</Apply>
 						<Apply FunctionId="urn:oasis:names:tc:xacml:3.0:function:any-of-any">
-							<Function FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal" />
+							<Function FunctionId="urn:oasis:names:tc:xacml:1.0:function:dateTime-equal" />
 							<AttributeDesignator AttributeId="resource.old.creationTime"
-								DataType="http://www.w3.org/2001/XMLSchema#string"
+								DataType="http://www.w3.org/2001/XMLSchema#dateTime"
 								Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
 								MustBePresent="true" />
 							<AttributeDesignator AttributeId="resource.creationTime"
-								DataType="http://www.w3.org/2001/XMLSchema#string"
+								DataType="http://www.w3.org/2001/XMLSchema#dateTime"
 								Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
 								MustBePresent="true" />
 						</Apply>
@@ -417,4 +417,11 @@
 			</Condition>
 		</Rule>
 	</Policy>
+	<Policy PolicyId="denyAll"
+		RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
+		Version="1.0">
+		<Description>Denys every request that don't matches.</Description>
+		<Target></Target>
+		<Rule Effect="Deny" RuleId="denyAll.rule"></Rule>
+		</Policy>
 </PolicySet>
