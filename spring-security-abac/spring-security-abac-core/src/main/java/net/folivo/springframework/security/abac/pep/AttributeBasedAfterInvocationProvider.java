@@ -38,7 +38,7 @@ public class AttributeBasedAfterInvocationProvider<T> implements AfterInvocation
 	public Object decide(Authentication authentication, Object object, Collection<ConfigAttribute> attributes,
 			Object returnedObject) throws AccessDeniedException {
 		RequestAttributesHolder holder = findRequestAttributeHolder(attributes);
-		if (holder != null && !pep.buildRequestAndEvaluateToBoolean(holder.getAttributes(), (T) object))
+		if (holder != null && !pep.decide((T) object, holder.getAttributes()).evaluateToBoolean())
 			throw new AccessDeniedException("Access is denied");
 		return returnedObject;
 	}

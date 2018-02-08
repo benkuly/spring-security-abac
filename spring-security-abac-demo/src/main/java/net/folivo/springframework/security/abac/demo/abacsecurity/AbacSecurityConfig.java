@@ -13,15 +13,16 @@ import org.springframework.security.config.annotation.authentication.configurati
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProvider;
 import net.folivo.springframework.security.abac.config.AbacMethodSecurityConfiguration;
 import net.folivo.springframework.security.abac.method.MethodInvocationContext;
-import net.folivo.springframework.security.abac.xacml.core.config.XacmlPdpConfiguration;
+import net.folivo.springframework.security.abac.xacml.core.config.XacmlPdpMethodInvocationContextConfiguration;
 
 @Profile("abacSecurity")
-@Import({ XacmlPdpConfiguration.class })
+@Import({ XacmlPdpMethodInvocationContextConfiguration.class })
 @Configuration
 public class AbacSecurityConfig extends AbacMethodSecurityConfiguration {
 
 	@Autowired
-	public AbacSecurityConfig(XacmlPdpConfiguration pdpConfig, AuthenticationConfiguration authConfig) {
+	public AbacSecurityConfig(XacmlPdpMethodInvocationContextConfiguration pdpConfig,
+			AuthenticationConfiguration authConfig) {
 		super(pdpConfig, authConfig);
 	}
 

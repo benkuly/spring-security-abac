@@ -18,12 +18,17 @@ public class PostProcessingPepEngine<T> implements PepEngine<T> {
 		this.processors = processors;
 	}
 
-	protected Collection<RequestAttribute> postProcess(Collection<RequestAttribute> attrs, T context) {
+	protected Collection<RequestAttribute> postProcess(T context, Collection<RequestAttribute> attrs) {
 		return ProcessorUtils.process(attrs, context, processors);
 	}
 
 	@Override
-	public boolean buildRequestAndEvaluateToBoolean(Collection<RequestAttribute> attributes, T context) {
-		return handler.buildRequestAndEvaluateToBoolean(postProcess(attributes, context), context);
+	public PepResponse decide(T context, Collection<RequestAttribute> attributes) {
+		return handler.decide(context, postProcess(context, attributes));
+	}
+
+	@Override
+	public PepResponse decide(T context) {
+		throw new UnsupportedOperationException("currently not supported");
 	}
 }

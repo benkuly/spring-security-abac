@@ -1,7 +1,8 @@
 package net.folivo.springframework.security.abac.contexthandler;
 
-public interface PdpClient<R, S> {
+//TODO maybe T is too much, use object?
+public interface PdpClient<R, S, T> {
 
-	S decide(R request);
+	S decide(R request, T context);
 
 }

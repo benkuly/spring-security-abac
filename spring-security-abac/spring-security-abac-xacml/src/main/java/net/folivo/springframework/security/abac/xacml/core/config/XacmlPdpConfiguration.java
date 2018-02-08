@@ -38,17 +38,15 @@ import net.folivo.springframework.security.abac.attributes.RequestAttributeFacto
 import net.folivo.springframework.security.abac.attributes.SimpleRequestAttributeFactory;
 import net.folivo.springframework.security.abac.config.PdpConfiguration;
 import net.folivo.springframework.security.abac.contexthandler.PdpClient;
+import net.folivo.springframework.security.abac.contexthandler.PdpRequestFactory;
 import net.folivo.springframework.security.abac.contexthandler.RequestContextHandler;
-import net.folivo.springframework.security.abac.contexthandler.RequestFactory;
-import net.folivo.springframework.security.abac.contexthandler.ResponseEvaluator;
 import net.folivo.springframework.security.abac.contexthandler.SimpleRequestContextHandler;
-import net.folivo.springframework.security.abac.method.MethodInvocationContext;
+import net.folivo.springframework.security.abac.pep.PepResponseFactory;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlPdpClient;
+import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlPepResponseFactory;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlRequestFactory;
-import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlResponseEvaluator;
 
-public class XacmlPdpConfiguration
-		implements PdpConfiguration<DecisionRequest, DecisionResult, MethodInvocationContext> {
+public class XacmlPdpConfiguration<T> implements PdpConfiguration<DecisionRequest, DecisionResult, T> {
 
 	// I do things here, that are from PdpEngineConfiguration
 	@Bean
@@ -119,18 +117,18 @@ public class XacmlPdpConfiguration
 	}
 
 	@Override
-	public RequestFactory<DecisionRequest> requestFactory() {
+	public PdpRequestFactory<DecisionRequest> pdpRequestFactory() {
 		return new XacmlRequestFactory(pdpEngine());
 	}
 
 	@Override
-	public PdpClient<DecisionRequest, DecisionResult> pdpClient() {
-		return new XacmlPdpClient(pdpEngine());
+	public PdpClient<DecisionRequest, DecisionResult, T> pdpClient() {
+		return new XacmlPdpClient<>(pdpEngine());
 	}
 
 	@Override
-	public ResponseEvaluator<DecisionResult> responseEvaluator() {
-		return new XacmlResponseEvaluator();
+	public PepResponseFactory<DecisionResult> pepResponseFactory() {
+		return new XacmlPepResponseFactory();
 	}
 
 	@Override
@@ -139,8 +137,7 @@ public class XacmlPdpConfiguration
 	}
 
 	@Override
-	public RequestContextHandler<MethodInvocationContext> requestContextHandler() {
-		return new SimpleRequestContextHandler<>(pdpClient(),
-				responseEvaluator(), requestFactory());
+	public RequestContextHandler<T> requestContextHandler() {
+		return new SimpleRequestContextHandler<>(pdpClient(), pdpRequestFactory(), pepResponseFactory());
 	}
 }

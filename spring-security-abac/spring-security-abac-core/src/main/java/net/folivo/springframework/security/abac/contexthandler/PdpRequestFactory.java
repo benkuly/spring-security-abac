@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 
-public interface RequestFactory<R> {
+public interface PdpRequestFactory<R> {
 
 	R build(Collection<RequestAttribute> requestAttrs);
 

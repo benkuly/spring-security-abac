@@ -5,21 +5,21 @@ import org.springframework.context.annotation.Configuration;
 
 import net.folivo.springframework.security.abac.attributes.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.contexthandler.PdpClient;
+import net.folivo.springframework.security.abac.contexthandler.PdpRequestFactory;
 import net.folivo.springframework.security.abac.contexthandler.RequestContextHandler;
-import net.folivo.springframework.security.abac.contexthandler.RequestFactory;
-import net.folivo.springframework.security.abac.contexthandler.ResponseEvaluator;
+import net.folivo.springframework.security.abac.pep.PepResponseFactory;
 
 @Configuration
 public interface PdpConfiguration<R, S, T> {
 
 	@Bean
-	PdpClient<R, S> pdpClient();
+	PdpClient<R, S, T> pdpClient();
 
 	@Bean
-	RequestFactory<R> requestFactory();
+	PdpRequestFactory<R> pdpRequestFactory();
 
 	@Bean
-	ResponseEvaluator<S> responseEvaluator();
+	PepResponseFactory<S> pepResponseFactory();
 
 	@Bean
 	RequestAttributeFactory requestAttributeFactory();

@@ -3,24 +3,26 @@ package net.folivo.springframework.security.abac.contexthandler;
 import java.util.Collection;
 
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
+import net.folivo.springframework.security.abac.pep.PepResponse;
+import net.folivo.springframework.security.abac.pep.PepResponseFactory;
 
 public class SimpleRequestContextHandler<R, S, T> implements RequestContextHandler<T> {
 
-	private final PdpClient<R, S> pdp;
-	private final ResponseEvaluator<S> evaluator;
-	private final RequestFactory<R> requestFactory;
+	private final PdpClient<R, S, T> pdp;
+	private final PdpRequestFactory<R> requestFactory;
+	private final PepResponseFactory<S> responseFactory;
 
-	public SimpleRequestContextHandler(PdpClient<R, S> pdp, ResponseEvaluator<S> evaluator,
-			RequestFactory<R> requestFactory) {
+	public SimpleRequestContextHandler(PdpClient<R, S, T> pdp, PdpRequestFactory<R> requestFactory,
+			PepResponseFactory<S> responseFactory) {
 		this.pdp = pdp;
-		this.evaluator = evaluator;
 		this.requestFactory = requestFactory;
+		this.responseFactory = responseFactory;
 	}
 
 	@Override
-	public boolean buildRequestAndEvaluateToBoolean(Collection<RequestAttribute> attributes, T context) {
-		R request = requestFactory.build(attributes);
-		S response = pdp.decide(request);
-		return evaluator.evaluateToBoolean(response);
+	public PepResponse decide(T context, Collection<RequestAttribute> attrs) {
+		R request = requestFactory.build(attrs);
+		S response = pdp.decide(request, context);
+		return responseFactory.build(response);
 	}
 }

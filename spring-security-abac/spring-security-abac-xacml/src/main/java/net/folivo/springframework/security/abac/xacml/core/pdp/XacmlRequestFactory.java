@@ -23,9 +23,9 @@ import org.ow2.authzforce.xacml.identifiers.XacmlAttributeCategory;
 import net.folivo.springframework.security.abac.attributes.AttributeCategory;
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeMetadata;
-import net.folivo.springframework.security.abac.contexthandler.RequestFactory;
+import net.folivo.springframework.security.abac.contexthandler.PdpRequestFactory;
 
-public class XacmlRequestFactory implements RequestFactory<DecisionRequest> {
+public class XacmlRequestFactory implements PdpRequestFactory<DecisionRequest> {
 
 	private static final Log log = LogFactory.getLog(XacmlRequestFactory.class);
 	private final PdpEngine pdp;
@@ -43,7 +43,6 @@ public class XacmlRequestFactory implements RequestFactory<DecisionRequest> {
 		final DecisionRequestBuilder<?> requestBuilder = pdp.newRequestBuilder(-1, requestAttrs.size());
 
 		for (RequestAttribute r : requestAttrs) {
-
 			final RequestAttributeMetadata meta = r.getMetadata();
 			if (r.getValue() != null) {
 				// TODO maybe use identifier base from configuration?

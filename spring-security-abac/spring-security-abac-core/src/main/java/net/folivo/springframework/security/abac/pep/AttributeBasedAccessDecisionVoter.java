@@ -36,7 +36,7 @@ public class AttributeBasedAccessDecisionVoter<T> implements AccessDecisionVoter
 		RequestAttributesHolder holder = findRequestAttributeHolder(attributes);
 		if (holder == null)
 			return ACCESS_ABSTAIN;
-		if (pep.buildRequestAndEvaluateToBoolean(holder.getAttributes(), context))
+		if (pep.decide(context, holder.getAttributes()).evaluateToBoolean())
 			return ACCESS_GRANTED;
 		return ACCESS_DENIED;
 	}

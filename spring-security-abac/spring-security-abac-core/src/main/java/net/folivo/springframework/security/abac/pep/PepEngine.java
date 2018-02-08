@@ -4,8 +4,11 @@ import java.util.Collection;
 
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 
+//mention, that usually Pep collects the attributes
 public interface PepEngine<T> {
 
-	boolean buildRequestAndEvaluateToBoolean(Collection<RequestAttribute> attributes, T context);
+	PepResponse decide(T context, Collection<RequestAttribute> attributes);
+
+	PepResponse decide(T context);
 
 }
