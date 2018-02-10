@@ -35,12 +35,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.util.ResourceUtils;
 
 import net.folivo.springframework.security.abac.attributes.RequestAttributeFactory;
-import net.folivo.springframework.security.abac.attributes.SimpleRequestAttributeFactory;
+import net.folivo.springframework.security.abac.attributes.StandardRequestAttributeFactory;
 import net.folivo.springframework.security.abac.config.PdpConfiguration;
 import net.folivo.springframework.security.abac.contexthandler.PdpClient;
 import net.folivo.springframework.security.abac.contexthandler.PdpRequestFactory;
 import net.folivo.springframework.security.abac.contexthandler.RequestContextHandler;
-import net.folivo.springframework.security.abac.contexthandler.SimpleRequestContextHandler;
+import net.folivo.springframework.security.abac.contexthandler.StandardRequestContextHandler;
 import net.folivo.springframework.security.abac.pep.PepResponseFactory;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlPdpClient;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlPepResponseFactory;
@@ -133,11 +133,11 @@ public class XacmlPdpConfiguration<T> implements PdpConfiguration<DecisionReques
 
 	@Override
 	public RequestAttributeFactory requestAttributeFactory() {
-		return new SimpleRequestAttributeFactory();
+		return new StandardRequestAttributeFactory();
 	}
 
 	@Override
 	public RequestContextHandler<T> requestContextHandler() {
-		return new SimpleRequestContextHandler<>(pdpClient(), pdpRequestFactory(), pepResponseFactory());
+		return new StandardRequestContextHandler<>(pdpClient(), pdpRequestFactory(), pepResponseFactory());
 	}
 }

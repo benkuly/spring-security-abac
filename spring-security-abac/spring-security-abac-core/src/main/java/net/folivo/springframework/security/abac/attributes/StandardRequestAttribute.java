@@ -2,12 +2,12 @@ package net.folivo.springframework.security.abac.attributes;
 
 import org.springframework.util.Assert;
 
-public class SimpleRequestAttribute implements RequestAttribute {
+public class StandardRequestAttribute implements RequestAttribute {
 
 	private final RequestAttributeMetadata metadata;
 	private Object value;
 
-	public SimpleRequestAttribute(RequestAttributeMetadata metadata, Object value) {
+	public StandardRequestAttribute(RequestAttributeMetadata metadata, Object value) {
 		Assert.notNull(metadata, "Metadata must not be null!");
 		this.metadata = metadata;
 		this.value = value;

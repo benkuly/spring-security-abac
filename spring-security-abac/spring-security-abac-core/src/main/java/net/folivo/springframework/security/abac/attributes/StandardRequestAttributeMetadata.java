@@ -1,11 +1,11 @@
 package net.folivo.springframework.security.abac.attributes;
 
-public class SimpleRequestAttributeMetadata implements RequestAttributeMetadata {
+public class StandardRequestAttributeMetadata implements RequestAttributeMetadata {
 
 	private final AttributeCategory category;
 	private final String id;
 
-	public SimpleRequestAttributeMetadata(AttributeCategory category, String id) {
+	public StandardRequestAttributeMetadata(AttributeCategory category, String id) {
 		this.category = category;
 		this.id = id;
 	}

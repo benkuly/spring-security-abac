@@ -6,13 +6,13 @@ import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 import net.folivo.springframework.security.abac.pep.PepResponse;
 import net.folivo.springframework.security.abac.pep.PepResponseFactory;
 
-public class SimpleRequestContextHandler<R, S, T> implements RequestContextHandler<T> {
+public class StandardRequestContextHandler<R, S, T> implements RequestContextHandler<T> {
 
 	private final PdpClient<R, S, T> pdp;
 	private final PdpRequestFactory<R> requestFactory;
 	private final PepResponseFactory<S> responseFactory;
 
-	public SimpleRequestContextHandler(PdpClient<R, S, T> pdp, PdpRequestFactory<R> requestFactory,
+	public StandardRequestContextHandler(PdpClient<R, S, T> pdp, PdpRequestFactory<R> requestFactory,
 			PepResponseFactory<S> responseFactory) {
 		this.pdp = pdp;
 		this.requestFactory = requestFactory;
