@@ -3,6 +3,7 @@ package net.folivo.springframework.security.abac.pip;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,6 +29,7 @@ public class StandardPipEngine<T> implements PipEngine<T> {
 			if (log.isDebugEnabled() && attr.isPresent())
 				log.debug("Cannot find any attribute for metadata:" + metadata);
 			return attr;
-		}).flatMap(Optional::stream).collect(Collectors.toList());
+		}).flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty()/* TODO Java9: Optional::stream */)
+				.collect(Collectors.toList());
 	}
 }

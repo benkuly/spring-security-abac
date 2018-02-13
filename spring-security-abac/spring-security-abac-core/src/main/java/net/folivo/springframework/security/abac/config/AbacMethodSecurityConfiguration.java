@@ -42,10 +42,10 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.util.Assert;
 
-import net.folivo.springframework.security.abac.attributes.PreProcessingProviderCollector;
 import net.folivo.springframework.security.abac.attributes.ProviderCollector;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProcessor;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProvider;
+import net.folivo.springframework.security.abac.attributes.StandardProviderCollector;
 import net.folivo.springframework.security.abac.method.AbacAnnotationMethodSecurityMetadataSource;
 import net.folivo.springframework.security.abac.method.AbacAnnotationPostRequestAttributeProvider;
 import net.folivo.springframework.security.abac.method.AbacAnnotationPreRequestAttributeProvider;
@@ -54,7 +54,6 @@ import net.folivo.springframework.security.abac.method.aopalliance.AbacMethodSec
 import net.folivo.springframework.security.abac.method.aopalliance.AbacMethodSecurityPointcut;
 import net.folivo.springframework.security.abac.method.aopalliance.AbacMethodSecurityPointcutAdvisor;
 import net.folivo.springframework.security.abac.method.expression.ExpressionBasedRequestAttributePostProcessor;
-import net.folivo.springframework.security.abac.method.expression.ExpressionBasedRequestAttributePreProcessor;
 import net.folivo.springframework.security.abac.pep.AttributeBasedAccessDecisionVoter;
 import net.folivo.springframework.security.abac.pep.AttributeBasedAfterInvocationProvider;
 import net.folivo.springframework.security.abac.pep.PepEngine;
@@ -123,10 +122,10 @@ public class AbacMethodSecurityConfiguration implements ImportBeanDefinitionRegi
 
 	@Bean
 	protected SecurityMetadataSource methodSecurityMetadataSource() {
-		ProviderCollector<MethodInvocationContext> preCollector = new PreProcessingProviderCollector<>(
-				requestAttributePreInvocationProvider(), requestAttributePreProcessors());
-		ProviderCollector<MethodInvocationContext> postCollector = new PreProcessingProviderCollector<>(
-				requestAttributePostInvocationProvider(), requestAttributePreProcessors());
+		ProviderCollector<MethodInvocationContext> preCollector = new StandardProviderCollector<>(
+				requestAttributePreInvocationProvider());
+		ProviderCollector<MethodInvocationContext> postCollector = new StandardProviderCollector<>(
+				requestAttributePostInvocationProvider());
 		return new AbacAnnotationMethodSecurityMetadataSource(preCollector, postCollector,
 				new AbacPreInvocationConfigAttributeFactory(), new AbacPostInvocationConfigAttributeFactory());
 	}
@@ -152,14 +151,6 @@ public class AbacMethodSecurityConfiguration implements ImportBeanDefinitionRegi
 		providers.addAll(staticRequestAttributeProvider());
 		AnnotationAwareOrderComparator.sort(providers);
 		return providers;
-	}
-
-	@Bean
-	protected List<RequestAttributeProcessor<MethodInvocationContext>> requestAttributePreProcessors() {
-		List<RequestAttributeProcessor<MethodInvocationContext>> processors = new ArrayList<>();
-		processors.add(new ExpressionBasedRequestAttributePreProcessor(expressionHandler()));
-		AnnotationAwareOrderComparator.sort(processors);
-		return processors;
 	}
 
 	@Bean

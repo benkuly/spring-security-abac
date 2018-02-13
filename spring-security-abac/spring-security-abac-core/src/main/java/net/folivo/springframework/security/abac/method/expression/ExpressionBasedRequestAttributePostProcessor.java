@@ -26,12 +26,20 @@ public class ExpressionBasedRequestAttributePostProcessor
 	@Override
 	public boolean supports(RequestAttribute a) {
 		// TODO null check?
-		return Expression.class.isAssignableFrom(a.getValue().getClass());
+		if (String.class.isAssignableFrom(a.getValue().getClass())) {
+			String value = (String) a.getValue();
+			if (value.startsWith("${") && value.endsWith("}"))
+				return true;
+		}
+		return false;
 	}
 
 	@Override
 	public Collection<RequestAttribute> process(RequestAttribute attr, MethodInvocationContext context) {
-		Expression expr = (Expression) attr.getValue();
+		String value = (String) attr.getValue();
+		String expressionString = value.substring(2, value.length() - 1);
+		Expression expr = expressionHandler.getExpressionParser().parseExpression(expressionString);
+
 		EvaluationContext evaluationContext = expressionHandler.createEvaluationContext(
 				SecurityContextHolder.getContext().getAuthentication(), context.getMethodInvocation());
 		context.getReturnedObject().ifPresent(r -> expressionHandler.setReturnObject(r, evaluationContext));
