@@ -2,10 +2,22 @@ package net.folivo.springframework.security.abac.pip;
 
 import net.folivo.springframework.security.abac.attributes.RequestAttributeMetadata;
 
-public interface PipProviderContext<T> {
+public class PipProviderContext<T> {
 
-	T getOriginalContext();
+	private final T originalContext;
+	private final RequestAttributeMetadata attributeMetadata;
 
-	RequestAttributeMetadata getAttributeMetadata();
+	public PipProviderContext(T originalContext, RequestAttributeMetadata attributeMetadata) {
+		this.originalContext = originalContext;
+		this.attributeMetadata = attributeMetadata;
+	}
+
+	public T getOriginalContext() {
+		return originalContext;
+	}
+
+	public RequestAttributeMetadata getAttributeMetadata() {
+		return attributeMetadata;
+	}
 
 }

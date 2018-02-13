@@ -3,6 +3,7 @@ package net.folivo.springframework.security.abac.contexthandler;
 import java.util.Collection;
 
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
+import net.folivo.springframework.security.abac.attributes.RequestAttributeMetadata;
 import net.folivo.springframework.security.abac.pep.PepResponse;
 import net.folivo.springframework.security.abac.pep.PepResponseFactory;
 
@@ -24,5 +25,12 @@ public class StandardRequestContextHandler<R, S, T> implements RequestContextHan
 		R request = requestFactory.build(attrs);
 		S response = pdp.decide(request, context);
 		return responseFactory.build(response);
+	}
+
+	@Override
+	public Collection<RequestAttribute> attributeQuery(String requestIdentifier,
+			Collection<RequestAttributeMetadata> metadata) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

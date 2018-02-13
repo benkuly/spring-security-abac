@@ -1,32 +1,22 @@
 package net.folivo.springframework.security.abac.attributes;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 //TODO force that providers and processors are sorted!
-public class PreProcessingProviderCollector<T> implements ProviderCollector<T> {
+public class PreProcessingProviderCollector<T> extends StandardProviderCollector<T> {
 
-	private final List<RequestAttributeProvider<T>> providers;
 	private final List<RequestAttributeProcessor<T>> processors;
 
 	public PreProcessingProviderCollector(List<RequestAttributeProvider<T>> providers,
 			List<RequestAttributeProcessor<T>> processors) {
-		this.providers = providers;
+		super(providers);
 		this.processors = processors;
 	}
 
 	@Override
-	public Collection<RequestAttribute> collect(T context) {
-		return preProcessAttributes(mergeAttribtesFromProvider(context), context);
-	}
-
-	protected Collection<RequestAttribute> mergeAttribtesFromProvider(T context) {
-		// TODO bad solution (instead of put, go backwards and use containsKey)
-		Map<RequestAttributeMetadata, RequestAttribute> attrs = new HashMap<>();
-		providers.stream().flatMap(p -> p.getAttributes(context).stream()).forEach(a -> attrs.put(a.getMetadata(), a));
-		return attrs.values();
+	public Collection<RequestAttribute> collectAll(T context) {
+		return preProcessAttributes(super.collectAll(context), context);
 	}
 
 	protected Collection<RequestAttribute> preProcessAttributes(Collection<RequestAttribute> attrs, T context) {
