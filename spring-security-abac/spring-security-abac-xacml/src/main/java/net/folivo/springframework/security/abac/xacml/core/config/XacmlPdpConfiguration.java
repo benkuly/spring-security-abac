@@ -2,6 +2,7 @@ package net.folivo.springframework.security.abac.xacml.core.config;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,9 +35,6 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.util.ResourceUtils;
 
-import net.folivo.springframework.security.abac.attributes.RequestAttributeFactory;
-import net.folivo.springframework.security.abac.attributes.StandardRequestAttributeFactory;
-import net.folivo.springframework.security.abac.config.PdpConfiguration;
 import net.folivo.springframework.security.abac.contexthandler.PdpClient;
 import net.folivo.springframework.security.abac.contexthandler.PdpRequestFactory;
 import net.folivo.springframework.security.abac.contexthandler.RequestContextHandler;
@@ -46,7 +44,8 @@ import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlPdpClient;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlPepResponseFactory;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlRequestFactory;
 
-public class XacmlPdpConfiguration<T> implements PdpConfiguration<DecisionRequest, DecisionResult, T> {
+//TOTO isn't there a better solution without T?
+public class XacmlPdpConfiguration<T> {
 
 	// I do things here, that are from PdpEngineConfiguration
 	@Bean
@@ -88,9 +87,9 @@ public class XacmlPdpConfiguration<T> implements PdpConfiguration<DecisionReques
 
 		RootPolicyProvider rootPolicyProvider;
 		try {
-			rootPolicyProvider = CoreRootPolicyProvider.getInstance(
-					ResourceUtils.getURL("src/main/resources/xacml/policy.xml"), xacmlParserFactory,
-					xacmlExpressionFactory, combiningAlgRegistry, refPolicyProvider);
+			URL url = ResourceUtils.getURL("src/main/resources/xacml/policy.xml");
+			rootPolicyProvider = CoreRootPolicyProvider.getInstance(url, xacmlParserFactory, xacmlExpressionFactory,
+					combiningAlgRegistry, refPolicyProvider);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -116,28 +115,24 @@ public class XacmlPdpConfiguration<T> implements PdpConfiguration<DecisionReques
 		}
 	}
 
-	@Override
+	@Bean
 	public PdpRequestFactory<DecisionRequest> pdpRequestFactory() {
 		return new XacmlRequestFactory(pdpEngine());
 	}
 
-	@Override
+	@Bean
 	public PdpClient<DecisionRequest, DecisionResult, T> pdpClient() {
 		return new XacmlPdpClient<>(pdpEngine());
 	}
 
-	@Override
+	@Bean
 	public PepResponseFactory<DecisionResult> pepResponseFactory() {
 		return new XacmlPepResponseFactory();
 	}
 
-	@Override
-	public RequestAttributeFactory requestAttributeFactory() {
-		return new StandardRequestAttributeFactory();
-	}
-
-	@Override
+	@Bean
 	public RequestContextHandler<T> requestContextHandler() {
+		System.out.println("################################################");
 		return new StandardRequestContextHandler<>(pdpClient(), pdpRequestFactory(), pepResponseFactory());
 	}
 }
