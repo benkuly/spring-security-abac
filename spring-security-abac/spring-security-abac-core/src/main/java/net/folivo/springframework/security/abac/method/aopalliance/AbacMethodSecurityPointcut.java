@@ -13,8 +13,8 @@ public class AbacMethodSecurityPointcut extends StaticMethodMatcherPointcut impl
 
 	@Override
 	public boolean matches(Method method, Class<?> targetClass) {
-		return AbacAnnotationUtil.findAnnotation(method, targetClass, AbacPreAuthorize.class) != null
-				|| AbacAnnotationUtil.findAnnotation(method, targetClass, AbacPostAuthorize.class) != null;
+		return AbacAnnotationUtil.findAnnotation(method, targetClass, AbacPreAuthorize.class).isPresent()
+				|| AbacAnnotationUtil.findAnnotation(method, targetClass, AbacPostAuthorize.class).isPresent();
 	}
 
 }

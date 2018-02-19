@@ -27,7 +27,6 @@ public class DataInitializer implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		eMa.persist(new User("admin", PWD, ROLE_ADMIN, "Achim", "Admino", "mail@mail.mail"));
-
 		eMa.persist(new User("normal", PWD, ROLE_NORMAL, "Norman", "Normalo", "mail@mail.mail"));
 
 		System.out.println("\r\nCreated demo enitites\r\n");

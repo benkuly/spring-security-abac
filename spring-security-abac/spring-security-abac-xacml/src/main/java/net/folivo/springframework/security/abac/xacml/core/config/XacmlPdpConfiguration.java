@@ -132,7 +132,6 @@ public class XacmlPdpConfiguration<T> {
 
 	@Bean
 	public RequestContextHandler<T> requestContextHandler() {
-		System.out.println("################################################");
 		return new StandardRequestContextHandler<>(pdpClient(), pdpRequestFactory(), pepResponseFactory());
 	}
 }

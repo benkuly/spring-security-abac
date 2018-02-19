@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 import org.aopalliance.intercept.MethodInvocation;
@@ -40,9 +41,9 @@ public class AbacAnnotationUtil {
 		return attrs;
 	}
 
-	public static <A extends Annotation> A findAnnotation(MethodInvocation mi, Class<A> annotationClass) {
+	public static <A extends Annotation> Optional<A> findAnnotation(MethodInvocation mi, Class<A> annotationClass) {
 		if (mi.getMethod().getDeclaringClass() == Object.class) {
-			return null;
+			return Optional.empty();
 		}
 
 		Object target = mi.getThis();
@@ -51,11 +52,8 @@ public class AbacAnnotationUtil {
 		if (target != null) {
 			targetClass = target instanceof Class<?> ? (Class<?>) target : AopProxyUtils.ultimateTargetClass(target);
 		}
-		A annotation = findAnnotation(mi.getMethod(), targetClass, annotationClass);
-		if (annotation != null) {
-			return annotation;
-		}
-		if (target != null && !(target instanceof Class<?>)) {
+		Optional<A> annotation = findAnnotation(mi.getMethod(), targetClass, annotationClass);
+		if (!annotation.isPresent() && target != null && !(target instanceof Class<?>)) {
 			annotation = findAnnotation(mi.getMethod(), target.getClass(), annotationClass);
 		}
 		return annotation;
@@ -71,7 +69,7 @@ public class AbacAnnotationUtil {
 	 * we consider method-specific annotations on an interface before class-level
 	 * ones.
 	 */
-	public static <A extends Annotation> A findAnnotation(Method method, Class<?> targetClass,
+	public static <A extends Annotation> Optional<A> findAnnotation(Method method, Class<?> targetClass,
 			Class<A> annotationClass) {
 		// The method may be on an interface, but we need attributes from the target
 		// class.
@@ -81,7 +79,7 @@ public class AbacAnnotationUtil {
 
 		if (annotation != null) {
 			// logger.debug(annotation + " found on specific method: " + specificMethod);
-			return annotation;
+			return Optional.of(annotation);
 		}
 
 		// Check the original (e.g. interface) method
@@ -90,7 +88,7 @@ public class AbacAnnotationUtil {
 
 			if (annotation != null) {
 				// logger.debug(annotation + " found on: " + method);
-				return annotation;
+				return Optional.of(annotation);
 			}
 		}
 
@@ -101,10 +99,10 @@ public class AbacAnnotationUtil {
 		if (annotation != null) {
 			// logger.debug(annotation + " found on: " +
 			// specificMethod.getDeclaringClass().getName());
-			return annotation;
+			return Optional.of(annotation);
 		}
 
-		return null;
+		return Optional.empty();
 	}
 
 }

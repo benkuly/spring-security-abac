@@ -16,9 +16,6 @@ import org.springframework.security.access.intercept.AfterInvocationManager;
 import org.springframework.security.access.intercept.AfterInvocationProviderManager;
 import org.springframework.security.access.vote.AbstractAccessDecisionManager;
 import org.springframework.security.access.vote.AffirmativeBased;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 
 import net.folivo.springframework.security.abac.attributes.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProcessor;
@@ -36,11 +33,9 @@ import net.folivo.springframework.security.abac.prepost.AbacPostInvocationAttrib
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationAttribute;
 
 @Configuration
-@EnableGlobalAuthentication
 public abstract class StandardAbstractAbacConfiguration<T> {
 
 	private RequestContextHandler<T> contextHandler;
-	private AuthenticationConfiguration authConfig;
 
 	@Bean
 	protected PepEngine<T> pepEngine() {
@@ -48,7 +43,7 @@ public abstract class StandardAbstractAbacConfiguration<T> {
 	}
 
 	@Bean
-	protected AccessDecisionManager accessDecisionManager() {
+	protected AccessDecisionManager abacAccessDecisionManager() {
 		List<AccessDecisionVoter<? extends Object>> decisionVoters = new ArrayList<>();
 		decisionVoters.add(new AttributeBasedAccessDecisionVoter<>(pepEngine(), getContextClass(),
 				AbacPreInvocationAttribute.class));
@@ -59,7 +54,7 @@ public abstract class StandardAbstractAbacConfiguration<T> {
 	}
 
 	@Bean
-	protected AfterInvocationManager afterInvocationManager() {
+	protected AfterInvocationManager abacAfterInvocationManager() {
 		AfterInvocationProviderManager invocationProviderManager = new AfterInvocationProviderManager();
 		List<AfterInvocationProvider> afterInvocationProviders = new ArrayList<>();
 		afterInvocationProviders.add(new AttributeBasedAfterInvocationProvider<>(pepEngine(), getContextClass(),
@@ -101,23 +96,9 @@ public abstract class StandardAbstractAbacConfiguration<T> {
 		this.contextHandler = contextHandler;
 	}
 
-	@Autowired
-	public void setAuthConfig(AuthenticationConfiguration authConfig) {
-		this.authConfig = authConfig;
-	}
-
-	// TODO catch?
-	protected AuthenticationManager getAuthenticationManager() throws Exception {
-		return authConfig.getAuthenticationManager();
-	}
-
 	@Bean
 	abstract protected List<RequestAttributeProcessor<T>> requestAttributePostProcessors();
 
 	abstract protected Class<T> getContextClass();
-
-	protected AuthenticationConfiguration getAuthenticationConfig() {
-		return authConfig;
-	}
 
 }

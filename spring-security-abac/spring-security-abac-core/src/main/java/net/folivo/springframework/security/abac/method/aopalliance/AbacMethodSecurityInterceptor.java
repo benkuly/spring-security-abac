@@ -27,8 +27,8 @@ public class AbacMethodSecurityInterceptor extends AbstractSecurityInterceptor i
 	public Object invoke(MethodInvocation mi) throws Throwable {
 
 		MethodInvocationContext context = new MethodInvocationContext(mi, Optional.empty(),
-				Optional.ofNullable(AbacAnnotationUtil.findAnnotation(mi, AbacPreAuthorize.class)),
-				Optional.ofNullable(AbacAnnotationUtil.findAnnotation(mi, AbacPostAuthorize.class)));
+				AbacAnnotationUtil.findAnnotation(mi, AbacPreAuthorize.class),
+				AbacAnnotationUtil.findAnnotation(mi, AbacPostAuthorize.class));
 
 		InterceptorStatusToken token = super.beforeInvocation(context);
 
