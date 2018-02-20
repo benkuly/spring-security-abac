@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.security.access.PermissionEvaluator;
@@ -24,7 +26,12 @@ import net.folivo.springframework.security.abac.method.expression.ExpressionBase
 import net.folivo.springframework.security.abac.prepost.AbacPostInvocationConfigAttributeFactory;
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationConfigAttributeFactory;
 
-public class AbacMethodSecurityConfiguration extends StandardAbstractAbacConfiguration<MethodInvocationContext> {
+public class AbacMethodSecurityConfiguration extends StandardAbstractAbacConfiguration<MethodInvocationContext>
+		implements SmartInitializingSingleton {
+
+	private MethodSecurityExpressionHandler expressionHandler;
+	private DefaultMethodSecurityExpressionHandler defaultExpressionHandler;
+	private ApplicationContext context;
 
 	@Bean
 	protected SecurityMetadataSource abacMethodSecurityMetadataSource() {
@@ -44,28 +51,48 @@ public class AbacMethodSecurityConfiguration extends StandardAbstractAbacConfigu
 		return processors;
 	}
 
-	@Bean
-	protected MethodSecurityExpressionHandler abacExpressionHandler() {
-		return new DefaultMethodSecurityExpressionHandler();
+	protected MethodSecurityExpressionHandler createAbacExpressionHandler() {
+		defaultExpressionHandler = new DefaultMethodSecurityExpressionHandler();
+		return defaultExpressionHandler;
 	}
 
-	@Autowired
-	protected void configureExpressionHandler(MethodSecurityExpressionHandler abacExpressionHandler,
-			Optional<PermissionEvaluator> permissionEvaluator, Optional<RoleHierarchy> roleHierarchy,
-			Optional<GrantedAuthorityDefaults> grantedAuthorityDefaults,
-			Optional<AuthenticationTrustResolver> trustResolver) {
-		if (abacExpressionHandler instanceof DefaultMethodSecurityExpressionHandler) {
-			DefaultMethodSecurityExpressionHandler defaultExpressionHandler = (DefaultMethodSecurityExpressionHandler) abacExpressionHandler;
-			permissionEvaluator.ifPresent(defaultExpressionHandler::setPermissionEvaluator);
-			roleHierarchy.ifPresent(defaultExpressionHandler::setRoleHierarchy);
-			trustResolver.ifPresent(defaultExpressionHandler::setTrustResolver);
-			grantedAuthorityDefaults.map(GrantedAuthorityDefaults::getRolePrefix)
+	@Bean
+	protected MethodSecurityExpressionHandler abacExpressionHandler() {
+		if (expressionHandler == null)
+			expressionHandler = createAbacExpressionHandler();
+		return expressionHandler;
+	}
+
+	protected void initializeExpressionHandler() {
+		if (defaultExpressionHandler != null) {
+			getSingleBean(PermissionEvaluator.class).ifPresent(defaultExpressionHandler::setPermissionEvaluator);
+			getSingleBean(RoleHierarchy.class).ifPresent(defaultExpressionHandler::setRoleHierarchy);
+			getSingleBean(AuthenticationTrustResolver.class).ifPresent(defaultExpressionHandler::setTrustResolver);
+			getSingleBean(GrantedAuthorityDefaults.class).map(GrantedAuthorityDefaults::getRolePrefix)
 					.ifPresent(defaultExpressionHandler::setDefaultRolePrefix);
 		}
 	}
 
+	private <T> Optional<T> getSingleBean(Class<T> type) {
+		String[] beanNamesForType = this.context.getBeanNamesForType(type);
+		if (beanNamesForType == null || beanNamesForType.length != 1) {
+			return Optional.empty();
+		}
+		return Optional.of(context.getBean(beanNamesForType[0], type));
+	}
+
 	@Override
-	protected Class<MethodInvocationContext> getContextClass() {
+	protected Class<MethodInvocationContext> getSecurityContextClass() {
 		return MethodInvocationContext.class;
+	}
+
+	@Override
+	public void afterSingletonsInstantiated() {
+		initializeExpressionHandler();
+	}
+
+	@Autowired
+	public void setApplicationContext(ApplicationContext context) {
+		this.context = context;
 	}
 }

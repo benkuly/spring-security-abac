@@ -103,7 +103,7 @@
 							<AttributeDesignator AttributeId="username"
 								DataType="http://www.w3.org/2001/XMLSchema#string"
 								Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
-								MustBePresent="true" />
+								MustBePresent="false" />
 							<AttributeDesignator AttributeId="resource.username"
 								DataType="http://www.w3.org/2001/XMLSchema#string"
 								Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
@@ -178,7 +178,7 @@
 					<AttributeDesignator AttributeId="username"
 						DataType="http://www.w3.org/2001/XMLSchema#string"
 						Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
-						MustBePresent="true" />
+						MustBePresent="false" />
 					<AttributeDesignator AttributeId="resource.username"
 						DataType="http://www.w3.org/2001/XMLSchema#string"
 						Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
@@ -264,7 +264,7 @@
 						<AttributeDesignator AttributeId="username"
 							DataType="http://www.w3.org/2001/XMLSchema#string"
 							Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
-							MustBePresent="true" />
+							MustBePresent="false" />
 						<AttributeDesignator AttributeId="resource.creator"
 							DataType="http://www.w3.org/2001/XMLSchema#string"
 							Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
@@ -408,7 +408,7 @@
 					<AttributeDesignator AttributeId="username"
 						DataType="http://www.w3.org/2001/XMLSchema#string"
 						Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
-						MustBePresent="true" />
+						MustBePresent="false" />
 					<AttributeDesignator AttributeId="resource.creator"
 						DataType="http://www.w3.org/2001/XMLSchema#string"
 						Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"

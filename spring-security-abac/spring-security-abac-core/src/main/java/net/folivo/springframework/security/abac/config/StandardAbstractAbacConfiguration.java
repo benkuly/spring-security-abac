@@ -45,7 +45,7 @@ public abstract class StandardAbstractAbacConfiguration<T> {
 	@Bean
 	protected AccessDecisionManager abacAccessDecisionManager() {
 		List<AccessDecisionVoter<? extends Object>> decisionVoters = new ArrayList<>();
-		decisionVoters.add(new AttributeBasedAccessDecisionVoter<>(pepEngine(), getContextClass(),
+		decisionVoters.add(new AttributeBasedAccessDecisionVoter<>(pepEngine(), getSecurityContextClass(),
 				AbacPreInvocationAttribute.class));
 		AbstractAccessDecisionManager acdm = new AffirmativeBased(decisionVoters);
 		// TODO bad workaound
@@ -57,7 +57,7 @@ public abstract class StandardAbstractAbacConfiguration<T> {
 	protected AfterInvocationManager abacAfterInvocationManager() {
 		AfterInvocationProviderManager invocationProviderManager = new AfterInvocationProviderManager();
 		List<AfterInvocationProvider> afterInvocationProviders = new ArrayList<>();
-		afterInvocationProviders.add(new AttributeBasedAfterInvocationProvider<>(pepEngine(), getContextClass(),
+		afterInvocationProviders.add(new AttributeBasedAfterInvocationProvider<>(pepEngine(), getSecurityContextClass(),
 				AbacPostInvocationAttribute.class));
 		invocationProviderManager.setProviders(afterInvocationProviders);
 		return invocationProviderManager;
@@ -99,6 +99,6 @@ public abstract class StandardAbstractAbacConfiguration<T> {
 	@Bean
 	abstract protected List<RequestAttributeProcessor<T>> requestAttributePostProcessors();
 
-	abstract protected Class<T> getContextClass();
+	abstract protected Class<T> getSecurityContextClass();
 
 }

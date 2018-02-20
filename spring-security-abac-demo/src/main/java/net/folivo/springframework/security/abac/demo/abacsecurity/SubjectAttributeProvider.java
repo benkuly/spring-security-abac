@@ -23,8 +23,8 @@ public class SubjectAttributeProvider implements RequestAttributeProvider<Method
 		Collection<RequestAttribute> attrs = new ArrayList<>();
 		attrs.add(
 				attrFactory.build(AttributeCategory.SUBJECT, "role", AuthenticationUtil.getCurrentLoggedInUserRole()));
-		attrs.add(attrFactory.build(AttributeCategory.SUBJECT, "username",
-				AuthenticationUtil.getCurrentLoggedInUsername().orElse(null)));
+		AuthenticationUtil.getCurrentLoggedInUsername()
+				.ifPresent(u -> attrs.add(attrFactory.build(AttributeCategory.SUBJECT, "username", u)));
 		return attrs;
 	}
 

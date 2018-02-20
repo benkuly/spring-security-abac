@@ -20,7 +20,7 @@ import net.folivo.springframework.security.abac.demo.entities.User;
 public class SecurityPermissionEvaluator implements PermissionEvaluator {
 
 	public final static String SAVE_USER = "SAVE_USER";
-	public final static String DELETE_USER = "DELETE_USER";
+	public final static String GET_USER = "GET_USER";
 	public final static String SAVE_POSTING = "SAVE_POSTING";
 
 	private final StdUserRepository usRep;
@@ -41,8 +41,8 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 		switch ((String) permission) {
 		case SAVE_USER:
 			return canSaveUser((User) targetDomainObject);
-		case DELETE_USER:
-			return canDeleteUser((Optional<User>) targetDomainObject);
+		case GET_USER:
+			return canGetUser((Optional<User>) targetDomainObject);
 		case SAVE_POSTING:
 			return canSavePosting((Posting) targetDomainObject);
 		}
@@ -90,7 +90,7 @@ public class SecurityPermissionEvaluator implements PermissionEvaluator {
 		return false;
 	}
 
-	private boolean canDeleteUser(Optional<User> user) {
+	private boolean canGetUser(Optional<User> user) {
 		if (AuthenticationUtil.getCurrentLoggedInUserRole().equals(WebSecurityConfig.ROLE_ADMIN))
 			return true;
 		if (user.isPresent())
