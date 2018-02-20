@@ -2,9 +2,9 @@ package net.folivo.springframework.security.abac.config;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.SecurityMetadataSource;
 import org.springframework.security.access.intercept.AfterInvocationManager;
@@ -18,13 +18,14 @@ import net.folivo.springframework.security.abac.method.aopalliance.AbacMethodSec
 //TODO no good way with this interface
 @Configuration
 @EnableGlobalAuthentication
+@Import({ AbacAopAdvisorConfiguration.class, AutoProxyRegistration.class })
 public class AbacAopConfiguration {
 
 	AbacMethodSecurityInterceptor methodSecurityInterceptor;
 	private AccessDecisionManager abacAccessDecisionManager;
 	private AfterInvocationManager abacAfterInvocationManager;
 	private SecurityMetadataSource abacMethodSecurityMetadataSource;
-	private ApplicationContext context;
+	private AuthenticationConfiguration authConfig;
 
 	// TODO aspectJ
 	// TODO catch?
@@ -66,13 +67,6 @@ public class AbacAopConfiguration {
 	public void setAbacMethodSecurityMetadataSource(SecurityMetadataSource abacMethodSecurityMetadataSource) {
 		this.abacMethodSecurityMetadataSource = abacMethodSecurityMetadataSource;
 	}
-
-	@Autowired
-	public void setApplicationContext(ApplicationContext context) {
-		this.context = context;
-	}
-
-	private AuthenticationConfiguration authConfig;
 
 	@Autowired
 	protected void setAuthConfig(AuthenticationConfiguration authConfig) {
