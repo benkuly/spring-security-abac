@@ -25,8 +25,6 @@ public interface AbacPostingRepository extends PostingRepository {
 	@Override
 	<S extends Posting> S save(@Param("entity") S entity);
 
-	@AbacPreAuthorize(//
-			actionAttributes = { @AttributeMapping(id = "actionId", value = "POSTING_GET") }) //
 	@Override
 	Optional<Posting> findById(Long id);
 

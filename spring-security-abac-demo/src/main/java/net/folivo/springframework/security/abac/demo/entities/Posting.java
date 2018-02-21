@@ -2,6 +2,7 @@ package net.folivo.springframework.security.abac.demo.entities;
 
 import java.time.LocalDateTime;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -17,7 +18,7 @@ public class Posting {
 	private long id;
 
 	@JsonIgnore
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	private User creator;
 	private LocalDateTime creationTime;
 	private String content;
