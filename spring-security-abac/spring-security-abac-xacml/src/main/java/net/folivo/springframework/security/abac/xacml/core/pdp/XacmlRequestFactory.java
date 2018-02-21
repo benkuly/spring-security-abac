@@ -52,13 +52,11 @@ public class XacmlRequestFactory implements PdpRequestFactory<DecisionRequest> {
 				final AttributeBag<?> attributeValues = findAttributes(r.getValue());
 				requestBuilder.putNamedAttributeIfAbsent(attributeId, attributeValues);
 				if (log.isDebugEnabled())
-					log.debug(
-							"RequestAttribute with id:'" + meta.getId() + "' and value:'" + r.getValue() + "' added.");
+					log.debug("RequestAttribute " + r + " added.");
 			} else {
 				// TODO that should really never happen, so: warn?
 				if (log.isDebugEnabled())
-					log.debug("RequestAttribute with id '" + meta.getId()
-							+ "' will not be used in request because its value is null!");
+					log.debug("RequestAttribute " + r + " will not be used in request because its value is null!");
 			}
 		}
 		return requestBuilder.build(false);

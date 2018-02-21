@@ -37,12 +37,11 @@ public class StandardRequestAttribute implements RequestAttribute {
 
 		stringBuilder.append("value=");
 		stringBuilder.append(value);
-		stringBuilder.append(',');
 
 		if (value != null) {
+			stringBuilder.append(',');
 			stringBuilder.append("valueClassName=");
 			stringBuilder.append(value.getClass().getSimpleName());
-			stringBuilder.append(',');
 		}
 
 		stringBuilder.append("}");

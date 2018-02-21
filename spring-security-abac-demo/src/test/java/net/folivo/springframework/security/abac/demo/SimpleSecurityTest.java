@@ -49,8 +49,9 @@ public abstract class SimpleSecurityTest {
 		if (postingTest == null)
 			postingTest = new RepoSecurityTestHelper<>(Posting.class, postingRepo, "id", eMa);
 
-		userTest.clearRepository();
 		postingTest.clearRepository();
+		userTest.clearRepository();
+
 		assertEquals(Long.valueOf(0), userTest.getRepoSize());
 		assertEquals(Long.valueOf(0), postingTest.getRepoSize());
 	}
