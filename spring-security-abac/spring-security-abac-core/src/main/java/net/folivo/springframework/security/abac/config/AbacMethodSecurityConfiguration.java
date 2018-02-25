@@ -20,9 +20,9 @@ import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import net.folivo.springframework.security.abac.attributes.ProviderCollector;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProcessor;
 import net.folivo.springframework.security.abac.attributes.StandardProviderCollector;
+import net.folivo.springframework.security.abac.expression.ExpressionBasedRequestAttributePostProcessor;
 import net.folivo.springframework.security.abac.method.AbacAnnotationMethodSecurityMetadataSource;
 import net.folivo.springframework.security.abac.method.MethodInvocationContext;
-import net.folivo.springframework.security.abac.method.expression.ExpressionBasedRequestAttributePostProcessor;
 import net.folivo.springframework.security.abac.prepost.AbacPostInvocationConfigAttributeFactory;
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationConfigAttributeFactory;
 

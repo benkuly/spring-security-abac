@@ -1,4 +1,4 @@
-package net.folivo.springframework.security.abac.method.expression;
+package net.folivo.springframework.security.abac.expression;
 
 import java.util.Collection;
 import java.util.Collections;

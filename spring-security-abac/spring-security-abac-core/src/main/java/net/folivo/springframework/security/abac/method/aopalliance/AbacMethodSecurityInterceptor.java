@@ -13,6 +13,7 @@ import net.folivo.springframework.security.abac.method.AbacPostAuthorize;
 import net.folivo.springframework.security.abac.method.AbacPreAuthorize;
 import net.folivo.springframework.security.abac.method.MethodInvocationContext;
 
+//TODO maybe use an custom AbstractSecurityInterceptor, that doesn't throw an exception if there are no attributes
 public class AbacMethodSecurityInterceptor extends AbstractSecurityInterceptor implements MethodInterceptor {
 
 	private SecurityMetadataSource securityMetadataSource;
@@ -22,7 +23,7 @@ public class AbacMethodSecurityInterceptor extends AbstractSecurityInterceptor i
 		return MethodInvocationContext.class;
 	}
 
-	// TODO caching
+	// TODO caching!
 	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 
