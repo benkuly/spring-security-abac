@@ -20,7 +20,7 @@ import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import net.folivo.springframework.security.abac.attributes.ProviderCollector;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProcessor;
 import net.folivo.springframework.security.abac.attributes.StandardProviderCollector;
-import net.folivo.springframework.security.abac.expression.ExpressionBasedRequestAttributePostProcessor;
+import net.folivo.springframework.security.abac.expression.ExpressionBasedRequestAttributeProcessor;
 import net.folivo.springframework.security.abac.method.AbacAnnotationMethodSecurityMetadataSource;
 import net.folivo.springframework.security.abac.method.MethodInvocationContext;
 import net.folivo.springframework.security.abac.prepost.AbacPostInvocationConfigAttributeFactory;
@@ -46,7 +46,7 @@ public class AbacMethodSecurityConfiguration extends StandardAbstractAbacConfigu
 	@Override
 	protected List<RequestAttributeProcessor<MethodInvocationContext>> requestAttributePostProcessors() {
 		List<RequestAttributeProcessor<MethodInvocationContext>> processors = new ArrayList<>();
-		processors.add(new ExpressionBasedRequestAttributePostProcessor(abacExpressionHandler()));
+		processors.add(new ExpressionBasedRequestAttributeProcessor(abacExpressionHandler()));
 		AnnotationAwareOrderComparator.sort(processors);
 		return processors;
 	}

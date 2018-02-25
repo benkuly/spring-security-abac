@@ -47,7 +47,7 @@ import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlRequestFacto
 //TOTO isn't there a better solution without T?
 public class XacmlPdpConfiguration<T> {
 
-	// I do things here, that are from PdpEngineConfiguration
+	// TODO I do things here, that are from PdpEngineConfiguration
 	@Bean
 	public PdpEngine pdpEngine() {
 

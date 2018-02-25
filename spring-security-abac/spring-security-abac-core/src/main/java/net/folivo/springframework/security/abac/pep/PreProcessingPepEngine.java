@@ -7,12 +7,12 @@ import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProcessor;
 import net.folivo.springframework.security.abac.contexthandler.RequestContextHandler;
 
-public class PostProcessingPepEngine<T> implements PepEngine<T> {
+public class PreProcessingPepEngine<T> implements PepEngine<T> {
 
 	private final RequestContextHandler<T> handler;
 	private final Collection<RequestAttributeProcessor<T>> processors;
 
-	public PostProcessingPepEngine(RequestContextHandler<T> handler,
+	public PreProcessingPepEngine(RequestContextHandler<T> handler,
 			Collection<RequestAttributeProcessor<T>> processors) {
 		this.handler = handler;
 		this.processors = processors;

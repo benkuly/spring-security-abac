@@ -14,12 +14,12 @@ import net.folivo.springframework.security.abac.attributes.RequestAttributeProce
 import net.folivo.springframework.security.abac.method.MethodInvocationContext;
 
 //TODO implements aop needed?
-public class ExpressionBasedRequestAttributePostProcessor
+public class ExpressionBasedRequestAttributeProcessor
 		implements RequestAttributeProcessor<MethodInvocationContext>, AopInfrastructureBean {
 
 	private final MethodSecurityExpressionHandler expressionHandler;
 
-	public ExpressionBasedRequestAttributePostProcessor(MethodSecurityExpressionHandler expressionHandler) {
+	public ExpressionBasedRequestAttributeProcessor(MethodSecurityExpressionHandler expressionHandler) {
 		this.expressionHandler = expressionHandler;
 	}
 

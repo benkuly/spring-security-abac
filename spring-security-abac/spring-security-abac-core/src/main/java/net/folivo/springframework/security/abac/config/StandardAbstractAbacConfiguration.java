@@ -28,7 +28,7 @@ import net.folivo.springframework.security.abac.method.MethodInvocationContext;
 import net.folivo.springframework.security.abac.pep.AttributeBasedAccessDecisionVoter;
 import net.folivo.springframework.security.abac.pep.AttributeBasedAfterInvocationProvider;
 import net.folivo.springframework.security.abac.pep.PepEngine;
-import net.folivo.springframework.security.abac.pep.PostProcessingPepEngine;
+import net.folivo.springframework.security.abac.pep.PreProcessingPepEngine;
 import net.folivo.springframework.security.abac.prepost.AbacPostInvocationAttribute;
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationAttribute;
 
@@ -39,7 +39,7 @@ public abstract class StandardAbstractAbacConfiguration<T> {
 
 	@Bean
 	protected PepEngine<T> pepEngine() {
-		return new PostProcessingPepEngine<>(contextHandler, requestAttributePostProcessors());
+		return new PreProcessingPepEngine<>(contextHandler, requestAttributePostProcessors());
 	}
 
 	@Bean
