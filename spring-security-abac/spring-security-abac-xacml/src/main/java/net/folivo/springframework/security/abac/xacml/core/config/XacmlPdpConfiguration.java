@@ -4,13 +4,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import org.ow2.authzforce.core.pdp.api.CloseableDesignatedAttributeProvider.DependencyAwareFactory;
 import org.ow2.authzforce.core.pdp.api.DecisionCache;
-import org.ow2.authzforce.core.pdp.api.DecisionRequest;
-import org.ow2.authzforce.core.pdp.api.DecisionResult;
 import org.ow2.authzforce.core.pdp.api.PdpEngine;
 import org.ow2.authzforce.core.pdp.api.XmlUtils.XmlnsFilteringParserFactory;
 import org.ow2.authzforce.core.pdp.api.combining.CombiningAlgRegistry;
@@ -35,14 +34,17 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.util.ResourceUtils;
 
-import net.folivo.springframework.security.abac.contexthandler.PdpClient;
-import net.folivo.springframework.security.abac.contexthandler.PdpRequestFactory;
-import net.folivo.springframework.security.abac.contexthandler.RequestContextHandler;
-import net.folivo.springframework.security.abac.contexthandler.StandardRequestContextHandler;
-import net.folivo.springframework.security.abac.pep.PepResponseFactory;
+import net.folivo.springframework.security.abac.attributes.ProviderCollector;
+import net.folivo.springframework.security.abac.attributes.RequestAttributeFactory;
+import net.folivo.springframework.security.abac.attributes.RequestAttributeProvider;
+import net.folivo.springframework.security.abac.attributes.StandardProviderCollector;
+import net.folivo.springframework.security.abac.context.RequestContextMapper;
+import net.folivo.springframework.security.abac.context.SimpleRequestContextMapper;
+import net.folivo.springframework.security.abac.pdp.PdpClient;
+import net.folivo.springframework.security.abac.pip.ContextMappingPipEngine;
+import net.folivo.springframework.security.abac.pip.PipEngine;
+import net.folivo.springframework.security.abac.pip.PipProviderContext;
 import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlPdpClient;
-import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlPepResponseFactory;
-import net.folivo.springframework.security.abac.xacml.core.pdp.XacmlRequestFactory;
 
 //TOTO isn't there a better solution without T?
 public class XacmlPdpConfiguration<T> {
@@ -116,22 +118,20 @@ public class XacmlPdpConfiguration<T> {
 	}
 
 	@Bean
-	public PdpRequestFactory<DecisionRequest> pdpRequestFactory() {
-		return new XacmlRequestFactory(pdpEngine());
+	protected RequestContextMapper<T> requestContextMapper() {
+		return new SimpleRequestContextMapper<>();
 	}
 
 	@Bean
-	public PdpClient<DecisionRequest, DecisionResult, T> pdpClient() {
-		return new XacmlPdpClient<>(pdpEngine());
+	protected PipEngine<T> pipEngine() {
+		// TODO
+		List<RequestAttributeProvider<PipProviderContext<T>>> providers = Collections.emptyList();
+		ProviderCollector<PipProviderContext<T>> collector = new StandardProviderCollector<>(providers);
+		return new ContextMappingPipEngine<>(collector, requestContextMapper());
 	}
 
 	@Bean
-	public PepResponseFactory<DecisionResult> pepResponseFactory() {
-		return new XacmlPepResponseFactory();
-	}
-
-	@Bean
-	public RequestContextHandler<T> requestContextHandler() {
-		return new StandardRequestContextHandler<>(pdpClient(), pdpRequestFactory(), pepResponseFactory());
+	protected PdpClient<T> pdpClient(RequestAttributeFactory attributeFactory) {
+		return new XacmlPdpClient<>(pdpEngine(), requestContextMapper(), attributeFactory);
 	}
 }

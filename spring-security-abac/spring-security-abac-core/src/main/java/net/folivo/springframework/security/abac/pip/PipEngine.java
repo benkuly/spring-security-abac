@@ -7,6 +7,6 @@ import net.folivo.springframework.security.abac.attributes.RequestAttributeMetad
 
 public interface PipEngine<T> {
 
-	Collection<RequestAttribute> resolve(T context, Collection<RequestAttributeMetadata> metadata);
+	Collection<RequestAttribute> attributeQuery(T context, Collection<RequestAttributeMetadata> metadata);
 
 }

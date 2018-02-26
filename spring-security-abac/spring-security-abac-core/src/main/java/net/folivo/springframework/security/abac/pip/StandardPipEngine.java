@@ -22,7 +22,7 @@ public class StandardPipEngine<T> implements PipEngine<T> {
 	}
 
 	@Override
-	public Collection<RequestAttribute> resolve(T context, Collection<RequestAttributeMetadata> metadata) {
+	public Collection<RequestAttribute> attributeQuery(T context, Collection<RequestAttributeMetadata> metadata) {
 		return metadata.stream().map(metadatum -> {
 			PipProviderContext<T> providerContext = new PipProviderContext<>(context, metadatum);
 			Optional<RequestAttribute> attr = collector.collectFirst(providerContext);

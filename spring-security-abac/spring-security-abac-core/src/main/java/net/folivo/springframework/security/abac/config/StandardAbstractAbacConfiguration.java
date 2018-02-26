@@ -21,10 +21,10 @@ import net.folivo.springframework.security.abac.attributes.RequestAttributeFacto
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProcessor;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProvider;
 import net.folivo.springframework.security.abac.attributes.StandardRequestAttributeFactory;
-import net.folivo.springframework.security.abac.contexthandler.RequestContextHandler;
 import net.folivo.springframework.security.abac.method.AbacAnnotationPostRequestAttributeProvider;
 import net.folivo.springframework.security.abac.method.AbacAnnotationPreRequestAttributeProvider;
 import net.folivo.springframework.security.abac.method.MethodInvocationContext;
+import net.folivo.springframework.security.abac.pdp.PdpClient;
 import net.folivo.springframework.security.abac.pep.AttributeBasedAccessDecisionVoter;
 import net.folivo.springframework.security.abac.pep.AttributeBasedAfterInvocationProvider;
 import net.folivo.springframework.security.abac.pep.PepEngine;
@@ -35,11 +35,11 @@ import net.folivo.springframework.security.abac.prepost.AbacPreInvocationAttribu
 @Configuration
 public abstract class StandardAbstractAbacConfiguration<T> {
 
-	private RequestContextHandler<T> contextHandler;
+	private PdpClient<T> pdpClient;
 
 	@Bean
 	protected PepEngine<T> pepEngine() {
-		return new PreProcessingPepEngine<>(contextHandler, requestAttributePostProcessors());
+		return new PreProcessingPepEngine<>(pdpClient, requestAttributePostProcessors());
 	}
 
 	@Bean
@@ -92,8 +92,8 @@ public abstract class StandardAbstractAbacConfiguration<T> {
 	}
 
 	@Autowired
-	public void setContextHandler(RequestContextHandler<T> contextHandler) {
-		this.contextHandler = contextHandler;
+	public void setContextHandler(PdpClient<T> pdpClient) {
+		this.pdpClient = pdpClient;
 	}
 
 	@Bean
