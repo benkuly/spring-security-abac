@@ -1,8 +1,8 @@
 package net.folivo.springframework.security.abac.method;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.stream.Stream;
+
+import com.google.common.collect.Streams;
 
 import net.folivo.springframework.security.abac.attributes.AttributeCategory;
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
@@ -16,31 +16,19 @@ public class AbacAnnotationPostRequestAttributeProvider extends AbacAnnotationRe
 	}
 
 	@Override
-	public Collection<RequestAttribute> getAttributes(MethodInvocationContext context) {
+	public Stream<RequestAttribute> getAttributes(MethodInvocationContext context) {
 		if (context.getMethodInvocation().getMethod().getDeclaringClass() == Object.class) {
-			return Collections.emptyList();
+			return Stream.empty();
 		}
 
 		// TODO you've already checked this in metadatasource...
-		if (!context.getPostAuthorize().isPresent())
-			// There is no meta-data so return
-			return Collections.emptyList();
-
-		AbacPostAuthorize abacPostAuthorize = context.getPostAuthorize().get();
-
-		ArrayList<RequestAttribute> attrs = new ArrayList<>();
-
-		if (abacPostAuthorize != null) {
-			createAndAddRequestAttribute(AttributeCategory.SUBJECT, abacPostAuthorize.subjectAttributes(), attrs);
-			createAndAddRequestAttribute(AttributeCategory.RESOURCE, abacPostAuthorize.resourceAttributes(), attrs);
-			createAndAddRequestAttribute(AttributeCategory.ACTION, abacPostAuthorize.actionAttributes(), attrs);
-			createAndAddRequestAttribute(AttributeCategory.ENVIRONMENT, abacPostAuthorize.environmentAttributes(),
-					attrs);
-		}
-
-		attrs.trimToSize();
-
-		return attrs;
+		return context.getPostAuthorize()
+				.map(abacPostAuthorize -> Streams.concat(
+						createRequestAttributes(AttributeCategory.SUBJECT, abacPostAuthorize.subjectAttributes()),
+						createRequestAttributes(AttributeCategory.RESOURCE, abacPostAuthorize.resourceAttributes()),
+						createRequestAttributes(AttributeCategory.ACTION, abacPostAuthorize.actionAttributes()),
+						createRequestAttributes(AttributeCategory.ENVIRONMENT,
+								abacPostAuthorize.environmentAttributes())))
+				.orElse(Stream.empty());
 	}
-
 }

@@ -14,9 +14,11 @@ import org.springframework.util.ClassUtils;
 
 public class AbacAnnotationUtil {
 
+	// TODO unused
 	// TODO caching
 	// TODO a bit copy paste from AbstractMethodSecurityMetadataSource
 	// TODO better name
+	@Deprecated
 	public static <T> Collection<T> callMethod(BiFunction<Method, Class<?>, Collection<T>> function,
 			MethodInvocation mi) {
 		// TODO why? it's from prepost source

@@ -1,9 +1,9 @@
 package net.folivo.springframework.security.abac.attributes;
 
-import java.util.Collection;
+import java.util.stream.Stream;
 
 public interface RequestAttributeProvider<T> {
 
-	Collection<RequestAttribute> getAttributes(T context);
+	Stream<RequestAttribute> getAttributes(T context);
 
 }

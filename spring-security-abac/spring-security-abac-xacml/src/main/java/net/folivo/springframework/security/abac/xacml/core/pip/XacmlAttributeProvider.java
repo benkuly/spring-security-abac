@@ -1,8 +1,7 @@
 package net.folivo.springframework.security.abac.xacml.core.pip;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.ow2.authzforce.core.pdp.api.AttributeFqn;
 import org.ow2.authzforce.core.pdp.api.AttributeFqns;
@@ -43,7 +42,7 @@ public class XacmlAttributeProvider<T> implements AttributeProvider {
 								Optional.empty(), RequestContextMapper.ATTR_ID),
 						StandardDatatypes.STRING.getBagDatatype())
 				.getSingleElement().getUnderlyingValue();
-		Collection<RequestAttributeMetadata> metadata = Collections.singleton(new StandardRequestAttributeMetadata(
+		Stream<RequestAttributeMetadata> metadata = Stream.of(new StandardRequestAttributeMetadata(
 				AbacUtils.mapCategory(attributeFQN.getCategory()), attributeFQN.getId()));
 		pip.attributeQuery(requestIdentifier, metadata);
 		return Bags.emptyAttributeBag(returnDatatype.getElementType(), NO_VALUE_FROM_PIP);

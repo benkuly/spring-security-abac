@@ -1,8 +1,6 @@
 package net.folivo.springframework.security.abac.pip;
 
-import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
@@ -22,14 +20,13 @@ public class StandardPipEngine<T> implements PipEngine<T> {
 	}
 
 	@Override
-	public Collection<RequestAttribute> attributeQuery(T context, Collection<RequestAttributeMetadata> metadata) {
-		return metadata.stream().map(metadatum -> {
+	public Stream<RequestAttribute> attributeQuery(T context, Stream<RequestAttributeMetadata> metadata) {
+		return metadata.map(metadatum -> {
 			PipProviderContext<T> providerContext = new PipProviderContext<>(context, metadatum);
-			Optional<RequestAttribute> attr = collector.collectFirst(providerContext);
+			Optional<RequestAttribute> attr = collector.collect(providerContext).findFirst();
 			if (log.isDebugEnabled() && attr.isPresent())
 				log.debug("Cannot find any attribute for metadata:" + metadata);
 			return attr;
-		}).flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty()/* TODO Java9: Optional::stream */)
-				.collect(Collectors.toList());
+		}).flatMap(o -> o.isPresent() ? Stream.of(o.get()) : Stream.empty()/* TODO Java 9: Optional::stream */);
 	}
 }

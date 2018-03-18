@@ -1,12 +1,11 @@
 package net.folivo.springframework.security.abac.attributes;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Stream;
 
-//TODO force that providers and processors are sorted!
+//TODO javadoc: providers and processors must be sorted!
 public class StandardProviderCollector<T> implements ProviderCollector<T> {
 
 	private final List<RequestAttributeProvider<T>> providers;
@@ -16,15 +15,15 @@ public class StandardProviderCollector<T> implements ProviderCollector<T> {
 	}
 
 	@Override
-	public Collection<RequestAttribute> collectAll(T context) {
-		// TODO bad solution (instead of put, go backwards and use containsKey)
+	public Stream<RequestAttribute> collect(T context) {
 		Map<RequestAttributeMetadata, RequestAttribute> attrs = new HashMap<>();
-		providers.stream().flatMap(p -> p.getAttributes(context).stream()).forEach(a -> attrs.put(a.getMetadata(), a));
-		return attrs.values();
-	}
 
-	@Override
-	public Optional<RequestAttribute> collectFirst(T context) {
-		return providers.stream().flatMap(p -> p.getAttributes(context).stream()).findFirst();
+		for (int i = providers.size() - 1; i >= 0; i--) {
+			providers.get(i).getAttributes(context)
+					.filter(a -> attrs.containsKey(a.getMetadata()))
+					.forEach(a -> attrs.put(a.getMetadata(), a));
+		}
+
+		return attrs.values().stream();
 	}
 }

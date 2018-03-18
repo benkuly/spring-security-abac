@@ -1,6 +1,7 @@
 package net.folivo.springframework.security.abac.pep;
 
 import java.util.Collection;
+import java.util.stream.Stream;
 
 import net.folivo.springframework.security.abac.attributes.ProcessorUtils;
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
@@ -18,12 +19,12 @@ public class PreProcessingPepEngine<T> implements PepEngine<T> {
 		this.processors = processors;
 	}
 
-	protected Collection<RequestAttribute> postProcess(T context, Collection<RequestAttribute> attrs) {
+	protected Stream<RequestAttribute> postProcess(T context, Stream<RequestAttribute> attrs) {
 		return ProcessorUtils.process(attrs, context, processors);
 	}
 
 	@Override
-	public PepResponse decide(T context, Collection<RequestAttribute> attributes) {
+	public PepResponse decide(T context, Stream<RequestAttribute> attributes) {
 		return pdp.decide(context, postProcess(context, attributes));
 	}
 

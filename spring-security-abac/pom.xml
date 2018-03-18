@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.springframework.security</groupId>
 		<artifactId>spring-security-bom</artifactId>
-		<version>5.0.2.RELEASE</version>
+		<version>5.0.3.RELEASE</version>
 	</parent>
 
 	<properties>
@@ -23,14 +23,36 @@
 			<artifactId>spring-security-core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-test</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.1.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit}</version>
+			<!-- this is only a workaround for a bug https://stackoverflow.com/questions/46717693/eclipse-no-tests-found-using-junit-5-caused-by-noclassdeffounderror -->
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-launcher</artifactId>
+			<version>1.1.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>2.15.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<!-- this is only a workaround because an official extension isn't available 
+				yet -->
+			<groupId>name.falgout.jeffrey.testing.junit5</groupId>
+			<artifactId>mockito-extension</artifactId>
+			<version>1.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>3.9.1</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

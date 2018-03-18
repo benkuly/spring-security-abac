@@ -1,6 +1,6 @@
 package net.folivo.springframework.security.abac.pip;
 
-import java.util.Collection;
+import java.util.stream.Stream;
 
 import net.folivo.springframework.security.abac.attributes.ProviderCollector;
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
@@ -16,8 +16,8 @@ public class ContextMappingPipEngine<T> extends StandardPipEngine<T> {
 		this.mapper = mapper;
 	}
 
-	public Collection<RequestAttribute> attributeQuery(String requestIdentifier,
-			Collection<RequestAttributeMetadata> metadata) {
+	public Stream<RequestAttribute> attributeQuery(String requestIdentifier,
+			Stream<RequestAttributeMetadata> metadata) {
 		T context = mapper.resolve(requestIdentifier);
 		return attributeQuery(context, metadata);
 	}

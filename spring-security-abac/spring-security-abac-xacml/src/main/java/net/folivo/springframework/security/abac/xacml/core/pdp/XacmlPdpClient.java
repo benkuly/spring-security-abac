@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,14 +43,16 @@ public class XacmlPdpClient<T> extends ContextMappingPdpClient<T> {
 	}
 
 	@Override
-	protected PepResponse decide(Collection<RequestAttribute> attrs) {
+	protected PepResponse decide(Stream<RequestAttribute> attrs) {
 		DecisionRequest request = buildRequest(attrs);
 		DecisionResult response = pdp.evaluate(request);
 		return new XacmlPepResponse(response);
 	}
 
 	// TODO throw exception when build didn't work
-	public DecisionRequest buildRequest(Collection<RequestAttribute> requestAttrs) {
+	public DecisionRequest buildRequest(Stream<RequestAttribute> streamAttrs) {
+
+		Collection<RequestAttribute> requestAttrs = streamAttrs.collect(Collectors.toList());
 
 		final DecisionRequestBuilder<?> requestBuilder = pdp.newRequestBuilder(-1, requestAttrs.size());
 

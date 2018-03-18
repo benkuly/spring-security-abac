@@ -1,8 +1,9 @@
 package net.folivo.springframework.security.abac.expression;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.stream.Stream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -17,6 +18,7 @@ import net.folivo.springframework.security.abac.method.MethodInvocationContext;
 public class ExpressionBasedRequestAttributeProcessor
 		implements RequestAttributeProcessor<MethodInvocationContext>, AopInfrastructureBean {
 
+	private final static Log LOG = LogFactory.getLog(ExpressionBasedRequestAttributeProcessor.class);
 	private final MethodSecurityExpressionHandler expressionHandler;
 
 	public ExpressionBasedRequestAttributeProcessor(MethodSecurityExpressionHandler expressionHandler) {
@@ -25,17 +27,22 @@ public class ExpressionBasedRequestAttributeProcessor
 
 	@Override
 	public boolean supports(RequestAttribute a) {
-		// TODO null check?
+		Object value = a.getValue();
+		if (value == null) {
+			if (LOG.isDebugEnabled())
+				LOG.debug("RequestAttribute " + a + " will not be processed because its value is null!");
+			return false;
+		}
 		if (String.class.isAssignableFrom(a.getValue().getClass())) {
-			String value = (String) a.getValue();
-			if (value.startsWith("${") && value.endsWith("}"))
+			String stringValue = (String) a.getValue();
+			if (stringValue.startsWith("${") && stringValue.endsWith("}"))
 				return true;
 		}
 		return false;
 	}
 
 	@Override
-	public Collection<RequestAttribute> process(RequestAttribute attr, MethodInvocationContext context) {
+	public Stream<RequestAttribute> process(RequestAttribute attr, MethodInvocationContext context) {
 		String value = (String) attr.getValue();
 		String expressionString = value.substring(2, value.length() - 1);
 		Expression expr = expressionHandler.getExpressionParser().parseExpression(expressionString);
@@ -44,6 +51,6 @@ public class ExpressionBasedRequestAttributeProcessor
 				SecurityContextHolder.getContext().getAuthentication(), context.getMethodInvocation());
 		context.getReturnedObject().ifPresent(r -> expressionHandler.setReturnObject(r, evaluationContext));
 		attr.setValue(expr.getValue(evaluationContext));
-		return Collections.singleton(attr);
+		return Stream.of(attr);
 	}
 }

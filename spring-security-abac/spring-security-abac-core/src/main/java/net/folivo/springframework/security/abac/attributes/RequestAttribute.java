@@ -6,7 +6,7 @@ public interface RequestAttribute {
 
 	public Object getValue();
 
-	// TODO hm :/ mybe extra RequestAttributeValue class
+	// TODO hm :/ maybe extra RequestAttributeValue class
 	public void setValue(Object value);
 
 }

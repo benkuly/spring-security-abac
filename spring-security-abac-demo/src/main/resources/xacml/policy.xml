@@ -371,7 +371,7 @@
 	<Policy PolicyId="demo.posting.delete"
 		RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
 		Version="1.0">
-		<Description>PolicySet for AbacPostingRepository::delete</Description>
+		<Description>Policy for AbacPostingRepository::delete</Description>
 		<Target>
 			<AnyOf>
 				<AllOf>

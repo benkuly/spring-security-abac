@@ -1,6 +1,8 @@
 package net.folivo.springframework.security.abac.pdp;
 
-import java.util.Collection;
+import java.util.stream.Stream;
+
+import com.google.common.collect.Streams;
 
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeFactory;
@@ -18,14 +20,15 @@ public abstract class ContextMappingPdpClient<T> implements PdpClient<T> {
 	}
 
 	@Override
-	public final PepResponse decide(T context, Collection<RequestAttribute> attrs) {
+	public final PepResponse decide(T context, Stream<RequestAttribute> attrs) {
 		String identifier = mapper.map(context);
-		attrs.add(attributeFactory.build(RequestContextMapper.ATTR_CAT, RequestContextMapper.ATTR_ID, identifier));
-		PepResponse response = decide(attrs);
+		Stream<RequestAttribute> attributesPlusContext = Streams.concat(attrs, Stream
+				.of(attributeFactory.build(RequestContextMapper.ATTR_CAT, RequestContextMapper.ATTR_ID, identifier)));
+		PepResponse response = decide(attributesPlusContext);
 		mapper.release(identifier);
 		return response;
 	}
 
-	protected abstract PepResponse decide(Collection<RequestAttribute> attrs);
+	protected abstract PepResponse decide(Stream<RequestAttribute> attrs);
 
 }

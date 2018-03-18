@@ -12,7 +12,7 @@ public abstract class CollectingSecurityMetadataSource<T> implements SecurityMet
 
 	protected Collection<ConfigAttribute> collectConfigAttributes(T context, ProviderCollector<T> collector,
 			ConfigAttributeFactory factory) {
-		return factory.createConfigAttributes(collector.collectAll(context));
+		return factory.createConfigAttributes(collector.collect(context));
 	}
 
 	@Override

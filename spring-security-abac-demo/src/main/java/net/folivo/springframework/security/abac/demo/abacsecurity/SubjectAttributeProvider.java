@@ -2,6 +2,7 @@ package net.folivo.springframework.security.abac.demo.abacsecurity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 import net.folivo.springframework.security.abac.attributes.AttributeCategory;
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
@@ -19,13 +20,13 @@ public class SubjectAttributeProvider implements RequestAttributeProvider<Method
 	}
 
 	@Override
-	public Collection<RequestAttribute> getAttributes(MethodInvocationContext context) {
+	public Stream<RequestAttribute> getAttributes(MethodInvocationContext context) {
 		Collection<RequestAttribute> attrs = new ArrayList<>();
 		attrs.add(
 				attrFactory.build(AttributeCategory.SUBJECT, "role", AuthenticationUtil.getCurrentLoggedInUserRole()));
 		AuthenticationUtil.getCurrentLoggedInUsername()
 				.ifPresent(u -> attrs.add(attrFactory.build(AttributeCategory.SUBJECT, "username", u)));
-		return attrs;
+		return attrs.stream();
 	}
 
 }

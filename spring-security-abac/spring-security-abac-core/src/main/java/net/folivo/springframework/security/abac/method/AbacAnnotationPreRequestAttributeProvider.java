@@ -1,8 +1,8 @@
 package net.folivo.springframework.security.abac.method;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.stream.Stream;
+
+import com.google.common.collect.Streams;
 
 import net.folivo.springframework.security.abac.attributes.AttributeCategory;
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
@@ -16,31 +16,24 @@ public class AbacAnnotationPreRequestAttributeProvider extends AbacAnnotationReq
 	}
 
 	@Override
-	public Collection<RequestAttribute> getAttributes(MethodInvocationContext context) {
+	public Stream<RequestAttribute> getAttributes(MethodInvocationContext context) {
 		if (context.getMethodInvocation().getMethod().getDeclaringClass() == Object.class) {
-			return Collections.emptyList();
+			return Stream.empty();
+		}
+
+		if (context.getMethodInvocation().getMethod().getDeclaringClass() == Object.class) {
+			return Stream.empty();
 		}
 
 		// TODO you've already checked this in metadatasource...
-		if (!context.getPreAuthorize().isPresent())
-			// There is no meta-data so return
-			return Collections.emptyList();
-
-		AbacPreAuthorize abacPreAuthorize = context.getPreAuthorize().get();
-
-		ArrayList<RequestAttribute> attrs = new ArrayList<>();
-
-		if (abacPreAuthorize != null) {
-			createAndAddRequestAttribute(AttributeCategory.SUBJECT, abacPreAuthorize.subjectAttributes(), attrs);
-			createAndAddRequestAttribute(AttributeCategory.RESOURCE, abacPreAuthorize.resourceAttributes(), attrs);
-			createAndAddRequestAttribute(AttributeCategory.ACTION, abacPreAuthorize.actionAttributes(), attrs);
-			createAndAddRequestAttribute(AttributeCategory.ENVIRONMENT, abacPreAuthorize.environmentAttributes(),
-					attrs);
-		}
-
-		attrs.trimToSize();
-
-		return attrs;
+		return context.getPreAuthorize()
+				.map(abacPreAuthorize -> Streams.concat(
+						createRequestAttributes(AttributeCategory.SUBJECT, abacPreAuthorize.subjectAttributes()),
+						createRequestAttributes(AttributeCategory.RESOURCE, abacPreAuthorize.resourceAttributes()),
+						createRequestAttributes(AttributeCategory.ACTION, abacPreAuthorize.actionAttributes()),
+						createRequestAttributes(AttributeCategory.ENVIRONMENT,
+								abacPreAuthorize.environmentAttributes())))
+				.orElse(Stream.empty());
 	}
 
 }
