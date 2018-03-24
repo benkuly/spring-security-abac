@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 import org.springframework.security.access.ConfigAttribute;
 
 import net.folivo.springframework.security.abac.attributes.RequestAttribute;
-import net.folivo.springframework.security.abac.pep.ConfigAttributeFactory;
 
 public class AbacPreInvocationConfigAttributeFactory implements ConfigAttributeFactory {
 

@@ -1,4 +1,4 @@
-package net.folivo.springframework.security.abac.pep;
+package net.folivo.springframework.security.abac.prepost;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -6,13 +6,13 @@ import java.util.Collections;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityMetadataSource;
 
-import net.folivo.springframework.security.abac.attributes.ProviderCollector;
+import net.folivo.springframework.security.abac.attributes.RequestAttributeProvider;
 
 public abstract class CollectingSecurityMetadataSource<T> implements SecurityMetadataSource {
 
-	protected Collection<ConfigAttribute> collectConfigAttributes(T context, ProviderCollector<T> collector,
+	protected Collection<ConfigAttribute> collectConfigAttributes(T context, RequestAttributeProvider<T> collector,
 			ConfigAttributeFactory factory) {
-		return factory.createConfigAttributes(collector.collect(context));
+		return factory.createConfigAttributes(collector.getAttributes(context));
 	}
 
 	@Override

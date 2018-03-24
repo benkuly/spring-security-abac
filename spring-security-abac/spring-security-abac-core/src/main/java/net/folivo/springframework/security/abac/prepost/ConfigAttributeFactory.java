@@ -1,4 +1,4 @@
-package net.folivo.springframework.security.abac.pep;
+package net.folivo.springframework.security.abac.prepost;
 
 import java.util.Collection;
 import java.util.stream.Stream;

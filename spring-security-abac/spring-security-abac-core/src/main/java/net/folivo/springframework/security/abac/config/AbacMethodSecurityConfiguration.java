@@ -17,8 +17,8 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.config.core.GrantedAuthorityDefaults;
 
-import net.folivo.springframework.security.abac.attributes.ProviderCollector;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProcessor;
+import net.folivo.springframework.security.abac.attributes.RequestAttributeProvider;
 import net.folivo.springframework.security.abac.attributes.StandardProviderCollector;
 import net.folivo.springframework.security.abac.expression.ExpressionBasedRequestAttributeProcessor;
 import net.folivo.springframework.security.abac.method.AbacAnnotationMethodSecurityMetadataSource;
@@ -35,9 +35,9 @@ public class AbacMethodSecurityConfiguration extends StandardAbstractAbacConfigu
 
 	@Bean
 	protected SecurityMetadataSource abacMethodSecurityMetadataSource() {
-		ProviderCollector<MethodInvocationContext> preCollector = new StandardProviderCollector<>(
+		RequestAttributeProvider<MethodInvocationContext> preCollector = new StandardProviderCollector<>(
 				requestAttributePreInvocationProvider());
-		ProviderCollector<MethodInvocationContext> postCollector = new StandardProviderCollector<>(
+		RequestAttributeProvider<MethodInvocationContext> postCollector = new StandardProviderCollector<>(
 				requestAttributePostInvocationProvider());
 		return new AbacAnnotationMethodSecurityMetadataSource(preCollector, postCollector,
 				new AbacPreInvocationConfigAttributeFactory(), new AbacPostInvocationConfigAttributeFactory());

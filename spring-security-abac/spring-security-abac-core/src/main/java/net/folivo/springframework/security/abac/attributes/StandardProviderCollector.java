@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 //TODO javadoc: providers and processors must be sorted!
-public class StandardProviderCollector<T> implements ProviderCollector<T> {
+public class StandardProviderCollector<T> implements RequestAttributeProvider<T> {
 
 	private final List<RequestAttributeProvider<T>> providers;
 
@@ -15,12 +15,12 @@ public class StandardProviderCollector<T> implements ProviderCollector<T> {
 	}
 
 	@Override
-	public Stream<RequestAttribute> collect(T context) {
+	public Stream<RequestAttribute> getAttributes(T context) {
 		Map<RequestAttributeMetadata, RequestAttribute> attrs = new HashMap<>();
 
 		for (int i = providers.size() - 1; i >= 0; i--) {
 			providers.get(i).getAttributes(context)
-					.filter(a -> attrs.containsKey(a.getMetadata()))
+					.filter(a -> !attrs.containsKey(a.getMetadata()))
 					.forEach(a -> attrs.put(a.getMetadata(), a));
 		}
 

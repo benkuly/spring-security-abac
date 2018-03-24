@@ -34,7 +34,6 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.util.ResourceUtils;
 
-import net.folivo.springframework.security.abac.attributes.ProviderCollector;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeFactory;
 import net.folivo.springframework.security.abac.attributes.RequestAttributeProvider;
 import net.folivo.springframework.security.abac.attributes.StandardProviderCollector;
@@ -126,7 +125,7 @@ public class XacmlPdpConfiguration<T> {
 	protected PipEngine<T> pipEngine() {
 		// TODO
 		List<RequestAttributeProvider<PipProviderContext<T>>> providers = Collections.emptyList();
-		ProviderCollector<PipProviderContext<T>> collector = new StandardProviderCollector<>(providers);
+		RequestAttributeProvider<PipProviderContext<T>> collector = new StandardProviderCollector<>(providers);
 		return new ContextMappingPipEngine<>(collector, requestContextMapper());
 	}
 

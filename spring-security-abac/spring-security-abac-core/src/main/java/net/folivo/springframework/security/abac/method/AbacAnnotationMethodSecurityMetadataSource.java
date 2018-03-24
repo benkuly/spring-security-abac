@@ -6,21 +6,21 @@ import java.util.Collection;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityMetadataSource;
 
-import net.folivo.springframework.security.abac.attributes.ProviderCollector;
-import net.folivo.springframework.security.abac.pep.CollectingSecurityMetadataSource;
-import net.folivo.springframework.security.abac.pep.ConfigAttributeFactory;
+import net.folivo.springframework.security.abac.attributes.RequestAttributeProvider;
+import net.folivo.springframework.security.abac.prepost.CollectingSecurityMetadataSource;
+import net.folivo.springframework.security.abac.prepost.ConfigAttributeFactory;
 
 //TODO this class is so outrageous ugly
 public class AbacAnnotationMethodSecurityMetadataSource
 		extends CollectingSecurityMetadataSource<MethodInvocationContext> implements SecurityMetadataSource {
 
-	private final ProviderCollector<MethodInvocationContext> preCollector;
-	private final ProviderCollector<MethodInvocationContext> postCollector;
+	private final RequestAttributeProvider<MethodInvocationContext> preCollector;
+	private final RequestAttributeProvider<MethodInvocationContext> postCollector;
 	private final ConfigAttributeFactory preAttributeFactory;
 	private final ConfigAttributeFactory postAttributeFactory;
 
-	public AbacAnnotationMethodSecurityMetadataSource(ProviderCollector<MethodInvocationContext> preCollector,
-			ProviderCollector<MethodInvocationContext> postCollector, ConfigAttributeFactory preAttributeFactory,
+	public AbacAnnotationMethodSecurityMetadataSource(RequestAttributeProvider<MethodInvocationContext> preCollector,
+			RequestAttributeProvider<MethodInvocationContext> postCollector, ConfigAttributeFactory preAttributeFactory,
 			ConfigAttributeFactory postAttributeFactory) {
 		this.preCollector = preCollector;
 		this.postCollector = postCollector;

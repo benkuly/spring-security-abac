@@ -1,4 +1,4 @@
-package net.folivo.springframework.security.abac.pep;
+package net.folivo.springframework.security.abac.prepost;
 
 import java.util.Collection;
 
@@ -6,7 +6,7 @@ import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.core.Authentication;
 
-import net.folivo.springframework.security.abac.prepost.RequestAttributesHolder;
+import net.folivo.springframework.security.abac.pep.PepEngine;
 
 public class AttributeBasedAccessDecisionVoter<T> implements AccessDecisionVoter<T> {
 
@@ -23,12 +23,12 @@ public class AttributeBasedAccessDecisionVoter<T> implements AccessDecisionVoter
 
 	@Override
 	public boolean supports(ConfigAttribute attribute) {
-		return attribute.getClass().isAssignableFrom(supportedAttribute);
+		return supportedAttribute.isAssignableFrom(attribute.getClass());
 	}
 
 	@Override
 	public boolean supports(Class<?> clazz) {
-		return clazz.isAssignableFrom(supportedContext);
+		return supportedContext.isAssignableFrom(clazz);
 	}
 
 	@Override

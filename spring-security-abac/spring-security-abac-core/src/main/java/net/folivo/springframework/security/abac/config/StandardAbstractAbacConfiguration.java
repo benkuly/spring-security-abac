@@ -25,12 +25,12 @@ import net.folivo.springframework.security.abac.method.AbacAnnotationPostRequest
 import net.folivo.springframework.security.abac.method.AbacAnnotationPreRequestAttributeProvider;
 import net.folivo.springframework.security.abac.method.MethodInvocationContext;
 import net.folivo.springframework.security.abac.pdp.PdpClient;
-import net.folivo.springframework.security.abac.pep.AttributeBasedAccessDecisionVoter;
-import net.folivo.springframework.security.abac.pep.AttributeBasedAfterInvocationProvider;
 import net.folivo.springframework.security.abac.pep.PepEngine;
 import net.folivo.springframework.security.abac.pep.PreProcessingPepEngine;
 import net.folivo.springframework.security.abac.prepost.AbacPostInvocationAttribute;
 import net.folivo.springframework.security.abac.prepost.AbacPreInvocationAttribute;
+import net.folivo.springframework.security.abac.prepost.AttributeBasedAccessDecisionVoter;
+import net.folivo.springframework.security.abac.prepost.AttributeBasedAfterInvocationProvider;
 
 @Configuration
 public abstract class StandardAbstractAbacConfiguration<T> {
